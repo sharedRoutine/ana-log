@@ -7,7 +7,16 @@ import deMessages from '../locales/de.json';
 export default function Layout() {
   return (
     <IntlProvider locale="de" messages={deMessages}>
-      <Stack />
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: true }} />
+        <Stack.Screen 
+          name="add-item" 
+          options={{ 
+            presentation: 'modal',
+            headerShown: true
+          }} 
+        />
+      </Stack>
     </IntlProvider>
   );
 }
