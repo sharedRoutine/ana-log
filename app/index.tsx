@@ -1,19 +1,25 @@
-import { Stack, Link } from 'expo-router';
-
-import { Button } from '~/components/Button';
-import { Container } from '~/components/Container';
-import { ScreenContent } from '~/components/ScreenContent';
+import { Stack, useRouter } from 'expo-router';
+import { View, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useIntl } from 'react-intl';
 
 export default function Home() {
+  const router = useRouter();
+  const intl = useIntl();
+
   return (
     <>
-      <Stack.Screen options={{ title: 'Home' }} />
-      <Container>
-        <ScreenContent path="app/index.tsx" title="Home"></ScreenContent>
-        <Link href={{ pathname: '/details', params: { name: 'Dan' } }} asChild>
-          <Button title="Show Details" />
-        </Link>
-      </Container>
+      <Stack.Screen
+        options={{
+          title: intl.formatMessage({ id: 'app.title' }),
+          headerRight: () => (
+            <TouchableOpacity onPress={() => router.push('/add-item')} className="mr-2">
+              <Ionicons name="add" size={24} color="#000" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <View className="flex-1 bg-white p-4">{/* Main content goes here */}</View>
     </>
   );
 }

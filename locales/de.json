@@ -1,0 +1,14 @@
+{
+  "app.title": "ANA | LOG",
+  "add-item.title": "Eintrag hinzufügen",
+  "add-item.back": "Zurück",
+  "add-item.basic-info": "Grundlegende Informationen",
+  "add-item.case-number": "Fallnummer",
+  "add-item.case-number.placeholder": "Fallnummer eingeben",
+  "add-item.operation-date": "OP-Datum",
+  "add-item.age-of-patient": "Alter des Patienten",
+  "add-item.age-of-patient.placeholder": "Geburtsdatum wählen",
+  "add-item.age": "Alter: {age} Jahre",
+  "add-item.done": "Fertig",
+  "add-item.save-item": "Speichern"
+}
