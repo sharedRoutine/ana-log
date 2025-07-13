@@ -22,19 +22,23 @@ export default function CreateFilter() {
   const form = useForm({
     defaultValues: {
       filterName: '',
-      conditions: [{ field: '', operator: '', value: '' }] as FilterCondition[],
+      conditions: [{ field: '', operator: 'equals', value: '' }] as FilterCondition[],
     },
   });
 
   const conditions = useStore(form.store, (state) => state.values.conditions);
 
-  const updateCondition = (index: number, field: keyof FilterCondition, value: any) => {
+  const updateCondition = (
+    index: number,
+    field: keyof FilterCondition,
+    value: string | number | boolean
+  ) => {
     const newConditions = [...conditions];
     newConditions[index] = { ...newConditions[index], [field]: value };
 
     // Reset operator and value when field changes
     if (field === 'field') {
-      newConditions[index].operator = '';
+      newConditions[index].operator = 'equals';
       newConditions[index].value = '';
     }
     // Reset value when operator changes
@@ -46,7 +50,7 @@ export default function CreateFilter() {
   };
 
   const addCondition = () => {
-    const newConditions = [...conditions, { field: '', operator: '', value: '' }];
+    const newConditions = [...conditions, { field: '', operator: 'equals', value: '' } as const];
     form.setFieldValue('conditions', newConditions);
   };
 

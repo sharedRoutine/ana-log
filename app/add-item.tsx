@@ -1,12 +1,11 @@
 import { Stack, router } from 'expo-router';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { useForm, useStore } from '@tanstack/react-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useIntl } from 'react-intl';
 import { DateTime } from 'effect';
 import { cssInterop } from 'nativewind';
 import { Picker } from '@react-native-picker/picker';
-import { medicalProceduresOps } from '../db/operations';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
 import { DEPARTMENT_OPTIONS, AIRWAY_OPTIONS } from '../constants/fieldOptions';
 
