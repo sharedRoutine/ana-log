@@ -1,12 +1,14 @@
 import { Stack, router } from 'expo-router';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { useForm, useStore } from '@tanstack/react-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useIntl } from 'react-intl';
 import { DateTime } from 'effect';
 import { cssInterop } from 'nativewind';
 import { Picker } from '@react-native-picker/picker';
+import { medicalProceduresOps } from '../db/operations';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
+import { DEPARTMENT_OPTIONS, AIRWAY_OPTIONS } from '../constants/fieldOptions';
 
 cssInterop(DateTimePicker, {
   className: 'style',
@@ -35,9 +37,7 @@ export default function AddItem() {
       outpatient: false,
       procedure: '',
     },
-    onSubmit: async ({ value }) => {
-      console.log('Form submitted:', value);
-    },
+    onSubmit: async ({ value }) => {},
   });
 
   const departmentValue = useStore(form.store, (state) => state.values.department);
@@ -61,7 +61,7 @@ export default function AddItem() {
           presentation: 'modal',
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text className="text-blue-500 font-medium">
+              <Text className="font-medium text-blue-500">
                 {intl.formatMessage({ id: 'add-item.back' })}
               </Text>
             </TouchableOpacity>
@@ -203,12 +203,13 @@ export default function AddItem() {
                       onValueChange={handleChange}
                       style={{ height: 200 }}>
                       <Picker.Item label="" value="" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.airway-management.tube' })} value="tubus" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.airway-management.lma' })} value="lama" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.airway-management.tracheostomy' })} value="trachealkanüle" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.airway-management.mask' })} value="maske" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.airway-management.spontaneous' })} value="spontan" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.airway-management.cricothyrotomy' })} value="koniotomie" />
+                      {AIRWAY_OPTIONS.map((airway) => (
+                        <Picker.Item
+                          key={airway}
+                          label={intl.formatMessage({ id: `add-item.airway-management.${airway}` })}
+                          value={airway}
+                        />
+                      ))}
                     </Picker>
                   </View>
                 </View>
@@ -227,21 +228,17 @@ export default function AddItem() {
                       onValueChange={handleChange}
                       style={{ height: 200 }}>
                       <Picker.Item label="" value="" />
-                      <Picker.Item label="TC" value="TC" />
-                      <Picker.Item label="NC" value="NC" />
-                      <Picker.Item label="AC" value="AC" />
-                      <Picker.Item label="GC" value="GC" />
-                      <Picker.Item label="HNO" value="HNO" />
-                      <Picker.Item label="HG" value="HG" />
-                      <Picker.Item label="DE" value="DE" />
-                      <Picker.Item label="PC" value="PC" />
-                      <Picker.Item label="UC" value="UC" />
-                      <Picker.Item label="URO" value="URO" />
-                      <Picker.Item label="GYN" value="GYN" />
-                      <Picker.Item label="MKG" value="MKG" />
-                      <Picker.Item label="RAD" value="RAD" />
-                      <Picker.Item label="NRAD" value="NRAD" />
-                      <Picker.Item label={intl.formatMessage({ id: 'add-item.department.other' })} value="other" />
+                      {DEPARTMENT_OPTIONS.map((dept) => (
+                        <Picker.Item
+                          key={dept}
+                          label={
+                            dept === 'other'
+                              ? intl.formatMessage({ id: 'add-item.department.other' })
+                              : dept
+                          }
+                          value={dept}
+                        />
+                      ))}
                     </Picker>
                   </View>
                 </View>
