@@ -7,7 +7,6 @@ import { DateTime } from 'effect';
 import { cssInterop } from 'nativewind';
 import { Picker } from '@react-native-picker/picker';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
-import { DEPARTMENT_OPTIONS, AIRWAY_OPTIONS } from '../constants/fieldOptions';
 
 cssInterop(DateTimePicker, {
   className: 'style',
@@ -202,13 +201,6 @@ export default function AddItem() {
                       onValueChange={handleChange}
                       style={{ height: 200 }}>
                       <Picker.Item label="" value="" />
-                      {AIRWAY_OPTIONS.map((airway) => (
-                        <Picker.Item
-                          key={airway}
-                          label={intl.formatMessage({ id: `add-item.airway-management.${airway}` })}
-                          value={airway}
-                        />
-                      ))}
                     </Picker>
                   </View>
                 </View>
@@ -227,17 +219,6 @@ export default function AddItem() {
                       onValueChange={handleChange}
                       style={{ height: 200 }}>
                       <Picker.Item label="" value="" />
-                      {DEPARTMENT_OPTIONS.map((dept) => (
-                        <Picker.Item
-                          key={dept}
-                          label={
-                            dept === 'other'
-                              ? intl.formatMessage({ id: 'add-item.department.other' })
-                              : dept
-                          }
-                          value={dept}
-                        />
-                      ))}
                     </Picker>
                   </View>
                 </View>

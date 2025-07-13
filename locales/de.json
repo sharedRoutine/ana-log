@@ -55,7 +55,7 @@
   "create-filter.filter-name": "Filter Name",
   "create-filter.filter-name.placeholder": "Filter Namen eingeben...",
   "create-filter.conditions": "Bedingungen",
-  "create-filter.condition": "Bedingung",
+  "create-filter.condition": "Bedingung {index}",
   "create-filter.remove": "Entfernen",
   "create-filter.field": "Feld",
   "create-filter.operator": "Operator",

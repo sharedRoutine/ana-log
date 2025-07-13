@@ -87,7 +87,7 @@ export default function CreateFilter() {
     },
   });
 
-  const FieldsWithName = AvailableFields.map((field) => ({
+  const FieldsWithName = FIELDS.map(({ field }) => ({
     label: intl.formatMessage({ id: `create-filter.field.${field}` }),
     value: field,
   })).sort((a, b) => a.label.localeCompare(b.label));
@@ -147,11 +147,11 @@ export default function CreateFilter() {
 
             <form.Field name="conditions" mode="array">
               {(field) => (
-                <View key="conditions">
+                <View key={field.name}>
                   {field.state.value.map((condition, i) => {
                     const value = field.form.getFieldValue(`conditions[${i}]`);
                     return (
-                      <>
+                      <View key={i}>
                         <View className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
                           <View className="mb-4 flex-row items-center justify-between">
                             <Text className="text-base font-medium dark:text-white">
@@ -206,7 +206,7 @@ export default function CreateFilter() {
                           </form.Field>
                           <Text>{value._tag}</Text>
                         </View>
-                      </>
+                      </View>
                     );
                   })}
                   <TouchableOpacity
