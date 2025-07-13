@@ -1,193 +1,100 @@
 import { Stack, router } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
-import type { FilterCondition } from '../db/schema';
-import {
-  getFieldOptions,
-  getOperatorOptions,
-  getAvailableOperators,
-  getInputTypeForField,
-  DEPARTMENT_OPTIONS,
-  AIRWAY_OPTIONS,
-} from '../constants/fieldOptions';
+import { Schema } from 'effect';
+
+const TextCondition = Schema.TaggedStruct('TEXT_CONDITION', {
+  field: Schema.String,
+  operator: Schema.Literal('eq', 'ct'),
+  value: Schema.String,
+});
+
+const NumberCondition = Schema.TaggedStruct('NUMBER_CONDITION', {
+  field: Schema.String,
+  operator: Schema.Literal('eq', 'gt', 'gte', 'lt', 'lte'),
+  value: Schema.Number,
+});
+
+const BooleanCondition = Schema.TaggedStruct('BOOLEAN_CONDITION', {
+  field: Schema.String,
+  operator: Schema.Literal('eq'),
+  value: Schema.Boolean,
+});
+
+const FilterCondition = Schema.Union(TextCondition, NumberCondition, BooleanCondition);
+
+const Filter = Schema.Struct({
+  name: Schema.String,
+  conditions: Schema.NonEmptyArray(FilterCondition),
+});
+
+const FIELDS = [
+  NumberCondition.make({
+    field: 'asa-score',
+    operator: 'eq',
+    value: 1,
+  }),
+  TextCondition.make({
+    field: 'case-number',
+    operator: 'eq',
+    value: '',
+  }),
+  TextCondition.make({
+    field: 'department',
+    operator: 'eq',
+    value: '', // 'TC', 'NC', 'AC', 'GC', 'HNO', 'HG', 'DE', 'PC', 'UC', 'URO', 'GYN', 'MKG', 'RAD', 'NRAD', 'other'
+  }),
+  TextCondition.make({
+    field: 'airway-management',
+    operator: 'eq',
+    value: '',
+  }),
+  BooleanCondition.make({
+    field: 'outpatient',
+    operator: 'eq',
+    value: false,
+  }),
+  BooleanCondition.make({
+    field: 'special-features',
+    operator: 'eq',
+    value: false,
+  }),
+  BooleanCondition.make({
+    field: 'regional-anesthesia',
+    operator: 'eq',
+    value: false,
+  }),
+  TextCondition.make({
+    field: 'procedure',
+    operator: 'eq',
+    value: '',
+  }),
+];
 
 export default function CreateFilter() {
   const intl = useIntl();
-  const fieldOptions = getFieldOptions(intl);
-  const operatorOptions = getOperatorOptions(intl);
 
   const form = useForm({
-    defaultValues: {
-      filterName: '',
-      conditions: [{ field: '', operator: 'equals', value: '' }] as FilterCondition[],
+    defaultValues: Filter.make({
+      name: '',
+      conditions: [TextCondition.make({ field: '', operator: 'eq', value: '' })],
+    }),
+    onSubmit: async ({ value }) => {
+      console.log('Form submitted:', value);
+      router.back();
     },
   });
 
+  const FieldsWithName = AvailableFields.map((field) => ({
+    label: intl.formatMessage({ id: `create-filter.field.${field}` }),
+    value: field,
+  })).sort((a, b) => a.label.localeCompare(b.label));
+
   const conditions = useStore(form.store, (state) => state.values.conditions);
-
-  const updateCondition = (
-    index: number,
-    field: keyof FilterCondition,
-    value: string | number | boolean
-  ) => {
-    const newConditions = [...conditions];
-    newConditions[index] = { ...newConditions[index], [field]: value };
-
-    // Reset operator and value when field changes
-    if (field === 'field') {
-      newConditions[index].operator = 'equals';
-      newConditions[index].value = '';
-    }
-    // Reset value when operator changes
-    if (field === 'operator') {
-      newConditions[index].value = '';
-    }
-
-    form.setFieldValue('conditions', newConditions);
-  };
-
-  const addCondition = () => {
-    const newConditions = [...conditions, { field: '', operator: 'equals', value: '' } as const];
-    form.setFieldValue('conditions', newConditions);
-  };
-
-  const removeCondition = (index: number) => {
-    if (conditions.length > 1) {
-      const newConditions = conditions.filter((_, i) => i !== index);
-      form.setFieldValue('conditions', newConditions);
-    }
-  };
-
-  const FieldPicker = ({ condition, index }: { condition: FilterCondition; index: number }) => {
-    return (
-      <View className="mb-4">
-        <Text className="mb-2 text-sm font-medium dark:text-white">
-          {intl.formatMessage({ id: 'create-filter.field' })}
-        </Text>
-        <View className="rounded-lg border border-gray-300 dark:border-gray-600">
-          <Picker
-            selectedValue={condition.field}
-            onValueChange={(value) => updateCondition(index, 'field', value)}>
-            <Picker.Item
-              label={intl.formatMessage({ id: 'create-filter.select-field' })}
-              value=""
-            />
-            {fieldOptions.map((option) => (
-              <Picker.Item key={option.value} label={option.label} value={option.value} />
-            ))}
-          </Picker>
-        </View>
-      </View>
-    );
-  };
-
-  const renderOperatorPicker = (condition: FilterCondition, index: number) => {
-    if (!condition.field) return null;
-
-    const availableOperators = getAvailableOperators(condition.field);
-    const filteredOperatorOptions = operatorOptions.filter((option) =>
-      availableOperators.includes(option.value)
-    );
-    const selectedOperatorIndex = filteredOperatorOptions.findIndex(
-      (option) => option.value === condition.operator
-    );
-
-    return (
-      <View className="mb-4">
-        <Text className="mb-2 text-sm font-medium dark:text-white">
-          {intl.formatMessage({ id: 'create-filter.operator' })}
-        </Text>
-        <SwiftUIPicker
-          options={filteredOperatorOptions.map((option) => option.label)}
-          selectedIndex={selectedOperatorIndex >= 0 ? selectedOperatorIndex : -1}
-          onOptionSelected={({ nativeEvent: { index } }) => {
-            updateCondition(index, 'operator', filteredOperatorOptions[index].value);
-          }}
-          variant="segmented"
-          style={{ height: 40 }}
-        />
-      </View>
-    );
-  };
-
-  const renderValueInput = (condition: FilterCondition, index: number) => {
-    if (!condition.field || !condition.operator) return null;
-
-    const inputType = getInputTypeForField(condition.field, condition.operator);
-
-    if (inputType === 'none') {
-      return null;
-    }
-
-    if (inputType === 'select-department') {
-      return (
-        <View className="mb-4">
-          <Text className="mb-2 text-sm font-medium dark:text-white">
-            {intl.formatMessage({ id: 'create-filter.value' })}
-          </Text>
-          <View className="rounded-lg border border-gray-300 dark:border-gray-600">
-            <Picker
-              selectedValue={condition.value}
-              onValueChange={(value) => updateCondition(index, 'value', value)}
-              style={{ height: 120 }}>
-              <Picker.Item
-                label={intl.formatMessage({ id: 'create-filter.select-department' })}
-                value=""
-              />
-              {DEPARTMENT_OPTIONS.map((dept) => (
-                <Picker.Item key={dept} label={dept} value={dept} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-      );
-    }
-
-    if (inputType === 'select-airway') {
-      return (
-        <View className="mb-4">
-          <Text className="mb-2 text-sm font-medium dark:text-white">
-            {intl.formatMessage({ id: 'create-filter.value' })}
-          </Text>
-          <View className="rounded-lg border border-gray-300 dark:border-gray-600">
-            <Picker
-              selectedValue={condition.value}
-              onValueChange={(value) => updateCondition(index, 'value', value)}
-              style={{ height: 120 }}>
-              <Picker.Item
-                label={intl.formatMessage({ id: 'create-filter.select-airway' })}
-                value=""
-              />
-              {AIRWAY_OPTIONS.map((airway) => (
-                <Picker.Item key={airway} label={airway} value={airway} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-      );
-    }
-
-    return (
-      <View className="mb-4">
-        <Text className="mb-2 text-sm font-medium dark:text-white">
-          {intl.formatMessage({ id: 'create-filter.value' })}
-        </Text>
-        <TextInput
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-          placeholder={intl.formatMessage({ id: 'create-filter.enter-value' })}
-          value={String(condition.value)}
-          onChangeText={(text) => {
-            const value = inputType === 'number' ? (text ? Number(text) : '') : text;
-            updateCondition(index, 'value', value);
-          }}
-          keyboardType={inputType === 'number' ? 'numeric' : 'default'}
-        />
-      </View>
-    );
-  };
+  const canSubmit = useStore(form.store, (state) => state.canSubmit);
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
     <>
@@ -202,12 +109,22 @@ export default function CreateFilter() {
               </Text>
             </TouchableOpacity>
           ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => form.handleSubmit()}
+              disabled={!canSubmit || isSubmitting}
+              style={{ opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}>
+              <Text className="font-medium text-blue-500">
+                {intl.formatMessage({ id: 'create-filter.save' })}
+              </Text>
+            </TouchableOpacity>
+          ),
         }}
       />
       <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
         <View className="p-4">
-          <form.Field name="filterName">
-            {(field) => (
+          <form.Field name="name">
+            {({ state, handleChange, handleBlur }) => (
               <View className="mb-6">
                 <Text className="mb-2 text-lg font-medium dark:text-white">
                   {intl.formatMessage({ id: 'create-filter.filter-name' })}
@@ -215,9 +132,9 @@ export default function CreateFilter() {
                 <TextInput
                   className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   placeholder={intl.formatMessage({ id: 'create-filter.filter-name.placeholder' })}
-                  value={field.state.value}
-                  onChangeText={field.handleChange}
-                  onBlur={field.handleBlur}
+                  value={state.value}
+                  onChangeText={handleChange}
+                  onBlur={handleBlur}
                 />
               </View>
             )}
@@ -228,38 +145,82 @@ export default function CreateFilter() {
               {intl.formatMessage({ id: 'create-filter.conditions' })}
             </Text>
 
-            {conditions.map((condition, index) => (
-              <View
-                key={index}
-                className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
-                <View className="mb-4 flex-row items-center justify-between">
-                  <Text className="text-base font-medium dark:text-white">
-                    {intl.formatMessage({ id: 'create-filter.condition' })} {index + 1}
-                  </Text>
-                  {conditions.length > 1 && (
-                    <TouchableOpacity
-                      onPress={() => removeCondition(index)}
-                      className="rounded bg-red-100 px-3 py-1 dark:bg-red-900">
-                      <Text className="text-sm text-red-800 dark:text-red-200">
-                        {intl.formatMessage({ id: 'create-filter.remove' })}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+            <form.Field name="conditions" mode="array">
+              {(field) => (
+                <View key="conditions">
+                  {field.state.value.map((condition, i) => {
+                    const value = field.form.getFieldValue(`conditions[${i}]`);
+                    return (
+                      <>
+                        <View className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
+                          <View className="mb-4 flex-row items-center justify-between">
+                            <Text className="text-base font-medium dark:text-white">
+                              {intl.formatMessage(
+                                { id: 'create-filter.condition' },
+                                { index: i + 1 }
+                              )}
+                            </Text>
+                            {conditions.length > 1 && (
+                              <TouchableOpacity
+                                onPress={() => field.removeValue(i)}
+                                className="rounded bg-red-100 px-3 py-1 dark:bg-red-900">
+                                <Text className="text-sm text-red-800 dark:text-red-200">
+                                  {intl.formatMessage({ id: 'create-filter.remove' })}
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                          <form.Field key={i} name={`conditions[${i}].field`}>
+                            {(subField) => (
+                              <View className="mb-4">
+                                <Text className="mb-2 text-sm font-medium dark:text-white">
+                                  {intl.formatMessage({ id: 'create-filter.field' })}
+                                </Text>
+                                <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                  <Picker
+                                    selectedValue={subField.state.value}
+                                    onValueChange={(newValue) => {
+                                      const condition = FIELDS.find((f) => f.field === newValue);
+                                      if (condition) {
+                                        field.form.setFieldValue(`conditions[${i}]`, condition);
+                                      }
+                                      subField.handleChange(newValue);
+                                    }}>
+                                    <Picker.Item
+                                      label={intl.formatMessage({
+                                        id: 'create-filter.select-field',
+                                      })}
+                                      value=""
+                                    />
+                                    {FieldsWithName.map((option) => (
+                                      <Picker.Item
+                                        key={option.value}
+                                        label={option.label}
+                                        value={option.value}
+                                      />
+                                    ))}
+                                  </Picker>
+                                </View>
+                              </View>
+                            )}
+                          </form.Field>
+                          <Text>{value._tag}</Text>
+                        </View>
+                      </>
+                    );
+                  })}
+                  <TouchableOpacity
+                    onPress={() =>
+                      field.pushValue(TextCondition.make({ field: '', operator: 'eq', value: '' }))
+                    }
+                    className="items-center rounded-lg bg-blue-500 p-3">
+                    <Text className="font-medium text-white">
+                      {intl.formatMessage({ id: 'create-filter.add-condition' })}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-
-                <FieldPicker condition={condition} index={index} />
-                {renderOperatorPicker(condition, index)}
-                {renderValueInput(condition, index)}
-              </View>
-            ))}
-
-            <TouchableOpacity
-              onPress={addCondition}
-              className="items-center rounded-lg bg-blue-500 p-3">
-              <Text className="font-medium text-white">
-                {intl.formatMessage({ id: 'create-filter.add-condition' })}
-              </Text>
-            </TouchableOpacity>
+              )}
+            </form.Field>
           </View>
         </View>
       </ScrollView>
