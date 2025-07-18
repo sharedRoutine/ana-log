@@ -1,29 +1,54 @@
 import { Stack, router } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
-import { Schema } from 'effect';
+import { Match, Schema } from 'effect';
 
 const TextCondition = Schema.TaggedStruct('TEXT_CONDITION', {
   field: Schema.String,
-  operator: Schema.Literal('eq', 'ct'),
+  operators: Schema.Set(Schema.Literal('eq', 'ct')),
+  operator: Schema.Literal('eq', 'ct').pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => 'eq' as const,
+      constructor: () => 'eq' as const,
+    })
+  ),
   value: Schema.String,
 });
 
 const NumberCondition = Schema.TaggedStruct('NUMBER_CONDITION', {
   field: Schema.String,
-  operator: Schema.Literal('eq', 'gt', 'gte', 'lt', 'lte'),
+  operators: Schema.Set(Schema.Literal('eq', 'gt', 'gte', 'lt', 'lte')),
+  operator: Schema.Literal('eq', 'gt', 'gte', 'lt', 'lte').pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => 'eq' as const,
+      constructor: () => 'eq' as const,
+    })
+  ),
   value: Schema.Number,
 });
 
 const BooleanCondition = Schema.TaggedStruct('BOOLEAN_CONDITION', {
   field: Schema.String,
-  operator: Schema.Literal('eq'),
   value: Schema.Boolean,
 });
 
-const FilterCondition = Schema.Union(TextCondition, NumberCondition, BooleanCondition);
+const EnumCondition = Schema.TaggedStruct('ENUM_CONDITION', {
+  field: Schema.String,
+  options: Schema.NonEmptyArray(Schema.String),
+  value: Schema.String,
+});
+
+const FilterCondition = Schema.Union(
+  TextCondition,
+  NumberCondition,
+  BooleanCondition,
+  EnumCondition
+);
 
 const Filter = Schema.Struct({
   name: Schema.String,
@@ -33,45 +58,102 @@ const Filter = Schema.Struct({
 const FIELDS = [
   NumberCondition.make({
     field: 'asa-score',
-    operator: 'eq',
+    operators: new Set(['eq', 'gt', 'gte', 'lt', 'lte']),
     value: 1,
   }),
   TextCondition.make({
     field: 'case-number',
-    operator: 'eq',
+    operators: new Set(['eq', 'ct']),
     value: '',
   }),
-  TextCondition.make({
+  EnumCondition.make({
     field: 'department',
-    operator: 'eq',
-    value: '', // 'TC', 'NC', 'AC', 'GC', 'HNO', 'HG', 'DE', 'PC', 'UC', 'URO', 'GYN', 'MKG', 'RAD', 'NRAD', 'other'
+    options: [
+      'TC',
+      'NC',
+      'AC',
+      'GC',
+      'HNO',
+      'HG',
+      'DE',
+      'PC',
+      'UC',
+      'URO',
+      'GYN',
+      'MKG',
+      'RAD',
+      'NRAD',
+      'other',
+    ],
+    value: '',
   }),
-  TextCondition.make({
+  EnumCondition.make({
     field: 'airway-management',
-    operator: 'eq',
+    options: ['tube', 'lama', 'tracheostomy', 'mask', 'spontaneous', 'cricothyrotomy', 'none'],
     value: '',
   }),
   BooleanCondition.make({
     field: 'outpatient',
-    operator: 'eq',
     value: false,
   }),
   BooleanCondition.make({
     field: 'special-features',
-    operator: 'eq',
     value: false,
   }),
   BooleanCondition.make({
     field: 'regional-anesthesia',
-    operator: 'eq',
     value: false,
   }),
   TextCondition.make({
     field: 'procedure',
-    operator: 'eq',
+    operators: new Set(['eq', 'ct']),
     value: '',
   }),
 ];
+
+// TODO: Better errors
+const validateForm = (value: typeof Filter.Type) => {
+  if (!value.name) {
+    return 'No name';
+  }
+  for (const condition of value.conditions) {
+    const returnVal = Match.value(condition).pipe(
+      Match.tag('TEXT_CONDITION', (textCondition) => {
+        if (!textCondition.field) {
+          return 'Missing field';
+        }
+        if (typeof textCondition.value !== 'string' || !textCondition.value.trim()) {
+          return 'Empty value in condition';
+        }
+      }),
+      Match.tag('NUMBER_CONDITION', (numberCondition) => {
+        if (!numberCondition.field) {
+          return 'Missing field';
+        }
+        if (typeof numberCondition.value !== 'number' || isNaN(numberCondition.value)) {
+          return 'Invalid number in condition';
+        }
+      }),
+      Match.tag('BOOLEAN_CONDITION', (booleanCondition) => {
+        if (!booleanCondition.field) {
+          return 'Missing field';
+        }
+      }),
+      Match.tag('ENUM_CONDITION', (enumCondition) => {
+        if (!enumCondition.field) {
+          return 'Missing field';
+        }
+        if (!enumCondition.options.includes(enumCondition.value)) {
+          return 'Invalid enum value in condition';
+        }
+      }),
+      Match.exhaustive
+    );
+    if (returnVal) {
+      return returnVal;
+    }
+  }
+};
 
 export default function CreateFilter() {
   const intl = useIntl();
@@ -79,11 +161,15 @@ export default function CreateFilter() {
   const form = useForm({
     defaultValues: Filter.make({
       name: '',
-      conditions: [TextCondition.make({ field: '', operator: 'eq', value: '' })],
+      conditions: [TextCondition.make({ field: '', operators: new Set(['eq', 'ct']), value: '' })],
     }),
+    validators: {
+      onMount: ({ value }) => validateForm(value),
+      onChange: ({ value }) => validateForm(value),
+    },
     onSubmit: async ({ value }) => {
       console.log('Form submitted:', value);
-      router.back();
+      // router.back();
     },
   });
 
@@ -148,7 +234,7 @@ export default function CreateFilter() {
             <form.Field name="conditions" mode="array">
               {(field) => (
                 <View key={field.name}>
-                  {field.state.value.map((condition, i) => {
+                  {field.state.value.map((_, i) => {
                     const value = field.form.getFieldValue(`conditions[${i}]`);
                     return (
                       <View key={i}>
@@ -170,48 +256,244 @@ export default function CreateFilter() {
                               </TouchableOpacity>
                             )}
                           </View>
-                          <form.Field key={i} name={`conditions[${i}].field`}>
-                            {(subField) => (
-                              <View className="mb-4">
-                                <Text className="mb-2 text-sm font-medium dark:text-white">
-                                  {intl.formatMessage({ id: 'create-filter.field' })}
-                                </Text>
-                                <View className="rounded-lg border border-gray-300 dark:border-gray-600">
-                                  <Picker
-                                    selectedValue={subField.state.value}
-                                    onValueChange={(newValue) => {
-                                      const condition = FIELDS.find((f) => f.field === newValue);
-                                      if (condition) {
-                                        field.form.setFieldValue(`conditions[${i}]`, condition);
-                                      }
-                                      subField.handleChange(newValue);
-                                    }}>
-                                    <Picker.Item
-                                      label={intl.formatMessage({
-                                        id: 'create-filter.select-field',
-                                      })}
-                                      value=""
-                                    />
-                                    {FieldsWithName.map((option) => (
-                                      <Picker.Item
-                                        key={option.value}
-                                        label={option.label}
-                                        value={option.value}
-                                      />
-                                    ))}
-                                  </Picker>
-                                </View>
-                              </View>
+                          <form.Field key={i} name={`conditions[${i}]`}>
+                            {(conditionField) => (
+                              <>
+                                {/* Field Selection Renderer */}
+                                <form.Field name={`conditions[${i}].field`}>
+                                  {(subField) => (
+                                    <View className="mb-4">
+                                      <Text className="mb-2 text-sm font-medium dark:text-white">
+                                        {intl.formatMessage({ id: 'create-filter.field' })}
+                                      </Text>
+                                      <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                        <Picker
+                                          selectedValue={subField.state.value}
+                                          onValueChange={(newValue) => {
+                                            const condition = FIELDS.find(
+                                              (f) => f.field === newValue
+                                            );
+                                            if (condition) {
+                                              conditionField.handleChange(condition);
+                                            }
+                                            subField.handleChange(newValue);
+                                          }}>
+                                          <Picker.Item
+                                            label={intl.formatMessage({
+                                              id: 'create-filter.select-field',
+                                            })}
+                                            value=""
+                                          />
+                                          {FieldsWithName.map((option) => (
+                                            <Picker.Item
+                                              key={option.value}
+                                              label={option.label}
+                                              value={option.value}
+                                            />
+                                          ))}
+                                        </Picker>
+                                      </View>
+                                    </View>
+                                  )}
+                                </form.Field>
+
+                                {/* Operator Renderer */}
+                                {value.field &&
+                                  Match.value(value).pipe(
+                                    Match.tag('TEXT_CONDITION', (textField) => (
+                                      <form.Field name={`conditions[${i}].operator`}>
+                                        {(operatorField) => (
+                                          <View className="mb-4">
+                                            <Text className="mb-2 text-sm font-medium dark:text-white">
+                                              {intl.formatMessage({ id: 'create-filter.operator' })}
+                                            </Text>
+                                            <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                              <SwiftUIPicker
+                                                options={Array.from(textField.operators).map((op) =>
+                                                  intl.formatMessage({
+                                                    id: `create-filter.operator.${op}`,
+                                                  })
+                                                )}
+                                                selectedIndex={0}
+                                                onOptionSelected={({ nativeEvent: { index } }) => {
+                                                  const ops = Array.from(textField.operators);
+                                                  const selectedOp = ops[index];
+                                                  operatorField.handleChange(selectedOp);
+                                                }}
+                                              />
+                                            </View>
+                                          </View>
+                                        )}
+                                      </form.Field>
+                                    )),
+                                    Match.tag('NUMBER_CONDITION', (numberField) => (
+                                      <form.Field name={`conditions[${i}].operator`}>
+                                        {(operatorField) => (
+                                          <View className="mb-4">
+                                            <Text className="mb-2 text-sm font-medium dark:text-white">
+                                              {intl.formatMessage({ id: 'create-filter.operator' })}
+                                            </Text>
+                                            <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                              <SwiftUIPicker
+                                                options={Array.from(numberField.operators).map(
+                                                  (op) =>
+                                                    intl.formatMessage({
+                                                      id: `create-filter.operator.${op}`,
+                                                    })
+                                                )}
+                                                selectedIndex={0}
+                                                onOptionSelected={({ nativeEvent: { index } }) => {
+                                                  const ops = Array.from(numberField.operators);
+                                                  const selectedOp = ops[index];
+                                                  operatorField.handleChange(selectedOp);
+                                                }}
+                                              />
+                                            </View>
+                                          </View>
+                                        )}
+                                      </form.Field>
+                                    )),
+                                    Match.tag('BOOLEAN_CONDITION', () => null),
+                                    Match.tag('ENUM_CONDITION', () => null),
+                                    Match.exhaustive
+                                  )}
+
+                                {/* Value Renderer */}
+                                {value.field &&
+                                  Match.value(value).pipe(
+                                    Match.tag('TEXT_CONDITION', () => (
+                                      <form.Field name={`conditions[${i}].value`}>
+                                        {(valueField) => (
+                                          <View className="mb-4">
+                                            <Text className="mb-2 text-sm font-medium dark:text-white">
+                                              {intl.formatMessage({ id: 'create-filter.value' })}
+                                            </Text>
+                                            <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                              <TextInput
+                                                style={{
+                                                  padding: 10,
+                                                }}
+                                                onChangeText={(newText) =>
+                                                  valueField.handleChange(newText)
+                                                }
+                                                value={valueField.state.value.toString()}
+                                                placeholder={intl.formatMessage({
+                                                  id: 'create-filter.value.placeholder',
+                                                })}
+                                                keyboardType="numeric"
+                                              />
+                                            </View>
+                                          </View>
+                                        )}
+                                      </form.Field>
+                                    )),
+                                    Match.tag('NUMBER_CONDITION', (numberField) => (
+                                      <form.Field name={`conditions[${i}].value`}>
+                                        {(valueField) => (
+                                          <View className="mb-4">
+                                            <Text className="mb-2 text-sm font-medium dark:text-white">
+                                              {intl.formatMessage({ id: 'create-filter.value' })}
+                                            </Text>
+                                            <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                              {numberField.field === 'asa-score' && (
+                                                <SwiftUIPicker
+                                                  options={['1', '2', '3', '4', '5', '6']}
+                                                  selectedIndex={0}
+                                                  onOptionSelected={({
+                                                    nativeEvent: { index },
+                                                  }) => {
+                                                    valueField.handleChange(index + 1);
+                                                  }}
+                                                />
+                                              )}
+                                            </View>
+                                          </View>
+                                        )}
+                                      </form.Field>
+                                    )),
+                                    Match.tag('BOOLEAN_CONDITION', () => (
+                                      <form.Field name={`conditions[${i}].value`}>
+                                        {(valueField) => (
+                                          <View className="mb-4">
+                                            <Text className="mb-2 text-sm font-medium dark:text-white">
+                                              {intl.formatMessage({ id: 'create-filter.value' })}
+                                            </Text>
+                                            <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                              <SwiftUIPicker
+                                                options={[
+                                                  intl.formatMessage({ id: 'create-filter.yes' }),
+                                                  intl.formatMessage({ id: 'create-filter.no' }),
+                                                ]}
+                                                selectedIndex={1}
+                                                onOptionSelected={({ nativeEvent: { index } }) => {
+                                                  valueField.handleChange(index === 0);
+                                                }}
+                                              />
+                                            </View>
+                                          </View>
+                                        )}
+                                      </form.Field>
+                                    )),
+                                    Match.tag('ENUM_CONDITION', (enumField) => {
+                                      const sortedOptions = enumField.options
+                                        .map((option) => ({
+                                          label: intl.formatMessage({
+                                            id: `create-filter.enum.${enumField.field}.${option}`,
+                                          }),
+                                          value: option,
+                                        }))
+                                        .sort((a, b) => a.label.localeCompare(b.label));
+                                      return (
+                                        <form.Field name={`conditions[${i}].value`}>
+                                          {(valueField) => (
+                                            <View className="mb-4">
+                                              <Text className="mb-2 text-sm font-medium dark:text-white">
+                                                {intl.formatMessage({ id: 'create-filter.value' })}
+                                              </Text>
+                                              <View className="rounded-lg border border-gray-300 dark:border-gray-600">
+                                                <Picker
+                                                  selectedValue={valueField.state.value}
+                                                  onValueChange={(newValue) => {
+                                                    valueField.handleChange(newValue);
+                                                  }}>
+                                                  <Picker.Item
+                                                    label={intl.formatMessage({
+                                                      id: 'create-filter.select-field',
+                                                    })}
+                                                    value=""
+                                                  />
+                                                  {sortedOptions.map((option) => (
+                                                    <Picker.Item
+                                                      key={option.value}
+                                                      label={option.label}
+                                                      value={option.value}
+                                                    />
+                                                  ))}
+                                                </Picker>
+                                              </View>
+                                            </View>
+                                          )}
+                                        </form.Field>
+                                      );
+                                    }),
+                                    Match.exhaustive
+                                  )}
+                              </>
                             )}
                           </form.Field>
-                          <Text>{value._tag}</Text>
                         </View>
                       </View>
                     );
                   })}
                   <TouchableOpacity
                     onPress={() =>
-                      field.pushValue(TextCondition.make({ field: '', operator: 'eq', value: '' }))
+                      field.pushValue(
+                        TextCondition.make({
+                          field: '',
+                          operators: new Set(['eq', 'ct']),
+                          value: '',
+                        })
+                      )
                     }
                     className="items-center rounded-lg bg-blue-500 p-3">
                     <Text className="font-medium text-white">
