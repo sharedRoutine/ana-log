@@ -61,6 +61,7 @@
   "create-filter.operator": "Operator",
   "create-filter.value": "Wert",
   "create-filter.add-condition": "Bedingung hinzufügen",
+  "create-filter.field.age": "Alter unter 5",
   "create-filter.field.case-number": "Fallnummer",
   "create-filter.field.department": "Fachrichtung",
   "create-filter.field.asa-score": "ASA Score",

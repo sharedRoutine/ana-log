@@ -88,4 +88,8 @@ export const FIELDS = [
     operators: new Set(['eq', 'ct']),
     value: '',
   }),
+  BooleanCondition.make({
+    field: 'age',
+    value: false,
+  }),
 ];
