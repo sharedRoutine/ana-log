@@ -1,16 +1,21 @@
 import { Stack, router } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
+import { Picker as SwiftUIPicker, Switch } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
 import { FIELDS, Filter, TextCondition } from '~/lib/condition';
 
 // TODO: Better errors
-const validateForm = (value: typeof Filter.Type) => {
+const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
   if (!value.name) {
     return 'No name';
+  }
+  if (value.hasGoal) {
+    if (typeof value.goal !== 'number' || isNaN(value.goal)) {
+      return 'Invalid goal value';
+    }
   }
   for (const condition of value.conditions) {
     const returnVal = Match.value(condition).pipe(
@@ -55,10 +60,15 @@ export default function CreateFilter() {
   const intl = useIntl();
 
   const form = useForm({
-    defaultValues: Filter.make({
-      name: '',
-      conditions: [TextCondition.make({ field: '', operators: new Set(['eq', 'ct']), value: '' })],
-    }),
+    defaultValues: {
+      ...Filter.make({
+        name: '',
+        conditions: [
+          TextCondition.make({ field: '', operators: new Set(['eq', 'ct']), value: '' }),
+        ],
+      }),
+      hasGoal: false,
+    },
     validators: {
       onMount: ({ value }) => validateForm(value),
       onChange: ({ value }) => validateForm(value),
@@ -74,6 +84,7 @@ export default function CreateFilter() {
     value: field,
   })).sort((a, b) => a.label.localeCompare(b.label));
 
+  const hasGoal = useStore(form.store, (state) => state.values.hasGoal);
   const conditions = useStore(form.store, (state) => state.values.conditions);
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
@@ -121,6 +132,50 @@ export default function CreateFilter() {
               </View>
             )}
           </form.Field>
+
+          <form.Field name="hasGoal">
+            {({ state, handleChange }) => (
+              <View className="mb-4 flex-row items-center justify-between">
+                <Text className="mb-4 text-lg font-medium dark:text-white">
+                  {intl.formatMessage({ id: 'create-filter.goal' })}
+                </Text>
+                <Switch
+                  value={state.value}
+                  onValueChange={(checked) => {
+                    handleChange(checked);
+
+                    if (!checked) {
+                      form.setFieldValue('goal', undefined);
+                    }
+                  }}
+                  variant="switch"
+                />
+              </View>
+            )}
+          </form.Field>
+
+          {hasGoal && (
+            <form.Field name="goal">
+              {({ state, handleChange }) => (
+                <View className="mb-6 rounded-lg border border-gray-300 dark:border-gray-600">
+                  <TextInput
+                    style={{
+                      padding: 10,
+                    }}
+                    onChangeText={(newText) => {
+                      const numericValue = parseInt(newText);
+                      handleChange(isNaN(numericValue) ? 0 : numericValue);
+                    }}
+                    value={state.value ? state.value.toString() : ''}
+                    placeholder={intl.formatMessage({
+                      id: 'create-filter.value.placeholder',
+                    })}
+                    keyboardType="numeric"
+                  />
+                </View>
+              )}
+            </form.Field>
+          )}
 
           <View className="mb-6">
             <Text className="mb-4 text-lg font-medium dark:text-white">

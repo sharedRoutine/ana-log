@@ -47,6 +47,7 @@ export const FilterCondition = Schema.Union(
 
 export const Filter = Schema.Struct({
   name: Schema.String,
+  goal: Schema.Number.pipe(Schema.optional),
   conditions: Schema.NonEmptyArray(FilterCondition),
 });
 
