@@ -3,10 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'rea
 import { useForm, useStore } from '@tanstack/react-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useIntl } from 'react-intl';
-import { DateTime } from 'effect';
+import { DateTime, Schema } from 'effect';
 import { cssInterop } from 'nativewind';
 import { Picker } from '@react-native-picker/picker';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
+import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 
 cssInterop(DateTimePicker, {
   className: 'style',
@@ -16,11 +17,39 @@ cssInterop(Picker, {
   className: 'style',
 });
 
+const Item = Schema.Struct({
+  caseNumber: Schema.String,
+  patientBirthDate: Schema.DateTimeUtc,
+  operationDate: Schema.DateTimeUtc,
+  asaScore: Schema.Literal(1, 2, 3, 4, 5, 6),
+  airwayManagement: Schema.String,
+  department: Schema.String,
+  departmentOther: Schema.String,
+  specialFeatures: Schema.Boolean,
+  specialFeaturesText: Schema.String,
+  regionalAnesthesia: Schema.Boolean,
+  regionalAnesthesiaText: Schema.String,
+  outpatient: Schema.Boolean,
+  procedure: Schema.String,
+});
+
+const validateForm = (value: typeof Item.Type) => {
+  if (!value.caseNumber) {
+    return 'No case number';
+  }
+  if (!value.airwayManagement) {
+    return 'No airway management';
+  }
+  if (!value.department) {
+    return 'No department';
+  }
+};
+
 export default function AddItem() {
   const intl = useIntl();
 
   const form = useForm({
-    defaultValues: {
+    defaultValues: Item.make({
       caseNumber: '',
       patientBirthDate: DateTime.unsafeMake(new Date()),
       operationDate: DateTime.unsafeMake(new Date()),
@@ -34,8 +63,14 @@ export default function AddItem() {
       regionalAnesthesiaText: '',
       outpatient: false,
       procedure: '',
+    }),
+    validators: {
+      onMount: ({ value }) => validateForm(value),
+      onChange: ({ value }) => validateForm(value),
     },
-    onSubmit: async ({ value }) => {},
+    onSubmit: async ({ value }) => {
+      console.log('Form submitted:', value);
+    },
   });
 
   const departmentValue = useStore(form.store, (state) => state.values.department);
@@ -51,6 +86,9 @@ export default function AddItem() {
     return { years, months };
   };
 
+  const canSubmit = useStore(form.store, (state) => state.canSubmit);
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
+
   return (
     <>
       <Stack.Screen
@@ -65,7 +103,10 @@ export default function AddItem() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => form.handleSubmit()}>
+            <TouchableOpacity
+              disabled={!canSubmit || isSubmitting}
+              style={{ opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}
+              onPress={() => form.handleSubmit()}>
               <Text className={`font-medium text-blue-500`}>
                 {intl.formatMessage({ id: 'add-item.save-item' })}
               </Text>
@@ -178,7 +219,7 @@ export default function AddItem() {
                     options={['1', '2', '3', '4', '5', '6']}
                     selectedIndex={state.value ? state.value - 1 : -1}
                     onOptionSelected={({ nativeEvent: { index } }) => {
-                      handleChange(index + 1);
+                      handleChange((index + 1) as 1 | 2 | 3 | 4 | 5 | 6);
                     }}
                     variant="segmented"
                     style={{
@@ -200,7 +241,22 @@ export default function AddItem() {
                       selectedValue={state.value}
                       onValueChange={handleChange}
                       style={{ height: 200 }}>
-                      <Picker.Item label="" value="" />
+                      <Picker.Item
+                        label={intl.formatMessage({ id: 'create-filter.select-airway' })}
+                        value=""
+                      />
+                      {AIRWAY_OPTIONS.map((option) => ({
+                        label: intl.formatMessage({ id: `enum.airway-management.${option}` }),
+                        value: option,
+                      }))
+                        .sort((a, b) => a.label.localeCompare(b.label))
+                        .map((option) => (
+                          <Picker.Item
+                            key={option.value}
+                            label={option.label}
+                            value={option.value}
+                          />
+                        ))}
                     </Picker>
                   </View>
                 </View>
@@ -218,7 +274,17 @@ export default function AddItem() {
                       selectedValue={state.value}
                       onValueChange={handleChange}
                       style={{ height: 200 }}>
-                      <Picker.Item label="" value="" />
+                      <Picker.Item
+                        label={intl.formatMessage({ id: 'create-filter.select-department' })}
+                        value=""
+                      />
+                      {DEPARTMENT_OPTIONS.map((option) => (
+                        <Picker.Item
+                          key={option}
+                          label={intl.formatMessage({ id: `enum.department.${option}` })}
+                          value={option}
+                        />
+                      ))}
                     </Picker>
                   </View>
                 </View>

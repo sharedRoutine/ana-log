@@ -4,112 +4,8 @@ import { Picker } from '@react-native-picker/picker';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
-import { Match, Schema } from 'effect';
-
-const TextCondition = Schema.TaggedStruct('TEXT_CONDITION', {
-  field: Schema.String,
-  operators: Schema.Set(Schema.Literal('eq', 'ct')),
-  operator: Schema.Literal('eq', 'ct').pipe(
-    Schema.optional,
-    Schema.withDefaults({
-      decoding: () => 'eq' as const,
-      constructor: () => 'eq' as const,
-    })
-  ),
-  value: Schema.String,
-});
-
-const NumberCondition = Schema.TaggedStruct('NUMBER_CONDITION', {
-  field: Schema.String,
-  operators: Schema.Set(Schema.Literal('eq', 'gt', 'gte', 'lt', 'lte')),
-  operator: Schema.Literal('eq', 'gt', 'gte', 'lt', 'lte').pipe(
-    Schema.optional,
-    Schema.withDefaults({
-      decoding: () => 'eq' as const,
-      constructor: () => 'eq' as const,
-    })
-  ),
-  value: Schema.Number,
-});
-
-const BooleanCondition = Schema.TaggedStruct('BOOLEAN_CONDITION', {
-  field: Schema.String,
-  value: Schema.Boolean,
-});
-
-const EnumCondition = Schema.TaggedStruct('ENUM_CONDITION', {
-  field: Schema.String,
-  options: Schema.NonEmptyArray(Schema.String),
-  value: Schema.String,
-});
-
-const FilterCondition = Schema.Union(
-  TextCondition,
-  NumberCondition,
-  BooleanCondition,
-  EnumCondition
-);
-
-const Filter = Schema.Struct({
-  name: Schema.String,
-  conditions: Schema.NonEmptyArray(FilterCondition),
-});
-
-const FIELDS = [
-  NumberCondition.make({
-    field: 'asa-score',
-    operators: new Set(['eq', 'gt', 'gte', 'lt', 'lte']),
-    value: 1,
-  }),
-  TextCondition.make({
-    field: 'case-number',
-    operators: new Set(['eq', 'ct']),
-    value: '',
-  }),
-  EnumCondition.make({
-    field: 'department',
-    options: [
-      'TC',
-      'NC',
-      'AC',
-      'GC',
-      'HNO',
-      'HG',
-      'DE',
-      'PC',
-      'UC',
-      'URO',
-      'GYN',
-      'MKG',
-      'RAD',
-      'NRAD',
-      'other',
-    ],
-    value: '',
-  }),
-  EnumCondition.make({
-    field: 'airway-management',
-    options: ['tube', 'lama', 'tracheostomy', 'mask', 'spontaneous', 'cricothyrotomy', 'none'],
-    value: '',
-  }),
-  BooleanCondition.make({
-    field: 'outpatient',
-    value: false,
-  }),
-  BooleanCondition.make({
-    field: 'special-features',
-    value: false,
-  }),
-  BooleanCondition.make({
-    field: 'regional-anesthesia',
-    value: false,
-  }),
-  TextCondition.make({
-    field: 'procedure',
-    operators: new Set(['eq', 'ct']),
-    value: '',
-  }),
-];
+import { Match } from 'effect';
+import { FIELDS, Filter, TextCondition } from '~/lib/condition';
 
 // TODO: Better errors
 const validateForm = (value: typeof Filter.Type) => {
@@ -438,7 +334,7 @@ export default function CreateFilter() {
                                       const sortedOptions = enumField.options
                                         .map((option) => ({
                                           label: intl.formatMessage({
-                                            id: `create-filter.enum.${enumField.field}.${option}`,
+                                            id: `enum.${enumField.field}.${option}`,
                                           }),
                                           value: option,
                                         }))
