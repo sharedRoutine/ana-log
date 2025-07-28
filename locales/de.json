@@ -1,5 +1,7 @@
 {
   "app.title": "ANA | LOG",
+  "home.number-of-items-created": "Du hast {count} OPs gesammelt",
+  "home.number-of-items-created.single": "Du hast eine OP geschafft!",
   "add-item.title": "Eintrag hinzufügen",
   "add-item.back": "Zurück",
   "add-item.basic-info": "Grundlegende Informationen",

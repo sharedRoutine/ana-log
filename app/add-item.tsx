@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'rea
 import { useForm, useStore } from '@tanstack/react-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useIntl } from 'react-intl';
-import { DateTime, Schema } from 'effect';
+import { DateTime, Duration, Schema } from 'effect';
 import { cssInterop } from 'nativewind';
 import { Picker } from '@react-native-picker/picker';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
+import { db } from '~/db/db';
+import { itemTable } from '~/db/schema';
 
 cssInterop(DateTimePicker, {
   className: 'style',
@@ -69,7 +71,21 @@ export default function AddItem() {
       onChange: ({ value }) => validateForm(value),
     },
     onSubmit: async ({ value }) => {
-      console.log('Form submitted:', value);
+      const age = calculateAge(value.patientBirthDate);
+      await db.insert(itemTable).values({
+        caseNumber: value.caseNumber,
+        ageYears: age.years,
+        ageMonths: age.months,
+        date: value.operationDate.epochMillis,
+        asaScore: value.asaScore,
+        airwayManagement: value.airwayManagement,
+        department: value.department,
+        specials: value.specialFeatures ? value.specialFeaturesText : null,
+        localAnesthetics: value.regionalAnesthesia ? 1 : 0,
+        outpatient: value.outpatient ? 1 : 0,
+        procedure: value.procedure,
+      });
+      router.back();
     },
   });
 

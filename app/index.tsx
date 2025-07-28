@@ -2,10 +2,15 @@ import { Stack, useRouter } from 'expo-router';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIntl } from 'react-intl';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { db } from '~/db/db';
+import { itemTable } from '~/db/schema';
 
 export default function Home() {
   const router = useRouter();
   const intl = useIntl();
+
+  const { data } = useLiveQuery(db.select().from(itemTable));
 
   return (
     <>
@@ -25,6 +30,11 @@ export default function Home() {
         }}
       />
       <View className="px-4 pt-4">
+        <Text className="mb-4 text-lg font-bold">
+          {data.length === 1
+            ? intl.formatMessage({ id: 'home.number-of-items-created.single' })
+            : intl.formatMessage({ id: 'home.number-of-items-created' }, { count: data.length })}
+        </Text>
         <TouchableOpacity
           onPress={() => router.push('/create-filter')}
           className="mb-4 rounded-lg border border-blue-300 bg-blue-100 p-3 dark:border-blue-700 dark:bg-blue-900">
