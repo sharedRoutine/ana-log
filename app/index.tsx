@@ -15,10 +15,6 @@ export default function Home() {
 
   const { colorScheme } = useColorScheme();
 
-  useEffect(() => {
-    console.log('Color scheme changed:', colorScheme);
-  }, [colorScheme]);
-
   return (
     <View className="flex-1 bg-white dark:bg-black">
       <Stack.Screen
@@ -41,7 +37,7 @@ export default function Home() {
         }}
       />
       <View className="bg-white px-4 pt-4 dark:bg-black">
-        <Text className="mb-4 text-lg font-bold text-white dark:text-gray-300">
+        <Text className="mb-4 text-lg font-bold text-black dark:text-gray-300">
           {data.length === 1
             ? intl.formatMessage({ id: 'home.number-of-items-created.single' })
             : intl.formatMessage({ id: 'home.number-of-items-created' }, { count: data.length })}
