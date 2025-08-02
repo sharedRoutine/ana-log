@@ -206,7 +206,8 @@ export default function AddItem() {
                     {intl.formatMessage({ id: 'add-item.operation-date' })}
                   </Text>
                   <DateTimePicker
-                    value={state.value ? new Date(DateTime.formatIso(state.value)) : new Date()}
+                    value={new Date(state.value.epochMillis)}
+                    maximumDate={new Date()}
                     mode="date"
                     display={'compact'}
                     onChange={(_, selectedDate) => {
