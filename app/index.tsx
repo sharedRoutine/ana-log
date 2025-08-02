@@ -6,14 +6,18 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
 import { useColorScheme } from 'nativewind';
+import { useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
   const intl = useIntl();
+  const { data } = useLiveQuery(db.select().from(itemTable));
 
   const { colorScheme } = useColorScheme();
 
-  const { data } = useLiveQuery(db.select().from(itemTable));
+  useEffect(() => {
+    console.log('Color scheme changed:', colorScheme);
+  }, [colorScheme]);
 
   return (
     <View className="flex-1 bg-white dark:bg-black">

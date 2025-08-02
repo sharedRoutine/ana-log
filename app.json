@@ -4,23 +4,30 @@
     "slug": "ana-log",
     "version": "1.0.0",
     "scheme": "ana-log",
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
     },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jnsh.analog"
+      "bundleIdentifier": "com.jnsh.analog",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +35,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.jnsh.analog"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f5e1af85-559b-43c1-891e-3713bef16b68"
+      }
     }
   }
 }
