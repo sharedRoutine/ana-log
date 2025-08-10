@@ -1,7 +1,5 @@
 {
   "app.title": "ANA | LOG",
-  "home.number-of-items-created": "Du hast {count} OPs gesammelt",
-  "home.number-of-items-created.single": "Du hast eine OP geschafft!",
   "add-item.title": "Eintrag hinzufügen",
   "add-item.back": "Zurück",
   "add-item.basic-info": "Grundlegende Informationen",
@@ -113,5 +111,5 @@
   "create-filter.error.save-failed": "Filter konnte nicht gespeichert werden. Bitte versuche es erneut.",
   "filter.condition.single": "1 Bedingung",
   "filter.condition.plural": "{count} Bedingungen",
-  "home.my-procedures": "Meine Eingriffe"
+  "home.my-procedures": "Meine Eingriffe ({count})"
 }

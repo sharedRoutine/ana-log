@@ -3,8 +3,9 @@ import { View, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { desc, eq, count } from 'drizzle-orm';
+import { desc, eq, count, and, or, like, gt, gte, lt, lte } from 'drizzle-orm';
 import { FlashList } from '@shopify/flash-list';
+import { Match } from 'effect';
 import { db } from '~/db/db';
 import { filterTable, itemTable, filterConditionTable } from '~/db/schema';
 import { useColorScheme } from 'nativewind';
@@ -26,6 +27,8 @@ export default function Home() {
       .from(filterConditionTable)
       .groupBy(filterConditionTable.filterId)
   );
+
+  const { data: allFilterConditions } = useLiveQuery(db.select().from(filterConditionTable));
 
   const { colorScheme } = useColorScheme();
 
@@ -78,6 +81,72 @@ export default function Home() {
     }
   };
 
+  const buildWhereClause = (conditions: any[]) => {
+    if (!conditions || conditions.length === 0) return undefined;
+
+    const whereConditions = conditions
+      .map((condition) => {
+        const field = getTableField(condition.field);
+        if (!field) return undefined;
+
+        const value = Match.value(condition.type).pipe(
+          Match.when('TEXT_CONDITION', () => condition.valueText),
+          Match.when('NUMBER_CONDITION', () => condition.valueNumber),
+          Match.when('BOOLEAN_CONDITION', () => condition.valueBoolean),
+          Match.when('ENUM_CONDITION', () => condition.valueEnum),
+          Match.orElse(() => null)
+        );
+
+        if (value == null) return undefined;
+
+        return Match.value(condition.operator).pipe(
+          Match.when('eq', () => eq(field, value)),
+          Match.when('ct', () => like(field, `%${value}%`)),
+          Match.when('gt', () => gt(field, value)),
+          Match.when('gte', () => gte(field, value)),
+          Match.when('lt', () => lt(field, value)),
+          Match.when('lte', () => lte(field, value)),
+          Match.when(null, () => eq(field, value)),
+          Match.when(undefined, () => eq(field, value)),
+          Match.orElse(() => undefined)
+        );
+      })
+      .filter(Boolean);
+
+    return whereConditions.length > 0 ? and(...whereConditions) : undefined;
+  };
+
+  const getTableField = (fieldName: string) => {
+    return Match.value(fieldName).pipe(
+      Match.when('department', () => itemTable.department),
+      Match.when('asa-score', () => itemTable.asaScore),
+      Match.when('airway-management', () => itemTable.airwayManagement),
+      Match.when('case-number', () => itemTable.caseNumber),
+      Match.when('procedure', () => itemTable.procedure),
+      Match.when('outpatient', () => itemTable.outpatient),
+      Match.when('age-years', () => itemTable.ageYears),
+      Match.when('age-months', () => itemTable.ageMonths),
+      Match.when('age', () => itemTable.ageYears),
+      Match.when('date', () => itemTable.date),
+      Match.when('specials', () => itemTable.specials),
+      Match.when('local-anesthetics', () => itemTable.localAnesthetics),
+      Match.orElse(() => undefined)
+    );
+  };
+
+  const getMatchingProceduresCount = (filterId: number) => {
+    if (!allFilterConditions) return 0;
+
+    const conditions = allFilterConditions.filter((condition) => condition.filterId === filterId);
+    if (conditions.length === 0) return -1;
+
+    const whereClause = buildWhereClause(conditions);
+    if (!whereClause) return 0;
+
+    const [result] = db.select({ count: count() }).from(itemTable).where(whereClause).all();
+    return result?.count || 0;
+  };
+
   return (
     <View className="flex-1 bg-white dark:bg-black">
       <Stack.Screen
@@ -100,14 +169,6 @@ export default function Home() {
         }}
       />
       <View className="bg-white px-4 pt-4 dark:bg-black">
-        <Text className="mb-4 text-lg font-bold text-black dark:text-gray-300">
-          {procedures.length === 1
-            ? intl.formatMessage({ id: 'home.number-of-items-created.single' })
-            : intl.formatMessage(
-                { id: 'home.number-of-items-created' },
-                { count: procedures.length }
-              )}
-        </Text>
         <TouchableOpacity
           onPress={() => router.push('/create-filter')}
           className="mb-4 rounded-lg border border-blue-300 bg-blue-100 p-3 dark:border-blue-700 dark:bg-blue-900">
@@ -141,7 +202,7 @@ export default function Home() {
                   {filter.name}
                 </Text>
                 <Text className="text-lg font-bold text-white">
-                  {procedures.filter(() => true).length}
+                  {getMatchingProceduresCount(filter.id)}
                 </Text>
               </View>
               <View className="flex-row flex-wrap gap-1">
@@ -154,7 +215,7 @@ export default function Home() {
         </View>
 
         <Text className="mb-3 text-xl font-bold text-black dark:text-white">
-          {intl.formatMessage({ id: 'home.my-procedures' })}
+          {intl.formatMessage({ id: 'home.my-procedures' }, { count: procedures?.length || 0 })}
         </Text>
       </View>
 
