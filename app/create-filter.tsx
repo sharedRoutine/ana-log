@@ -6,6 +6,8 @@ import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
 import { FIELDS, Filter, TextCondition } from '~/lib/condition';
+import { db } from '~/db/db';
+import { filterConditionTable, filterTable } from '~/db/schema';
 
 // TODO: Better errors
 const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
@@ -74,8 +76,66 @@ export default function CreateFilter() {
       onChange: ({ value }) => validateForm(value),
     },
     onSubmit: async ({ value }) => {
-      console.log('Form submitted:', value);
-      // router.back();
+      await db.transaction(async (tx) => {
+        const [f] = await tx
+          .insert(filterTable)
+          .values({ name: value.name, goal: value.goal })
+          .returning({ id: filterTable.id });
+
+        for (const condition of value.conditions) {
+          await Match.value(condition).pipe(
+            Match.tag('TEXT_CONDITION', (textCondition) =>
+              tx
+                .insert(filterConditionTable)
+                .values({
+                  filterId: f.id,
+                  type: 'TEXT_CONDITION',
+                  field: textCondition.field,
+                  operator: textCondition.operator,
+                  valueText: textCondition.value,
+                })
+                .execute()
+            ),
+            Match.tag('NUMBER_CONDITION', (numberCondition) =>
+              tx
+                .insert(filterConditionTable)
+                .values({
+                  filterId: f.id,
+                  type: 'NUMBER_CONDITION',
+                  field: numberCondition.field,
+                  operator: numberCondition.operator,
+                  valueNumber: numberCondition.value,
+                })
+                .execute()
+            ),
+            Match.tag('BOOLEAN_CONDITION', (booleanCondition) =>
+              tx
+                .insert(filterConditionTable)
+                .values({
+                  filterId: f.id,
+                  type: 'BOOLEAN_CONDITION',
+                  field: booleanCondition.field,
+                  valueBoolean: booleanCondition.value,
+                })
+                .execute()
+            ),
+            Match.tag('ENUM_CONDITION', (enumCondition) =>
+              tx
+                .insert(filterConditionTable)
+                .values({
+                  filterId: f.id,
+                  type: 'ENUM_CONDITION',
+                  field: enumCondition.field,
+                  valueEnum: enumCondition.value,
+                })
+                .execute()
+            ),
+            Match.exhaustive
+          );
+        }
+      });
+      router.back();
+      form.reset();
     },
   });
 
@@ -187,6 +247,7 @@ export default function CreateFilter() {
                 <View key={field.name}>
                   {field.state.value.map((_, i) => {
                     const value = field.form.getFieldValue(`conditions[${i}]`);
+
                     return (
                       <View key={i}>
                         <View className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-800">

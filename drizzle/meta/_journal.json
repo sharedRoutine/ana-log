@@ -8,6 +8,13 @@
       "when": 1753680343956,
       "tag": "0000_tiny_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1754820689765,
+      "tag": "0001_amazing_skin",
+      "breakpoints": true
     }
   ]
 }

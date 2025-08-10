@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'rea
 import { useForm, useStore } from '@tanstack/react-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useIntl } from 'react-intl';
-import { DateTime, Duration, Schema } from 'effect';
+import { DateTime, Schema } from 'effect';
 import { cssInterop } from 'nativewind';
 import { Picker } from '@react-native-picker/picker';
 import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
@@ -81,11 +81,12 @@ export default function AddItem() {
         airwayManagement: value.airwayManagement,
         department: value.department,
         specials: value.specialFeatures ? value.specialFeaturesText : null,
-        localAnesthetics: value.regionalAnesthesia ? 1 : 0,
-        outpatient: value.outpatient ? 1 : 0,
+        localAnesthetics: value.regionalAnesthesia,
+        outpatient: value.outpatient,
         procedure: value.procedure,
       });
       router.back();
+      form.reset();
     },
   });
 
