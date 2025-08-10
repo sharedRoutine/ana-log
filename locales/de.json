@@ -110,5 +110,8 @@
   "create-filter.enter-value": "Wert eingeben...",
   "create-filter.error.no-name": "Bitte gib einen Filter Namen ein",
   "create-filter.error.missing-values": "Bitte fülle alle Bedingungswerte aus",
-  "create-filter.error.save-failed": "Filter konnte nicht gespeichert werden. Bitte versuche es erneut."
+  "create-filter.error.save-failed": "Filter konnte nicht gespeichert werden. Bitte versuche es erneut.",
+  "filter.condition.single": "1 Bedingung",
+  "filter.condition.plural": "{count} Bedingungen",
+  "home.my-procedures": "Meine Eingriffe"
 }
