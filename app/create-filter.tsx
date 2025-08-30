@@ -500,6 +500,7 @@ export default function CreateFilter() {
                   <TouchableOpacity
                     onPress={() =>
                       field.pushValue(
+                        // @ts-expect-error Not sure why TS is unhappy here
                         TextCondition.make({
                           field: '',
                           operators: new Set(['eq', 'ct']),

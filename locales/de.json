@@ -37,6 +37,8 @@
   "add-item.done": "Fertig",
   "add-item.save-item": "Speichern",
   "add-item.save-failed": "Medizinischer Eingriff konnte nicht gespeichert werden. Bitte versuche es erneut.",
+  "edit-item.title": "Eintrag bearbeiten",
+  "edit-item.update-item": "Speichern",
   "home.department": "Fachrichtung:",
   "home.asa": "ASA:",
   "home.airway": "Atemweg:",
