@@ -1,7 +1,7 @@
 import { Stack, router } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { useForm, useStore } from '@tanstack/react-form';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DateTimePicker } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { DateTime, Schema } from 'effect';
 import { cssInterop } from 'nativewind';
@@ -10,10 +10,6 @@ import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
-
-cssInterop(DateTimePicker, {
-  className: 'style',
-});
 
 cssInterop(Picker, {
   className: 'style',
@@ -166,20 +162,14 @@ export default function AddItem() {
                     <Text className="text-lg font-medium dark:text-white">
                       {intl.formatMessage({ id: 'add-item.age-of-patient' })}
                     </Text>
-                    <View className="flex flex-col items-end">
-                      <DateTimePicker
-                        value={state.value ? new Date(DateTime.formatIso(state.value)) : new Date()}
-                        mode="date"
-                        display={'compact'}
-                        className="self-start"
-                        maximumDate={new Date()}
-                        onChange={(_, selectedDate) => {
-                          if (selectedDate) {
-                            handleChange(DateTime.unsafeMake(selectedDate));
-                          }
-                        }}
-                      />
-                    </View>
+                    <DateTimePicker
+                      onDateSelected={(date) => {
+                        handleChange(DateTime.unsafeMake(date));
+                      }}
+                      displayedComponents="date"
+                      initialDate={DateTime.toDate(state.value).toISOString()}
+                      variant="compact"
+                    />
                   </View>
                   <View className="mb-2 flex flex-col items-start">
                     {state.value && (
@@ -207,15 +197,12 @@ export default function AddItem() {
                     {intl.formatMessage({ id: 'add-item.operation-date' })}
                   </Text>
                   <DateTimePicker
-                    value={new Date(state.value.epochMillis)}
-                    maximumDate={new Date()}
-                    mode="date"
-                    display={'compact'}
-                    onChange={(_, selectedDate) => {
-                      if (selectedDate) {
-                        handleChange(DateTime.unsafeMake(selectedDate));
-                      }
+                    onDateSelected={(date) => {
+                      handleChange(DateTime.unsafeMake(date));
                     }}
+                    displayedComponents="date"
+                    initialDate={DateTime.toDate(state.value).toISOString()}
+                    variant="compact"
                   />
                 </View>
               )}
