@@ -70,28 +70,28 @@ export default function Home() {
         }}
       />
       <View className="bg-white px-4 pt-4 dark:bg-black">
-        <TouchableOpacity
-          onPress={() => router.push('/create-filter')}
-          className="mb-4 rounded-lg border border-blue-300 bg-blue-100 p-3 dark:border-blue-700 dark:bg-blue-900">
-          <View className="flex-row items-center justify-center">
-            <Ionicons name="add" size={20} color="#3B82F6" />
-            <Text className="ml-2 font-medium text-blue-600 dark:text-blue-300">
-              {intl.formatMessage({
-                id:
-                  filters && filters.length > 0
-                    ? 'home.create-another-filter'
-                    : 'home.create-first-filter',
-              })}
-            </Text>
-          </View>
-        </TouchableOpacity>
-
         <View className="mb-6 flex-row flex-wrap gap-4">
+          <TouchableOpacity
+            onPress={() => router.push('/create-filter')}
+            className="h-24 w-[48%] justify-center rounded-xl bg-blue-500 p-3">
+            <View className="items-center">
+              <Ionicons name="add" size={24} color="white" />
+              <Text className="mt-1 text-xs font-medium text-white text-center" numberOfLines={2}>
+                {intl.formatMessage({
+                  id:
+                    filters && filters.length > 0
+                      ? 'home.create-another-filter'
+                      : 'home.create-first-filter',
+                })}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
           {filters?.map((filter, index) => (
             <FilterCard
               key={filter.id}
               filter={filter}
-              index={index}
+              index={index + 1}
               conditionText={getConditionText(
                 filter.id,
                 filterConditions || [],
