@@ -25,7 +25,7 @@ export default function Layout() {
           }}
         />
         <Stack.Screen
-          name="add-item"
+          name="upsert-item"
           options={{
             presentation: 'modal',
             headerShown: true,
