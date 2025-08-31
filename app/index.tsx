@@ -76,18 +76,27 @@ export default function Home() {
           <View className="flex-row items-center justify-center">
             <Ionicons name="add" size={20} color="#3B82F6" />
             <Text className="ml-2 font-medium text-blue-600 dark:text-blue-300">
-              {intl.formatMessage({ id: 'home.create-first-filter' })}
+              {intl.formatMessage({
+                id:
+                  filters && filters.length > 0
+                    ? 'home.create-another-filter'
+                    : 'home.create-first-filter',
+              })}
             </Text>
           </View>
         </TouchableOpacity>
 
-        <View className="mb-6 flex-row flex-wrap gap-2">
+        <View className="mb-6 flex-row flex-wrap gap-4">
           {filters?.map((filter, index) => (
             <FilterCard
               key={filter.id}
               filter={filter}
               index={index}
-              conditionText={getConditionText(filter.id, filterConditions || [])}
+              conditionText={getConditionText(
+                filter.id,
+                filterConditions || [],
+                allFilterConditions || []
+              )}
               matchingCount={getMatchingProceduresCount(filter.id, allFilterConditions || [])}
             />
           ))}
