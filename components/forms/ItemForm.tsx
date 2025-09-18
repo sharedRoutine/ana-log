@@ -1,23 +1,24 @@
-import { View, Text, TextInput, ScrollView, Switch } from 'react-native';
 import { useForm, useStore } from '@tanstack/react-form';
-import { DateTimePicker } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { DateTime, Schema } from 'effect';
-import { cssInterop, useColorScheme } from 'nativewind';
-import { Picker } from '@react-native-picker/picker';
-import { Picker as SwiftUIPicker } from '@expo/ui/swift-ui';
+import { useColorScheme } from 'nativewind';
+import {
+  Host,
+  Picker,
+  DateTimePicker,
+  Text,
+  Switch,
+  Section,
+  Form,
+  TextField,
+} from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
 import { router } from 'expo-router';
 import { eq } from 'drizzle-orm';
 import { calculateAge } from '~/utils/age-utils';
-import { HorizontalLine } from '~/components/ui/HorizontalLine';
 import { useEffect } from 'react';
-
-cssInterop(Picker, {
-  className: 'style',
-});
 
 const Item = Schema.Struct({
   caseNumber: Schema.String,
@@ -67,6 +68,7 @@ export function ItemForm({
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
 
+  // TODO: Use this function
   const calculateBirthDateFromAge = (
     operationDate: DateTime.Utc,
     ageYears: number,
@@ -168,38 +170,26 @@ export function ItemForm({
   }, [canSubmit, isSubmitting, onFormStateChange, form]);
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900">
-      <View className="p-4">
-        <View className="mb-6">
-          <Text className="mb-4 text-xl font-bold text-gray-600 dark:text-gray-300">
-            {intl.formatMessage({ id: 'add-item.basic-info' })}
-          </Text>
-
-          <form.Field name="caseNumber">
-            {(field) => (
-              <View className="mb-4">
-                <Text className="mb-2 text-lg font-medium dark:text-white">
-                  {intl.formatMessage({ id: 'add-item.case-number' })}
-                </Text>
-                <TextInput
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  placeholder={intl.formatMessage({ id: 'add-item.case-number.placeholder' })}
-                  value={field.state.value}
-                  onChangeText={field.handleChange}
-                  onBlur={field.handleBlur}
-                  autoCorrect={false}
-                  spellCheck={false}
+    <Host style={{ flex: 1 }}>
+      <Form>
+        <>
+          <Section title={intl.formatMessage({ id: 'add-item.basic-info' })}>
+            <form.Field name="caseNumber">
+              {({ state, handleChange }) => (
+                <TextField
+                  autocorrection={false}
+                  onChangeText={handleChange}
+                  defaultValue={state.value}
+                  placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
+                  keyboardType={'numeric'}
                 />
-              </View>
-            )}
-          </form.Field>
-
-          <HorizontalLine />
-
-          <form.Field name="patientBirthDate">
-            {({ state, handleChange }) => (
-              <>
-                <View className="mb-4 flex flex-row items-center justify-between">
+              )}
+            </form.Field>
+          </Section>
+          <Section title={'Daten'}>
+            <form.Field name="patientBirthDate">
+              {({ state, handleChange }) => (
+                <>
                   <DateTimePicker
                     onDateSelected={(date) => {
                       handleChange(DateTime.unsafeMake(date));
@@ -210,10 +200,8 @@ export function ItemForm({
                     initialDate={DateTime.toDate(state.value).toISOString()}
                     variant="compact"
                   />
-                </View>
-                <View className="mb-2 flex flex-col items-start">
                   {state.value && (
-                    <Text className="text-sm text-gray-600 dark:text-gray-400">
+                    <Text>
                       {(() => {
                         const age = calculateAge(state.value);
                         return intl.formatMessage(
@@ -223,16 +211,11 @@ export function ItemForm({
                       })()}
                     </Text>
                   )}
-                </View>
-              </>
-            )}
-          </form.Field>
-
-          <HorizontalLine />
-
-          <form.Field name="operationDate">
-            {({ state, handleChange }) => (
-              <View className="mb-4 flex flex-row items-center justify-between">
+                </>
+              )}
+            </form.Field>
+            <form.Field name="operationDate">
+              {({ state, handleChange }) => (
                 <DateTimePicker
                   onDateSelected={(date) => {
                     handleChange(DateTime.unsafeMake(date));
@@ -243,224 +226,172 @@ export function ItemForm({
                   initialDate={DateTime.toDate(state.value).toISOString()}
                   variant="compact"
                 />
-              </View>
-            )}
-          </form.Field>
-        </View>
-
-        <View className="mb-6">
-          <Text className="mb-4 text-xl font-bold text-gray-600 dark:text-gray-300">
-            {intl.formatMessage({ id: 'add-item.details' })}
-          </Text>
-
-          <form.Field name="asaScore">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <Text className="mb-2 text-lg font-medium dark:text-white">
-                  {intl.formatMessage({ id: 'add-item.asa-score' })}
-                </Text>
-                <SwiftUIPicker
+              )}
+            </form.Field>
+          </Section>
+          <Section title={intl.formatMessage({ id: 'add-item.details' })}>
+            <form.Field name="asaScore">
+              {({ state, handleChange }) => (
+                <Picker
+                  label={intl.formatMessage({ id: 'add-item.asa-score' })}
+                  variant="menu"
                   options={['1', '2', '3', '4', '5', '6']}
                   selectedIndex={state.value ? state.value - 1 : -1}
                   onOptionSelected={({ nativeEvent: { index } }) => {
                     handleChange((index + 1) as 1 | 2 | 3 | 4 | 5 | 6);
                   }}
-                  variant="segmented"
-                  style={{
-                    height: 40,
-                  }}
                 />
-              </View>
-            )}
-          </form.Field>
-
-          <form.Field name="airwayManagement">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <Text className="mb-2 text-lg font-medium dark:text-white">
-                  {intl.formatMessage({ id: 'add-item.airway-management' })}
-                </Text>
-                <View className="rounded-lg border border-gray-300 dark:border-gray-600">
-                  <Picker
-                    selectedValue={state.value}
-                    onValueChange={handleChange}
-                    style={{ height: 200 }}>
-                    <Picker.Item
-                      label={intl.formatMessage({ id: 'create-filter.select-airway' })}
-                      value=""
-                    />
-                    {AIRWAY_OPTIONS.map((option) => ({
+              )}
+            </form.Field>
+            <form.Field name="airwayManagement">
+              {({ state, handleChange }) => (
+                // TODO: Fix indices
+                <Picker
+                  variant="menu"
+                  label={intl.formatMessage({ id: 'add-item.airway-management' })}
+                  options={[
+                    intl.formatMessage({ id: 'create-filter.select-airway' }),
+                    ...AIRWAY_OPTIONS.map((option) => ({
                       label: intl.formatMessage({ id: `enum.airway-management.${option}` }),
-                      value: option,
                     }))
                       .sort((a, b) => a.label.localeCompare(b.label))
-                      .map((option) => (
-                        <Picker.Item key={option.value} label={option.label} value={option.value} />
-                      ))}
-                  </Picker>
-                </View>
-              </View>
-            )}
-          </form.Field>
-
-          <form.Field name="department">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <Text className="mb-2 text-lg font-medium dark:text-white">
-                  {intl.formatMessage({ id: 'add-item.department' })}
-                </Text>
-                <View className="rounded-lg border border-gray-300 dark:border-gray-600">
-                  <Picker
-                    selectedValue={state.value}
-                    onValueChange={handleChange}
-                    style={{ height: 200 }}>
-                    <Picker.Item
-                      label={intl.formatMessage({ id: 'create-filter.select-department' })}
-                      value=""
-                    />
-                    {DEPARTMENT_OPTIONS.map((option) => (
-                      <Picker.Item
-                        key={option}
-                        label={intl.formatMessage({ id: `enum.department.${option}` })}
-                        value={option}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-            )}
-          </form.Field>
-
-          <form.Field name="departmentOther">
-            {({ state, handleChange }) => (
-              <>
-                {departmentValue === 'other' && (
-                  <View className="mb-4">
-                    <TextInput
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                      .map((option) => option.label),
+                  ]}
+                  selectedIndex={state.value ? AIRWAY_OPTIONS.indexOf(state.value) + 1 : 0}
+                  onOptionSelected={({ nativeEvent: { index } }) => {
+                    if (index === 0) {
+                      return;
+                    }
+                    handleChange(AIRWAY_OPTIONS[index - 1]);
+                  }}
+                />
+              )}
+            </form.Field>
+            <form.Field name="department">
+              {({ state, handleChange }) => (
+                // TODO: Fix indices
+                <Picker
+                  variant="menu"
+                  label={intl.formatMessage({ id: 'add-item.department' })}
+                  options={[
+                    intl.formatMessage({ id: 'create-filter.select-department' }),
+                    ...DEPARTMENT_OPTIONS.map((option) => ({
+                      label: intl.formatMessage({ id: `enum.department.${option}` }),
+                    }))
+                      .sort((a, b) => a.label.localeCompare(b.label))
+                      .map((option) => option.label),
+                  ]}
+                  selectedIndex={state.value ? DEPARTMENT_OPTIONS.indexOf(state.value) + 1 : 0}
+                  onOptionSelected={({ nativeEvent: { index } }) => {
+                    console.log('selected department index', index);
+                    if (index === 0) {
+                      return;
+                    }
+                    handleChange(DEPARTMENT_OPTIONS[index - 1]);
+                  }}
+                />
+              )}
+            </form.Field>
+            <form.Field name="departmentOther">
+              {({ state, handleChange }) => (
+                <>
+                  {departmentValue === 'other' && (
+                    <TextField
                       placeholder={intl.formatMessage({
                         id: 'add-item.department.other.placeholder',
                       })}
-                      value={state.value}
+                      defaultValue={state.value}
                       onChangeText={handleChange}
-                      autoCorrect={false}
-                      spellCheck={false}
+                      autocorrection={false}
                     />
-                  </View>
-                )}
-              </>
-            )}
-          </form.Field>
-
-          <form.Field name="specialFeatures">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <View className="flex flex-row items-center justify-between">
-                  <Text className="text-lg font-medium dark:text-white">
-                    {intl.formatMessage({ id: 'add-item.special-features' })}
-                  </Text>
-                  <Switch value={state.value} onValueChange={handleChange} />
-                </View>
-              </View>
-            )}
-          </form.Field>
-
-          <form.Field name="specialFeaturesText">
-            {({ state, handleChange }) => (
-              <>
-                {specialFeaturesValue && (
-                  <View className="mb-4">
-                    <TextInput
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  )}
+                </>
+              )}
+            </form.Field>
+          </Section>
+          <Section title={'Einstellungen'}>
+            <form.Field name="specialFeatures">
+              {({ state, handleChange }) => (
+                <Switch
+                  label={intl.formatMessage({ id: 'add-item.special-features' })}
+                  value={state.value}
+                  onValueChange={handleChange}
+                />
+              )}
+            </form.Field>
+            <form.Field name="specialFeaturesText">
+              {({ state, handleChange }) => (
+                <>
+                  {specialFeaturesValue && (
+                    <TextField
                       placeholder={intl.formatMessage({
                         id: 'add-item.special-features.placeholder',
                       })}
-                      value={state.value}
+                      defaultValue={state.value}
                       onChangeText={handleChange}
                       multiline
                       numberOfLines={3}
-                      autoCorrect={false}
-                      spellCheck={false}
-                      textAlignVertical="top"
+                      autocorrection={false}
+                      allowNewlines={true}
                     />
-                  </View>
-                )}
-              </>
-            )}
-          </form.Field>
-
-          <form.Field name="regionalAnesthesia">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <View className="flex flex-row items-center justify-between">
-                  <Text className="text-lg font-medium dark:text-white">
-                    {intl.formatMessage({ id: 'add-item.regional-anesthesia' })}
-                  </Text>
-                  <Switch value={state.value} onValueChange={handleChange} />
-                </View>
-              </View>
-            )}
-          </form.Field>
-
-          <form.Field name="regionalAnesthesiaText">
-            {({ state, handleChange }) => (
-              <>
-                {regionalAnesthesiaValue && (
-                  <View className="mb-4">
-                    <TextInput
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  )}
+                </>
+              )}
+            </form.Field>
+            <form.Field name="regionalAnesthesia">
+              {({ state, handleChange }) => (
+                <Switch
+                  label={intl.formatMessage({ id: 'add-item.regional-anesthesia' })}
+                  value={state.value}
+                  onValueChange={handleChange}
+                />
+              )}
+            </form.Field>
+            <form.Field name="regionalAnesthesiaText">
+              {({ state, handleChange }) => (
+                <>
+                  {regionalAnesthesiaValue && (
+                    <TextField
                       placeholder={intl.formatMessage({
                         id: 'add-item.regional-anesthesia.placeholder',
                       })}
-                      value={state.value}
+                      defaultValue={state.value}
                       onChangeText={handleChange}
                       multiline
                       numberOfLines={3}
-                      autoCorrect={false}
-                      spellCheck={false}
-                      textAlignVertical="top"
+                      autocorrection={false}
+                      allowNewlines={true}
                     />
-                  </View>
-                )}
-              </>
-            )}
-          </form.Field>
-
-          <form.Field name="outpatient">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <View className="flex flex-row items-center justify-between">
-                  <Text className="text-lg font-medium dark:text-white">
-                    {intl.formatMessage({ id: 'add-item.outpatient' })}
-                  </Text>
-                  <Switch value={state.value} onValueChange={handleChange} />
-                </View>
-              </View>
-            )}
-          </form.Field>
-
-          <form.Field name="procedure">
-            {({ state, handleChange }) => (
-              <View className="mb-4">
-                <Text className="mb-2 text-lg font-medium dark:text-white">
-                  {intl.formatMessage({ id: 'add-item.procedure' })}
-                </Text>
-                <TextInput
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  placeholder={intl.formatMessage({ id: 'add-item.procedure.placeholder' })}
+                  )}
+                </>
+              )}
+            </form.Field>
+            <form.Field name="outpatient">
+              {({ state, handleChange }) => (
+                <Switch
+                  label={intl.formatMessage({ id: 'add-item.outpatient' })}
                   value={state.value}
+                  onValueChange={handleChange}
+                />
+              )}
+            </form.Field>
+          </Section>
+          <Section title={'Eingriff'}>
+            <form.Field name="procedure">
+              {({ state, handleChange }) => (
+                <TextField
+                  placeholder={intl.formatMessage({ id: 'add-item.procedure.placeholder' })}
+                  defaultValue={state.value}
                   onChangeText={handleChange}
                   multiline
                   numberOfLines={4}
-                  autoCorrect={false}
-                  spellCheck={false}
-                  textAlignVertical="top"
+                  autocorrection={false}
                 />
-              </View>
-            )}
-          </form.Field>
-        </View>
-      </View>
-    </ScrollView>
+              )}
+            </form.Field>
+          </Section>
+        </>
+      </Form>
+    </Host>
   );
 }

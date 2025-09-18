@@ -23,4 +23,5 @@ export const AIRWAY_OPTIONS: [string, ...string[]] = [
   'mask',
   'spontaneous',
   'cricothyrotomy',
+  'doppel-lumen-tube',
 ] as const;
