@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { TouchableOpacity, Text } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useState, useEffect } from 'react';
@@ -6,22 +6,20 @@ import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
 import { ItemForm } from '~/components/forms/ItemForm';
-import { router } from 'expo-router';
-
 
 export default function UpsertItem() {
   const intl = useIntl();
   const { caseNumber } = useLocalSearchParams<{ caseNumber?: string }>();
 
   const [existingItem, setExistingItem] = useState<typeof itemTable.$inferSelect | null>(null);
-  const [formState, setFormState] = useState<{ 
-    canSubmit: boolean; 
-    isSubmitting: boolean; 
-    handleSubmit: () => void 
-  }>({ 
-    canSubmit: false, 
-    isSubmitting: false, 
-    handleSubmit: () => {} 
+  const [formState, setFormState] = useState<{
+    canSubmit: boolean;
+    isSubmitting: boolean;
+    handleSubmit: () => void;
+  }>({
+    canSubmit: false,
+    isSubmitting: false,
+    handleSubmit: () => {},
   });
 
   useEffect(() => {
@@ -34,7 +32,6 @@ export default function UpsertItem() {
   }, [caseNumber]);
 
   const isEditing = Boolean(caseNumber && existingItem);
-
 
   return (
     <>
