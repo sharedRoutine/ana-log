@@ -187,6 +187,21 @@ export function ItemForm({
             </form.Field>
           </Section>
           <Section title={'Daten'}>
+            {/* TODO: Translation */}
+            <form.Field name="operationDate">
+              {({ state, handleChange }) => (
+                <DateTimePicker
+                  onDateSelected={(date) => {
+                    handleChange(DateTime.unsafeMake(date));
+                  }}
+                  color={colorScheme === 'dark' ? 'white' : 'black'}
+                  title={intl.formatMessage({ id: 'add-item.operation-date' })}
+                  displayedComponents="date"
+                  initialDate={DateTime.toDate(state.value).toISOString()}
+                  variant="compact"
+                />
+              )}
+            </form.Field>
             <form.Field name="patientBirthDate">
               {({ state, handleChange }) => (
                 <>
@@ -212,20 +227,6 @@ export function ItemForm({
                     </Text>
                   )}
                 </>
-              )}
-            </form.Field>
-            <form.Field name="operationDate">
-              {({ state, handleChange }) => (
-                <DateTimePicker
-                  onDateSelected={(date) => {
-                    handleChange(DateTime.unsafeMake(date));
-                  }}
-                  color={colorScheme === 'dark' ? 'white' : 'black'}
-                  title={intl.formatMessage({ id: 'add-item.operation-date' })}
-                  displayedComponents="date"
-                  initialDate={DateTime.toDate(state.value).toISOString()}
-                  variant="compact"
-                />
               )}
             </form.Field>
           </Section>
