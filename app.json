@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "scheme": "ana-log",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-sqlite",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
