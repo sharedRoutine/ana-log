@@ -68,7 +68,6 @@ export default function UpsertItem() {
 
   const isEditing = Boolean(caseNumber && existingItem);
 
-  // TODO: Use this function
   const calculateBirthDateFromAge = (
     operationDate: DateTime.Utc,
     ageYears: number,
@@ -76,21 +75,22 @@ export default function UpsertItem() {
   ): DateTime.Utc => {
     const operationDateJS = DateTime.toDate(operationDate);
     const birthDate = new Date(operationDateJS);
-    birthDate.setFullYear(ageYears);
-    birthDate.setMonth(ageMonths);
+    birthDate.setFullYear(operationDateJS.getFullYear() - ageYears);
+    birthDate.setMonth(operationDateJS.getMonth() - ageMonths);
     return DateTime.unsafeMake(birthDate);
   };
 
   const getDefaultValues = () => {
     if (isEditing && existingItem) {
-      const operationDate = DateTime.unsafeMake(new Date(existingItem.date));
+      const operationDate = DateTime.unsafeMake(existingItem.date);
 
       return Item.make({
         caseNumber: existingItem.caseNumber,
-        patientBirthDate: DateTime.unsafeMake({
-          year: existingItem.ageYears,
-          month: existingItem.ageMonths,
-        }),
+        patientBirthDate: calculateBirthDateFromAge(
+          operationDate,
+          existingItem.ageYears,
+          existingItem.ageMonths
+        ),
         operationDate,
         asaScore: existingItem.asaScore as 1 | 2 | 3 | 4 | 5 | 6,
         airwayManagement: existingItem.airwayManagement,
@@ -163,6 +163,18 @@ export default function UpsertItem() {
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
+  const SORTED_AIRWAY_OPTIONS = AIRWAY_OPTIONS.map((option) => ({
+    label: intl.formatMessage({ id: `enum.airway-management.${option}` }),
+  }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((option) => option.label);
+
+  const SORTED_DEPARTMENT_OPTIONS = DEPARTMENT_OPTIONS.map((option) => ({
+    label: intl.formatMessage({ id: `enum.department.${option}` }),
+  }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((option) => option.label);
+
   return (
     <>
       <Stack.Screen
@@ -195,26 +207,30 @@ export default function UpsertItem() {
           <>
             <Section title={intl.formatMessage({ id: 'add-item.basic-info' })}>
               <form.Field name="caseNumber">
-                {({ state, handleChange }) => (
-                  <TextField
-                    autocorrection={false}
-                    onChangeText={handleChange}
-                    defaultValue={state.value}
-                    key={state.value}
-                    placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
-                    keyboardType={'numeric'}
-                  />
-                )}
+                {({ state, handleChange }) =>
+                  isEditing ? (
+                    <Text key={state.value}>{state.value}</Text>
+                  ) : (
+                    <TextField
+                      autocorrection={false}
+                      onChangeText={handleChange}
+                      defaultValue={state.value}
+                      key={state.value}
+                      placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
+                      keyboardType={'numeric'}
+                    />
+                  )
+                }
               </form.Field>
             </Section>
             <Section title={'Daten'}>
-              {/* TODO: Translation */}
               <form.Field name="operationDate">
                 {({ state, handleChange }) => (
                   <DateTimePicker
                     onDateSelected={(date) => {
                       handleChange(DateTime.unsafeMake(date));
                     }}
+                    key={state.value.epochMillis}
                     color={colorScheme === 'dark' ? 'white' : 'black'}
                     title={intl.formatMessage({ id: 'add-item.operation-date' })}
                     displayedComponents="date"
@@ -224,31 +240,47 @@ export default function UpsertItem() {
                 )}
               </form.Field>
               <form.Field name="patientBirthDate">
-                {({ state, handleChange }) => (
-                  <>
-                    <DateTimePicker
-                      onDateSelected={(date) => {
-                        handleChange(DateTime.unsafeMake(date));
-                      }}
-                      title={intl.formatMessage({ id: 'add-item.age-of-patient' })}
-                      color={colorScheme === 'dark' ? 'white' : 'black'}
-                      displayedComponents="date"
-                      initialDate={DateTime.toDate(state.value).toISOString()}
-                      variant="compact"
-                    />
-                    {state.value && (
-                      <Text>
-                        {(() => {
-                          const age = calculateAge(state.value);
-                          return intl.formatMessage(
-                            { id: 'add-item.age' },
-                            { years: age.years, months: age.months }
-                          );
-                        })()}
-                      </Text>
-                    )}
-                  </>
-                )}
+                {({ state, handleChange }) =>
+                  isEditing ? (
+                    <>
+                      {state.value && (
+                        <Text>
+                          {(() => {
+                            const age = calculateAge(state.value);
+                            return intl.formatMessage(
+                              { id: 'add-item.age' },
+                              { years: age.years, months: age.months }
+                            );
+                          })()}
+                        </Text>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <DateTimePicker
+                        onDateSelected={(date) => {
+                          handleChange(DateTime.unsafeMake(date));
+                        }}
+                        title={intl.formatMessage({ id: 'add-item.age-of-patient' })}
+                        color={colorScheme === 'dark' ? 'white' : 'black'}
+                        displayedComponents="date"
+                        initialDate={DateTime.toDate(state.value).toISOString()}
+                        variant="compact"
+                      />
+                      {state.value && (
+                        <Text>
+                          {(() => {
+                            const age = calculateAge(state.value);
+                            return intl.formatMessage(
+                              { id: 'add-item.age' },
+                              { years: age.years, months: age.months }
+                            );
+                          })()}
+                        </Text>
+                      )}
+                    </>
+                  )
+                }
               </form.Field>
             </Section>
             <Section title={intl.formatMessage({ id: 'add-item.details' })}>
@@ -267,49 +299,28 @@ export default function UpsertItem() {
               </form.Field>
               <form.Field name="airwayManagement">
                 {({ state, handleChange }) => (
-                  // TODO: Fix indices
                   <Picker
                     variant="menu"
                     label={intl.formatMessage({ id: 'add-item.airway-management' })}
-                    options={[
-                      intl.formatMessage({ id: 'create-filter.select-airway' }),
-                      ...AIRWAY_OPTIONS.map((option) => ({
-                        label: intl.formatMessage({ id: `enum.airway-management.${option}` }),
-                      }))
-                        .sort((a, b) => a.label.localeCompare(b.label))
-                        .map((option) => option.label),
-                    ]}
-                    selectedIndex={state.value ? AIRWAY_OPTIONS.indexOf(state.value) + 1 : 0}
+                    options={SORTED_AIRWAY_OPTIONS}
+                    selectedIndex={state.value ? SORTED_AIRWAY_OPTIONS.indexOf(state.value) : 0}
                     onOptionSelected={({ nativeEvent: { index } }) => {
-                      if (index === 0) {
-                        return;
-                      }
-                      handleChange(AIRWAY_OPTIONS[index - 1]);
+                      handleChange(SORTED_AIRWAY_OPTIONS[index]);
                     }}
                   />
                 )}
               </form.Field>
               <form.Field name="department">
                 {({ state, handleChange }) => (
-                  // TODO: Fix indices
                   <Picker
                     variant="menu"
                     label={intl.formatMessage({ id: 'add-item.department' })}
-                    options={[
-                      intl.formatMessage({ id: 'create-filter.select-department' }),
-                      ...DEPARTMENT_OPTIONS.map((option) => ({
-                        label: intl.formatMessage({ id: `enum.department.${option}` }),
-                      }))
-                        .sort((a, b) => a.label.localeCompare(b.label))
-                        .map((option) => option.label),
-                    ]}
-                    selectedIndex={state.value ? DEPARTMENT_OPTIONS.indexOf(state.value) + 1 : 0}
+                    options={SORTED_DEPARTMENT_OPTIONS}
+                    selectedIndex={
+                      state.value ? SORTED_DEPARTMENT_OPTIONS.indexOf(state.value) + 1 : 0
+                    }
                     onOptionSelected={({ nativeEvent: { index } }) => {
-                      console.log('selected department index', index);
-                      if (index === 0) {
-                        return;
-                      }
-                      handleChange(DEPARTMENT_OPTIONS[index - 1]);
+                      handleChange(SORTED_DEPARTMENT_OPTIONS[index - 1]);
                     }}
                   />
                 )}

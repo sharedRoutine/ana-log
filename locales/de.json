@@ -105,6 +105,7 @@
   "enum.department.MKG": "MKG",
   "enum.department.RAD": "RAD",
   "enum.department.NRAD": "NRAD",
+  "enum.department.PSY": "PSY",
   "enum.department.other": "Andere",
   "create-filter.select-field": "Feld wählen...",
   "create-filter.select-department": "Auswählen...",

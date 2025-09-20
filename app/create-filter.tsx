@@ -86,6 +86,7 @@ export default function CreateFilter() {
     validators: {
       onMount: ({ value }) => validateForm(value),
       onChange: ({ value }) => validateForm(value),
+      onBlur: ({ value }) => validateForm(value),
     },
     onSubmit: async ({ value }) => {
       await db.transaction(async (tx) => {

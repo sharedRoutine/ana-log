@@ -13,6 +13,7 @@ export const DEPARTMENT_OPTIONS: [string, ...string[]] = [
   'MKG',
   'RAD',
   'NRAD',
+  'PSY',
   'other',
 ] as const;
 
