@@ -1,5 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
@@ -12,6 +12,7 @@ import { FilterCard } from '~/components/ui/FilterCard';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function Home() {
   };
 
   return (
-    <View className="flex-1 bg-white dark:bg-black">
+    <ScrollView className="flex-1 bg-white dark:bg-black">
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
@@ -69,59 +70,61 @@ export default function Home() {
           ),
         }}
       />
-      <View className="bg-white px-4 pt-4 dark:bg-black">
-        <View className="mb-6 flex-row flex-wrap gap-4">
-          <TouchableOpacity
-            onPress={() => router.push('/create-filter')}
-            className="h-24 w-[48%] justify-center rounded-xl bg-blue-500 p-3">
-            <View className="items-center">
-              <Ionicons name="add" size={24} color="white" />
-              <Text className="mt-1 text-xs font-medium text-white text-center" numberOfLines={2}>
-                {intl.formatMessage({
-                  id:
-                    filters && filters.length > 0
-                      ? 'home.create-another-filter'
-                      : 'home.create-first-filter',
-                })}
-              </Text>
-            </View>
-          </TouchableOpacity>
+      <SafeAreaView edges={['bottom']}>
+        <View className="bg-white px-4 pt-4 dark:bg-black">
+          <View className="mb-6 flex-row flex-wrap gap-4">
+            <TouchableOpacity
+              onPress={() => router.push('/create-filter')}
+              className="h-24 w-[48%] justify-center rounded-xl bg-blue-500 p-3">
+              <View className="items-center">
+                <Ionicons name="add" size={24} color="white" />
+                <Text className="mt-1 text-center text-xs font-medium text-white" numberOfLines={2}>
+                  {intl.formatMessage({
+                    id:
+                      filters && filters.length > 0
+                        ? 'home.create-another-filter'
+                        : 'home.create-first-filter',
+                  })}
+                </Text>
+              </View>
+            </TouchableOpacity>
 
-          {filters?.map((filter, index) => (
-            <FilterCard
-              key={filter.id}
-              filter={filter}
-              index={index + 1}
-              conditionText={getConditionText(
-                filter.id,
-                filterConditions || [],
-                allFilterConditions || []
-              )}
-              matchingCount={getMatchingProceduresCount(filter.id, allFilterConditions || [])}
-            />
-          ))}
+            {filters?.map((filter, index) => (
+              <FilterCard
+                key={filter.id}
+                filter={filter}
+                index={index + 1}
+                conditionText={getConditionText(
+                  filter.id,
+                  filterConditions || [],
+                  allFilterConditions || []
+                )}
+                matchingCount={getMatchingProceduresCount(filter.id, allFilterConditions || [])}
+              />
+            ))}
+          </View>
+
+          <Text className="mb-3 text-xl font-bold text-black dark:text-white">
+            {intl.formatMessage({ id: 'home.my-procedures' }, { count: procedures?.length || 0 })}
+          </Text>
         </View>
 
-        <Text className="mb-3 text-xl font-bold text-black dark:text-white">
-          {intl.formatMessage({ id: 'home.my-procedures' }, { count: procedures?.length || 0 })}
-        </Text>
-      </View>
-
-      <View className="flex-1 px-4">
-        <FlashList
-          data={procedures}
-          renderItem={({ item }) => (
-            <ProcedureCard
-              item={item}
-              getDepartmentColor={getDepartmentColor}
-              getTranslatedDepartment={getTranslatedDepartment}
-              getTranslatedAirwayManagement={getTranslatedAirwayManagement}
-            />
-          )}
-          getItemType={() => 'procedure'}
-          keyExtractor={(item) => item.caseNumber}
-        />
-      </View>
-    </View>
+        <View className="flex-1 px-4">
+          <FlashList
+            data={procedures}
+            renderItem={({ item }) => (
+              <ProcedureCard
+                item={item}
+                getDepartmentColor={getDepartmentColor}
+                getTranslatedDepartment={getTranslatedDepartment}
+                getTranslatedAirwayManagement={getTranslatedAirwayManagement}
+              />
+            )}
+            getItemType={() => 'procedure'}
+            keyExtractor={(item) => item.caseNumber}
+          />
+        </View>
+      </SafeAreaView>
+    </ScrollView>
   );
 }
