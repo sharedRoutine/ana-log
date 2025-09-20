@@ -164,16 +164,14 @@ export default function UpsertItem() {
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   const SORTED_AIRWAY_OPTIONS = AIRWAY_OPTIONS.map((option) => ({
+    value: option,
     label: intl.formatMessage({ id: `enum.airway-management.${option}` }),
-  }))
-    .sort((a, b) => a.label.localeCompare(b.label))
-    .map((option) => option.label);
+  })).sort((a, b) => a.label.localeCompare(b.label));
 
   const SORTED_DEPARTMENT_OPTIONS = DEPARTMENT_OPTIONS.map((option) => ({
+    value: option,
     label: intl.formatMessage({ id: `enum.department.${option}` }),
-  }))
-    .sort((a, b) => a.label.localeCompare(b.label))
-    .map((option) => option.label);
+  })).sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <>
@@ -302,10 +300,14 @@ export default function UpsertItem() {
                   <Picker
                     variant="menu"
                     label={intl.formatMessage({ id: 'add-item.airway-management' })}
-                    options={SORTED_AIRWAY_OPTIONS}
-                    selectedIndex={state.value ? SORTED_AIRWAY_OPTIONS.indexOf(state.value) : 0}
+                    options={SORTED_AIRWAY_OPTIONS.map((option) => option.label)}
+                    selectedIndex={
+                      state.value
+                        ? SORTED_AIRWAY_OPTIONS.map((option) => option.value).indexOf(state.value)
+                        : 0
+                    }
                     onOptionSelected={({ nativeEvent: { index } }) => {
-                      handleChange(SORTED_AIRWAY_OPTIONS[index]);
+                      handleChange(SORTED_AIRWAY_OPTIONS[index].value);
                     }}
                   />
                 )}
@@ -315,12 +317,16 @@ export default function UpsertItem() {
                   <Picker
                     variant="menu"
                     label={intl.formatMessage({ id: 'add-item.department' })}
-                    options={SORTED_DEPARTMENT_OPTIONS}
+                    options={SORTED_DEPARTMENT_OPTIONS.map((option) => option.label)}
                     selectedIndex={
-                      state.value ? SORTED_DEPARTMENT_OPTIONS.indexOf(state.value) + 1 : 0
+                      state.value
+                        ? SORTED_DEPARTMENT_OPTIONS.map((option) => option.value).indexOf(
+                            state.value
+                          ) + 1
+                        : 0
                     }
                     onOptionSelected={({ nativeEvent: { index } }) => {
-                      handleChange(SORTED_DEPARTMENT_OPTIONS[index - 1]);
+                      handleChange(SORTED_DEPARTMENT_OPTIONS[index].value);
                     }}
                   />
                 )}
