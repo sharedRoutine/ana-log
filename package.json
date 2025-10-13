@@ -12,7 +12,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo/ui": "^0.2.0-beta.7",
+    "@expo/ui": "0.2.0-canary-20251013-623c5a6",
     "@expo/vector-icons": "^15.0.2",
     "@formatjs/intl-pluralrules": "^5.4.6",
     "@react-native-community/datetimepicker": "8.4.5",
