@@ -1,6 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useIntl } from 'react-intl';
 import { itemTable } from '~/db/schema';
 
 interface ProcedureCardProps {
