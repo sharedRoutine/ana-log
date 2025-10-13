@@ -11,6 +11,7 @@ import {
   Text,
   Spacer,
   HStack,
+  TextFieldRef,
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
@@ -20,6 +21,7 @@ import { db } from '~/db/db';
 import { filterConditionTable, filterTable } from '~/db/schema';
 import { Fragment } from 'react/jsx-runtime';
 import { frame } from '@expo/ui/swift-ui/modifiers';
+import { useRef } from 'react';
 
 // TODO: Better errors
 const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
@@ -73,12 +75,16 @@ const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
 export default function CreateFilter() {
   const intl = useIntl();
 
+  const nameRef = useRef<TextFieldRef>(null);
+  const goalRef = useRef<TextFieldRef>(null);
+  const textConditionRef = useRef<TextFieldRef>(null);
+
   const form = useForm({
     defaultValues: {
       ...Filter.make({
         name: '',
         conditions: [
-          TextCondition.make({ field: '', operators: new Set(['eq', 'ct']), value: '' }),
+          TextCondition.make({ field: '', operators: new Set(['eq', 'ct'] as const), value: '' }),
         ],
       }),
       hasGoal: false,
@@ -89,6 +95,10 @@ export default function CreateFilter() {
       onBlur: ({ value }) => validateForm(value),
     },
     onSubmit: async ({ value }) => {
+      await nameRef.current?.blur();
+      await goalRef.current?.blur();
+      await textConditionRef.current?.blur();
+
       await db.transaction(async (tx) => {
         const [f] = await tx
           .insert(filterTable)
@@ -169,7 +179,14 @@ export default function CreateFilter() {
           title: intl.formatMessage({ id: 'create-filter.title' }),
           presentation: 'modal',
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity
+              onPress={async () => {
+                await nameRef.current?.blur();
+                await goalRef.current?.blur();
+                await textConditionRef.current?.blur();
+
+                router.back();
+              }}>
               <RNText className="font-medium text-blue-500">
                 {intl.formatMessage({ id: 'create-filter.cancel' })}
               </RNText>
@@ -200,6 +217,7 @@ export default function CreateFilter() {
                     defaultValue={state.value}
                     onChangeText={handleChange}
                     autocorrection={false}
+                    ref={nameRef}
                   />
                 )}
               </form.Field>
@@ -232,6 +250,7 @@ export default function CreateFilter() {
                         id: 'create-filter.value.placeholder',
                       })}
                       keyboardType="numeric"
+                      ref={goalRef}
                     />
                   )}
                 </form.Field>
@@ -372,6 +391,7 @@ export default function CreateFilter() {
                                                 id: 'create-filter.value.placeholder',
                                               })}
                                               keyboardType="numeric"
+                                              ref={textConditionRef}
                                             />
                                           </>
                                         )}
@@ -496,7 +516,7 @@ export default function CreateFilter() {
                           // @ts-expect-error Not sure why TS is unhappy here
                           TextCondition.make({
                             field: '',
-                            operators: new Set(['eq', 'ct']),
+                            operators: new Set(['eq', 'ct'] as const),
                             value: '',
                           })
                         );
