@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { TouchableOpacity, Text as RNText } from 'react-native';
 import { useIntl } from 'react-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
@@ -17,6 +17,7 @@ import {
   Section,
   Form,
   TextField,
+  TextFieldRef,
 } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { calculateAge } from '~/utils/age-utils';
@@ -122,6 +123,12 @@ export default function UpsertItem() {
     });
   };
 
+  const caseNumberRef = useRef<TextFieldRef>(null);
+  const departmentOtherRef = useRef<TextFieldRef>(null);
+  const specialFeaturesTextRef = useRef<TextFieldRef>(null);
+  const regionalAnesthesiaTextRef = useRef<TextFieldRef>(null);
+  const procedureRef = useRef<TextFieldRef>(null);
+
   const form = useForm({
     defaultValues: getDefaultValues(),
     validators: {
@@ -130,6 +137,12 @@ export default function UpsertItem() {
       onChange: ({ value }) => validateForm(value),
     },
     onSubmit: async ({ value }) => {
+      await caseNumberRef.current?.blur();
+      await departmentOtherRef.current?.blur();
+      await specialFeaturesTextRef.current?.blur();
+      await regionalAnesthesiaTextRef.current?.blur();
+      await procedureRef.current?.blur();
+
       const age = calculateAge(value.patientBirthDate);
       const itemValues = {
         caseNumber: value.caseNumber,
@@ -180,7 +193,15 @@ export default function UpsertItem() {
           title: intl.formatMessage({ id: isEditing ? 'edit-item.title' : 'add-item.title' }),
           presentation: 'modal',
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity
+              onPress={async () => {
+                await caseNumberRef.current?.blur();
+                await departmentOtherRef.current?.blur();
+                await specialFeaturesTextRef.current?.blur();
+                await regionalAnesthesiaTextRef.current?.blur();
+                await procedureRef.current?.blur();
+                router.back();
+              }}>
               <RNText className="font-medium text-blue-500">
                 {intl.formatMessage({ id: isEditing ? 'edit-item.back' : 'add-item.back' })}
               </RNText>
@@ -215,7 +236,7 @@ export default function UpsertItem() {
                       defaultValue={state.value}
                       key={state.value}
                       placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
-                      keyboardType={'numeric'}
+                      ref={caseNumberRef}
                     />
                   )
                 }
@@ -342,6 +363,7 @@ export default function UpsertItem() {
                         defaultValue={state.value}
                         onChangeText={handleChange}
                         autocorrection={false}
+                        ref={departmentOtherRef}
                       />
                     )}
                   </>
@@ -372,6 +394,7 @@ export default function UpsertItem() {
                         numberOfLines={3}
                         autocorrection={false}
                         allowNewlines={true}
+                        ref={specialFeaturesTextRef}
                       />
                     )}
                   </>
@@ -400,6 +423,7 @@ export default function UpsertItem() {
                         numberOfLines={3}
                         autocorrection={false}
                         allowNewlines={true}
+                        ref={regionalAnesthesiaTextRef}
                       />
                     )}
                   </>
@@ -425,6 +449,7 @@ export default function UpsertItem() {
                     multiline
                     numberOfLines={4}
                     autocorrection={false}
+                    ref={procedureRef}
                   />
                 )}
               </form.Field>
