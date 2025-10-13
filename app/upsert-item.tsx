@@ -232,11 +232,11 @@ export default function UpsertItem() {
                   ) : (
                     <TextField
                       autocorrection={false}
-                      onChangeText={handleChange}
+                      onChangeText={(text) => handleChange(text)}
                       defaultValue={state.value}
-                      key={state.value}
                       placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
                       ref={caseNumberRef}
+                      keyboardType="numeric"
                     />
                   )
                 }

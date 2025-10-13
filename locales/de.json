@@ -84,6 +84,7 @@
   "create-filter.operator.lt": "<",
   "create-filter.operator.gte": ">=",
   "create-filter.operator.lte": "<=",
+  "create-filter.goal-value": "Ziel ({value})",
   "enum.airway-management.tube": "Tubus",
   "enum.airway-management.lama": "Lama",
   "enum.airway-management.tracheostomy": "Trachealkanüle",

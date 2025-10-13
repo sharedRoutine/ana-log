@@ -12,6 +12,7 @@ import {
   Spacer,
   HStack,
   TextFieldRef,
+  Stepper,
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
@@ -215,7 +216,7 @@ export default function CreateFilter() {
                       id: 'create-filter.filter-name.placeholder',
                     })}
                     defaultValue={state.value}
-                    onChangeText={handleChange}
+                    onChangeText={(text) => handleChange(text)}
                     autocorrection={false}
                     ref={nameRef}
                   />
@@ -240,17 +241,15 @@ export default function CreateFilter() {
               {hasGoal && (
                 <form.Field name="goal">
                   {({ state, handleChange }) => (
-                    <TextField
-                      onChangeText={(newText) => {
-                        const numericValue = parseInt(newText);
-                        handleChange(isNaN(numericValue) ? 0 : numericValue);
-                      }}
-                      defaultValue={state.value ? state.value.toString() : ''}
-                      placeholder={intl.formatMessage({
-                        id: 'create-filter.value.placeholder',
-                      })}
-                      keyboardType="numeric"
-                      ref={goalRef}
+                    <Stepper
+                      label={intl.formatMessage(
+                        { id: 'create-filter.goal-value' },
+                        { value: state.value ?? 0 }
+                      )}
+                      defaultValue={state.value ?? 0}
+                      step={1}
+                      min={0}
+                      onValueChanged={(value) => handleChange(value)}
                     />
                   )}
                 </form.Field>
