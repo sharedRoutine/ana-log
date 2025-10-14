@@ -343,7 +343,7 @@ export default function UpsertItem() {
                       state.value
                         ? SORTED_DEPARTMENT_OPTIONS.map((option) => option.value).indexOf(
                             state.value
-                          ) + 1
+                          )
                         : 0
                     }
                     onOptionSelected={({ nativeEvent: { index } }) => {
