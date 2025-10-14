@@ -54,19 +54,25 @@ export default function Home() {
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.push('/settings')} className="px-2">
+              <Ionicons
+                name="settings-outline"
+                size={24}
+                color={colorScheme === 'light' ? '#000' : '#fff'}
+              />
+            </TouchableOpacity>
+          ),
           headerRight: () => (
-            <View className="flex-row">
-              <TouchableOpacity onPress={() => router.push('/settings')} className="mr-3">
-                <Ionicons
-                  name="settings-outline"
-                  size={24}
-                  color={colorScheme === 'light' ? '#000' : '#fff'}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push('/upsert-item')} className="mr-2">
-                <Ionicons name="add" size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              onPress={() => router.push('/upsert-item')}
+              className="px-2 text-center">
+              <Ionicons
+                name="add-circle-outline"
+                size={24}
+                color={colorScheme === 'light' ? '#000' : '#fff'}
+              />
+            </TouchableOpacity>
           ),
         }}
       />
