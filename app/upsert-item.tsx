@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { TouchableOpacity, Text as RNText, View } from 'react-native';
 import { useIntl } from 'react-intl';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use, useCallback } from 'react';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
@@ -22,6 +22,7 @@ import {
 } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { listRowBackground, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
+import { ChevronLeftCircle, Save } from 'lucide-react-native';
 
 const Item = Schema.Struct({
   caseNumber: Schema.String,
@@ -71,7 +72,7 @@ export default function UpsertItem() {
 
   const isEditing = Boolean(caseNumber && existingItem);
 
-  const getDefaultValues = () => {
+  const getDefaultValues = useCallback(() => {
     if (isEditing && existingItem) {
       const operationDate = DateTime.unsafeMake(existingItem.date);
 
@@ -95,7 +96,7 @@ export default function UpsertItem() {
 
     return Item.make({
       caseNumber: '',
-      patientAgeYears: 20,
+      patientAgeYears: 0,
       patientAgeMonths: 0,
       operationDate: DateTime.unsafeMake(new Date()),
       asaScore: 1,
@@ -109,7 +110,7 @@ export default function UpsertItem() {
       outpatient: false,
       procedure: '',
     });
-  };
+  }, [isEditing, existingItem]);
 
   const caseNumberRef = useRef<TextFieldRef>(null);
   const departmentOtherRef = useRef<TextFieldRef>(null);
@@ -181,6 +182,7 @@ export default function UpsertItem() {
           presentation: 'modal',
           headerLeft: () => (
             <TouchableOpacity
+              className="px-2"
               onPress={async () => {
                 await caseNumberRef.current?.blur();
                 await departmentOtherRef.current?.blur();
@@ -189,21 +191,16 @@ export default function UpsertItem() {
                 await procedureRef.current?.blur();
                 router.back();
               }}>
-              <RNText className="font-medium text-blue-500">
-                {intl.formatMessage({ id: isEditing ? 'edit-item.back' : 'add-item.back' })}
-              </RNText>
+              <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity
+              className="px-2"
               disabled={!canSubmit || isSubmitting}
               style={{ opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}
               onPress={() => form.handleSubmit()}>
-              <RNText className="font-medium text-blue-500">
-                {intl.formatMessage({
-                  id: isEditing ? 'edit-item.save-item' : 'add-item.save-item',
-                })}
-              </RNText>
+              <Save size={24} color="#3B82F6" />
             </TouchableOpacity>
           ),
         }}
