@@ -120,5 +120,7 @@
   "create-filter.error.save-failed": "Filter konnte nicht gespeichert werden. Bitte versuche es erneut.",
   "filter.condition.single": "1 Bedingung",
   "filter.condition.plural": "{count} Bedingungen",
-  "home.my-procedures": "Meine Eingriffe ({count})"
+  "home.my-procedures": "Meine Eingriffe",
+  "home.my-filters": "Meine Filter",
+  "home.asa-score": "ASA Score {score}"
 }

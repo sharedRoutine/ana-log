@@ -1,6 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import { View, TouchableOpacity, Text, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, TouchableOpacity, Text, ScrollView, StyleSheet } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { desc, count } from 'drizzle-orm';
@@ -13,6 +12,7 @@ import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Plus, PlusCircle } from 'lucide-react-native';
 
 export default function Home() {
   const router = useRouter();
@@ -54,47 +54,38 @@ export default function Home() {
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.push('/settings')} className="px-2">
-              <Ionicons
-                name="settings-outline"
-                size={24}
-                color={colorScheme === 'light' ? '#000' : '#fff'}
-              />
-            </TouchableOpacity>
-          ),
           headerRight: () => (
             <TouchableOpacity
               onPress={() => router.push('/upsert-item')}
               className="px-2 text-center">
-              <Ionicons
-                name="add-circle-outline"
-                size={24}
-                color={colorScheme === 'light' ? '#000' : '#fff'}
-              />
+              <PlusCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
             </TouchableOpacity>
           ),
         }}
       />
       <SafeAreaView edges={['bottom']}>
         <View className="bg-white px-4 pt-4 dark:bg-black">
-          <View className="mb-6 flex-row flex-wrap gap-4">
-            <TouchableOpacity
-              onPress={() => router.push('/create-filter')}
-              className="h-24 w-[48%] justify-center rounded-xl bg-blue-500 p-3">
-              <View className="items-center">
-                <Ionicons name="add" size={24} color="white" />
-                <Text className="mt-1 text-center text-xs font-medium text-white" numberOfLines={2}>
-                  {intl.formatMessage({
-                    id:
-                      filters && filters.length > 0
-                        ? 'home.create-another-filter'
-                        : 'home.create-first-filter',
-                  })}
-                </Text>
-              </View>
-            </TouchableOpacity>
+          <View className="mb-6 flex-row items-center gap-4">
+            <Text className="text-[28px] font-semibold text-white">
+              {intl.formatMessage({ id: 'home.my-filters' })}
+            </Text>
+            <View style={styles.countBadge}>
+              <Text className="font-semibold text-[#8E8E93]">{filters.length}</Text>
+            </View>
+          </View>
 
+          <View style={styles.createFilterCard}>
+            <View className="mb-4">
+              <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
+            </View>
+            <Text className="text-[16px] font-semibold text-white">
+              {filters.length === 0
+                ? intl.formatMessage({ id: 'home.create-first-filter' })
+                : intl.formatMessage({ id: 'home.create-another-filter' })}
+            </Text>
+          </View>
+
+          <View className="flex-row flex-wrap gap-4">
             {filters?.map((filter, index) => (
               <FilterCard
                 key={filter.id}
@@ -110,9 +101,14 @@ export default function Home() {
             ))}
           </View>
 
-          <Text className="mb-3 text-xl font-bold text-black dark:text-white">
-            {intl.formatMessage({ id: 'home.my-procedures' }, { count: procedures?.length || 0 })}
-          </Text>
+          <View className="mb-6 flex-row items-center gap-4">
+            <Text className="text-[28px] font-semibold text-white">
+              {intl.formatMessage({ id: 'home.my-procedures' })}
+            </Text>
+            <View style={styles.countBadge}>
+              <Text className="font-semibold text-[#8E8E93]">{procedures.length}</Text>
+            </View>
+          </View>
         </View>
 
         <View className="flex-1 px-4">
@@ -128,9 +124,34 @@ export default function Home() {
             )}
             getItemType={() => 'procedure'}
             keyExtractor={(item) => item.caseNumber}
+            ItemSeparatorComponent={() => <View className="h-4" />}
           />
         </View>
       </SafeAreaView>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  createFilterCard: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+    shadowColor: '#5B8DEF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  countBadge: {
+    backgroundColor: '#1C1C1E',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+  },
+});
