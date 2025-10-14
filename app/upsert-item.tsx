@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { TouchableOpacity, Text as RNText } from 'react-native';
+import { TouchableOpacity, Text as RNText, View } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useState, useEffect, useRef } from 'react';
 import { eq } from 'drizzle-orm';
@@ -18,13 +18,15 @@ import {
   Form,
   TextField,
   TextFieldRef,
+  Stepper,
 } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
-import { calculateAge } from '~/utils/age-utils';
+import { listRowBackground, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 
 const Item = Schema.Struct({
   caseNumber: Schema.String,
-  patientBirthDate: Schema.DateTimeUtc,
+  patientAgeYears: Schema.NonNegative,
+  patientAgeMonths: Schema.NonNegative,
   operationDate: Schema.DateTimeUtc,
   asaScore: Schema.Literal(1, 2, 3, 4, 5, 6),
   airwayManagement: Schema.String,
@@ -69,29 +71,14 @@ export default function UpsertItem() {
 
   const isEditing = Boolean(caseNumber && existingItem);
 
-  const calculateBirthDateFromAge = (
-    operationDate: DateTime.Utc,
-    ageYears: number,
-    ageMonths: number
-  ): DateTime.Utc => {
-    const operationDateJS = DateTime.toDate(operationDate);
-    const birthDate = new Date(operationDateJS);
-    birthDate.setFullYear(operationDateJS.getFullYear() - ageYears);
-    birthDate.setMonth(operationDateJS.getMonth() - ageMonths);
-    return DateTime.unsafeMake(birthDate);
-  };
-
   const getDefaultValues = () => {
     if (isEditing && existingItem) {
       const operationDate = DateTime.unsafeMake(existingItem.date);
 
       return Item.make({
         caseNumber: existingItem.caseNumber,
-        patientBirthDate: calculateBirthDateFromAge(
-          operationDate,
-          existingItem.ageYears,
-          existingItem.ageMonths
-        ),
+        patientAgeYears: existingItem.ageYears,
+        patientAgeMonths: existingItem.ageMonths,
         operationDate,
         asaScore: existingItem.asaScore as 1 | 2 | 3 | 4 | 5 | 6,
         airwayManagement: existingItem.airwayManagement,
@@ -108,7 +95,8 @@ export default function UpsertItem() {
 
     return Item.make({
       caseNumber: '',
-      patientBirthDate: DateTime.unsafeMake(new Date()),
+      patientAgeYears: 20,
+      patientAgeMonths: 0,
       operationDate: DateTime.unsafeMake(new Date()),
       asaScore: 1,
       airwayManagement: '',
@@ -143,11 +131,10 @@ export default function UpsertItem() {
       await regionalAnesthesiaTextRef.current?.blur();
       await procedureRef.current?.blur();
 
-      const age = calculateAge(value.patientBirthDate);
       const itemValues = {
         caseNumber: value.caseNumber,
-        ageYears: age.years,
-        ageMonths: age.months,
+        ageYears: value.patientAgeYears,
+        ageMonths: value.patientAgeMonths,
         date: value.operationDate.epochMillis,
         asaScore: value.asaScore,
         airwayManagement: value.airwayManagement,
@@ -221,242 +208,229 @@ export default function UpsertItem() {
           ),
         }}
       />
-      <Host style={{ flex: 1 }}>
-        <Form>
-          <>
-            <Section title={intl.formatMessage({ id: 'add-item.basic-info' })}>
-              <form.Field name="caseNumber">
-                {({ state, handleChange }) =>
-                  isEditing ? (
-                    <Text key={state.value}>{state.value}</Text>
-                  ) : (
-                    <TextField
-                      autocorrection={false}
-                      onChangeText={(text) => handleChange(text)}
-                      defaultValue={state.value}
-                      placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
-                      ref={caseNumberRef}
-                      keyboardType="numeric"
+      <View className="flex-1 bg-black">
+        <Host style={{ flex: 1 }}>
+          <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
+            <>
+              <Section
+                title={intl.formatMessage({ id: 'add-item.basic-info' })}
+                modifiers={[listRowBackground('#1C1C1E')]}>
+                <form.Field name="caseNumber">
+                  {({ state, handleChange }) =>
+                    isEditing ? (
+                      <Text key={state.value}>{state.value}</Text>
+                    ) : (
+                      <TextField
+                        autocorrection={false}
+                        onChangeText={(text) => handleChange(text)}
+                        defaultValue={state.value}
+                        placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
+                        ref={caseNumberRef}
+                        keyboardType="numeric"
+                      />
+                    )
+                  }
+                </form.Field>
+              </Section>
+              <Section title={'Daten'} modifiers={[listRowBackground('#1C1C1E')]}>
+                <form.Field name="operationDate">
+                  {({ state, handleChange }) => (
+                    <DateTimePicker
+                      onDateSelected={(date) => {
+                        handleChange(DateTime.unsafeMake(date));
+                      }}
+                      key={state.value.epochMillis}
+                      color={colorScheme === 'dark' ? 'white' : 'black'}
+                      title={intl.formatMessage({ id: 'add-item.operation-date' })}
+                      displayedComponents="date"
+                      initialDate={DateTime.toDate(state.value).toISOString()}
+                      variant="compact"
                     />
-                  )
-                }
-              </form.Field>
-            </Section>
-            <Section title={'Daten'}>
-              <form.Field name="operationDate">
-                {({ state, handleChange }) => (
-                  <DateTimePicker
-                    onDateSelected={(date) => {
-                      handleChange(DateTime.unsafeMake(date));
-                    }}
-                    key={state.value.epochMillis}
-                    color={colorScheme === 'dark' ? 'white' : 'black'}
-                    title={intl.formatMessage({ id: 'add-item.operation-date' })}
-                    displayedComponents="date"
-                    initialDate={DateTime.toDate(state.value).toISOString()}
-                    variant="compact"
-                  />
-                )}
-              </form.Field>
-              <form.Field name="patientBirthDate">
-                {({ state, handleChange }) =>
-                  isEditing ? (
+                  )}
+                </form.Field>
+                <form.Field name="patientAgeYears">
+                  {({ state, handleChange }) => (
+                    <Stepper
+                      label={`Alter in Jahren: ${state.value}`}
+                      max={120}
+                      min={0}
+                      step={1}
+                      defaultValue={state.value}
+                      onValueChanged={(value) => handleChange(value)}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="patientAgeMonths">
+                  {({ state, handleChange }) => (
+                    <Stepper
+                      label={`Alter in Monaten: ${state.value}`}
+                      max={11}
+                      min={0}
+                      step={1}
+                      defaultValue={state.value}
+                      onValueChanged={(value) => handleChange(value)}
+                    />
+                  )}
+                </form.Field>
+              </Section>
+              <Section
+                title={intl.formatMessage({ id: 'add-item.details' })}
+                modifiers={[listRowBackground('#1C1C1E')]}>
+                <form.Field name="asaScore">
+                  {({ state, handleChange }) => (
+                    <Picker
+                      label={intl.formatMessage({ id: 'add-item.asa-score' })}
+                      variant="menu"
+                      options={['1', '2', '3', '4', '5', '6']}
+                      selectedIndex={state.value ? state.value - 1 : -1}
+                      onOptionSelected={({ nativeEvent: { index } }) => {
+                        handleChange((index + 1) as 1 | 2 | 3 | 4 | 5 | 6);
+                      }}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="airwayManagement">
+                  {({ state, handleChange }) => (
+                    <Picker
+                      variant="menu"
+                      label={intl.formatMessage({ id: 'add-item.airway-management' })}
+                      options={SORTED_AIRWAY_OPTIONS.map((option) => option.label)}
+                      selectedIndex={
+                        state.value
+                          ? SORTED_AIRWAY_OPTIONS.map((option) => option.value).indexOf(state.value)
+                          : 0
+                      }
+                      onOptionSelected={({ nativeEvent: { index } }) => {
+                        handleChange(SORTED_AIRWAY_OPTIONS[index].value);
+                      }}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="department">
+                  {({ state, handleChange }) => (
+                    <Picker
+                      variant="menu"
+                      label={intl.formatMessage({ id: 'add-item.department' })}
+                      options={SORTED_DEPARTMENT_OPTIONS.map((option) => option.label)}
+                      selectedIndex={
+                        state.value
+                          ? SORTED_DEPARTMENT_OPTIONS.map((option) => option.value).indexOf(
+                              state.value
+                            )
+                          : 0
+                      }
+                      onOptionSelected={({ nativeEvent: { index } }) => {
+                        handleChange(SORTED_DEPARTMENT_OPTIONS[index].value);
+                      }}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="departmentOther">
+                  {({ state, handleChange }) => (
                     <>
-                      {state.value && (
-                        <Text>
-                          {(() => {
-                            const age = calculateAge(state.value);
-                            return intl.formatMessage(
-                              { id: 'add-item.age' },
-                              { years: age.years, months: age.months }
-                            );
-                          })()}
-                        </Text>
+                      {departmentValue === 'other' && (
+                        <TextField
+                          placeholder={intl.formatMessage({
+                            id: 'add-item.department.other.placeholder',
+                          })}
+                          defaultValue={state.value}
+                          onChangeText={handleChange}
+                          autocorrection={false}
+                          ref={departmentOtherRef}
+                        />
                       )}
                     </>
-                  ) : (
+                  )}
+                </form.Field>
+              </Section>
+              <Section title={'Einstellungen'} modifiers={[listRowBackground('#1C1C1E')]}>
+                <form.Field name="specialFeatures">
+                  {({ state, handleChange }) => (
+                    <Switch
+                      label={intl.formatMessage({ id: 'add-item.special-features' })}
+                      value={state.value}
+                      onValueChange={handleChange}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="specialFeaturesText">
+                  {({ state, handleChange }) => (
                     <>
-                      <DateTimePicker
-                        onDateSelected={(date) => {
-                          handleChange(DateTime.unsafeMake(date));
-                        }}
-                        title={intl.formatMessage({ id: 'add-item.age-of-patient' })}
-                        color={colorScheme === 'dark' ? 'white' : 'black'}
-                        displayedComponents="date"
-                        initialDate={DateTime.toDate(state.value).toISOString()}
-                        variant="compact"
-                      />
-                      {state.value && (
-                        <Text>
-                          {(() => {
-                            const age = calculateAge(state.value);
-                            return intl.formatMessage(
-                              { id: 'add-item.age' },
-                              { years: age.years, months: age.months }
-                            );
-                          })()}
-                        </Text>
+                      {specialFeaturesValue && (
+                        <TextField
+                          placeholder={intl.formatMessage({
+                            id: 'add-item.special-features.placeholder',
+                          })}
+                          defaultValue={state.value}
+                          onChangeText={handleChange}
+                          multiline
+                          numberOfLines={3}
+                          autocorrection={false}
+                          allowNewlines={true}
+                          ref={specialFeaturesTextRef}
+                        />
                       )}
                     </>
-                  )
-                }
-              </form.Field>
-            </Section>
-            <Section title={intl.formatMessage({ id: 'add-item.details' })}>
-              <form.Field name="asaScore">
-                {({ state, handleChange }) => (
-                  <Picker
-                    label={intl.formatMessage({ id: 'add-item.asa-score' })}
-                    variant="menu"
-                    options={['1', '2', '3', '4', '5', '6']}
-                    selectedIndex={state.value ? state.value - 1 : -1}
-                    onOptionSelected={({ nativeEvent: { index } }) => {
-                      handleChange((index + 1) as 1 | 2 | 3 | 4 | 5 | 6);
-                    }}
-                  />
-                )}
-              </form.Field>
-              <form.Field name="airwayManagement">
-                {({ state, handleChange }) => (
-                  <Picker
-                    variant="menu"
-                    label={intl.formatMessage({ id: 'add-item.airway-management' })}
-                    options={SORTED_AIRWAY_OPTIONS.map((option) => option.label)}
-                    selectedIndex={
-                      state.value
-                        ? SORTED_AIRWAY_OPTIONS.map((option) => option.value).indexOf(state.value)
-                        : 0
-                    }
-                    onOptionSelected={({ nativeEvent: { index } }) => {
-                      handleChange(SORTED_AIRWAY_OPTIONS[index].value);
-                    }}
-                  />
-                )}
-              </form.Field>
-              <form.Field name="department">
-                {({ state, handleChange }) => (
-                  <Picker
-                    variant="menu"
-                    label={intl.formatMessage({ id: 'add-item.department' })}
-                    options={SORTED_DEPARTMENT_OPTIONS.map((option) => option.label)}
-                    selectedIndex={
-                      state.value
-                        ? SORTED_DEPARTMENT_OPTIONS.map((option) => option.value).indexOf(
-                            state.value
-                          )
-                        : 0
-                    }
-                    onOptionSelected={({ nativeEvent: { index } }) => {
-                      handleChange(SORTED_DEPARTMENT_OPTIONS[index].value);
-                    }}
-                  />
-                )}
-              </form.Field>
-              <form.Field name="departmentOther">
-                {({ state, handleChange }) => (
-                  <>
-                    {departmentValue === 'other' && (
-                      <TextField
-                        placeholder={intl.formatMessage({
-                          id: 'add-item.department.other.placeholder',
-                        })}
-                        defaultValue={state.value}
-                        onChangeText={handleChange}
-                        autocorrection={false}
-                        ref={departmentOtherRef}
-                      />
-                    )}
-                  </>
-                )}
-              </form.Field>
-            </Section>
-            <Section title={'Einstellungen'}>
-              <form.Field name="specialFeatures">
-                {({ state, handleChange }) => (
-                  <Switch
-                    label={intl.formatMessage({ id: 'add-item.special-features' })}
-                    value={state.value}
-                    onValueChange={handleChange}
-                  />
-                )}
-              </form.Field>
-              <form.Field name="specialFeaturesText">
-                {({ state, handleChange }) => (
-                  <>
-                    {specialFeaturesValue && (
-                      <TextField
-                        placeholder={intl.formatMessage({
-                          id: 'add-item.special-features.placeholder',
-                        })}
-                        defaultValue={state.value}
-                        onChangeText={handleChange}
-                        multiline
-                        numberOfLines={3}
-                        autocorrection={false}
-                        allowNewlines={true}
-                        ref={specialFeaturesTextRef}
-                      />
-                    )}
-                  </>
-                )}
-              </form.Field>
-              <form.Field name="regionalAnesthesia">
-                {({ state, handleChange }) => (
-                  <Switch
-                    label={intl.formatMessage({ id: 'add-item.regional-anesthesia' })}
-                    value={state.value}
-                    onValueChange={handleChange}
-                  />
-                )}
-              </form.Field>
-              <form.Field name="regionalAnesthesiaText">
-                {({ state, handleChange }) => (
-                  <>
-                    {regionalAnesthesiaValue && (
-                      <TextField
-                        placeholder={intl.formatMessage({
-                          id: 'add-item.regional-anesthesia.placeholder',
-                        })}
-                        defaultValue={state.value}
-                        onChangeText={handleChange}
-                        multiline
-                        numberOfLines={3}
-                        autocorrection={false}
-                        allowNewlines={true}
-                        ref={regionalAnesthesiaTextRef}
-                      />
-                    )}
-                  </>
-                )}
-              </form.Field>
-              <form.Field name="outpatient">
-                {({ state, handleChange }) => (
-                  <Switch
-                    label={intl.formatMessage({ id: 'add-item.outpatient' })}
-                    value={state.value}
-                    onValueChange={handleChange}
-                  />
-                )}
-              </form.Field>
-            </Section>
-            <Section title={'Eingriff'}>
-              <form.Field name="procedure">
-                {({ state, handleChange }) => (
-                  <TextField
-                    placeholder={intl.formatMessage({ id: 'add-item.procedure.placeholder' })}
-                    defaultValue={state.value}
-                    onChangeText={handleChange}
-                    multiline
-                    numberOfLines={4}
-                    autocorrection={false}
-                    ref={procedureRef}
-                  />
-                )}
-              </form.Field>
-            </Section>
-          </>
-        </Form>
-      </Host>
+                  )}
+                </form.Field>
+                <form.Field name="regionalAnesthesia">
+                  {({ state, handleChange }) => (
+                    <Switch
+                      label={intl.formatMessage({ id: 'add-item.regional-anesthesia' })}
+                      value={state.value}
+                      onValueChange={handleChange}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="regionalAnesthesiaText">
+                  {({ state, handleChange }) => (
+                    <>
+                      {regionalAnesthesiaValue && (
+                        <TextField
+                          placeholder={intl.formatMessage({
+                            id: 'add-item.regional-anesthesia.placeholder',
+                          })}
+                          defaultValue={state.value}
+                          onChangeText={handleChange}
+                          multiline
+                          numberOfLines={3}
+                          autocorrection={false}
+                          allowNewlines={true}
+                          ref={regionalAnesthesiaTextRef}
+                        />
+                      )}
+                    </>
+                  )}
+                </form.Field>
+                <form.Field name="outpatient">
+                  {({ state, handleChange }) => (
+                    <Switch
+                      label={intl.formatMessage({ id: 'add-item.outpatient' })}
+                      value={state.value}
+                      onValueChange={handleChange}
+                    />
+                  )}
+                </form.Field>
+              </Section>
+              <Section title={'Eingriff'} modifiers={[listRowBackground('#1C1C1E')]}>
+                <form.Field name="procedure">
+                  {({ state, handleChange }) => (
+                    <TextField
+                      placeholder={intl.formatMessage({ id: 'add-item.procedure.placeholder' })}
+                      defaultValue={state.value}
+                      onChangeText={handleChange}
+                      multiline
+                      numberOfLines={4}
+                      autocorrection={false}
+                      ref={procedureRef}
+                    />
+                  )}
+                </form.Field>
+              </Section>
+            </>
+          </Form>
+        </Host>
+      </View>
     </>
   );
 }
