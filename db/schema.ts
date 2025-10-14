@@ -1,4 +1,5 @@
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 
 export const itemTable = sqliteTable('item', {
   caseNumber: text().primaryKey().unique().notNull(),
@@ -6,8 +7,8 @@ export const itemTable = sqliteTable('item', {
   ageMonths: integer().notNull(),
   date: integer().notNull(),
   asaScore: integer().notNull(),
-  airwayManagement: text().notNull(),
-  department: text().notNull(),
+  airwayManagement: text().$type<(typeof AIRWAY_OPTIONS)[number]>().notNull(),
+  department: text().$type<(typeof DEPARTMENT_OPTIONS)[number]>().notNull(),
   specials: text(),
   localAnesthetics: integer('localAnesthetics', { mode: 'boolean' }).notNull(),
   outpatient: integer('outpatient', { mode: 'boolean' }).notNull(),

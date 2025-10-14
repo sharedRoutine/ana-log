@@ -1,4 +1,4 @@
-export const DEPARTMENT_OPTIONS: [string, ...string[]] = [
+export const DEPARTMENT_OPTIONS = [
   'TC',
   'NC',
   'AC',
@@ -17,7 +17,7 @@ export const DEPARTMENT_OPTIONS: [string, ...string[]] = [
   'other',
 ] as const;
 
-export const AIRWAY_OPTIONS: [string, ...string[]] = [
+export const AIRWAY_OPTIONS = [
   'tube',
   'lama',
   'tracheostomy',

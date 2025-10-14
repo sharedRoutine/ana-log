@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { TouchableOpacity, Text as RNText, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { useIntl } from 'react-intl';
-import { useState, useEffect, useRef, use, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
@@ -30,8 +30,8 @@ const Item = Schema.Struct({
   patientAgeMonths: Schema.NonNegative,
   operationDate: Schema.DateTimeUtc,
   asaScore: Schema.Literal(1, 2, 3, 4, 5, 6),
-  airwayManagement: Schema.String,
-  department: Schema.String,
+  airwayManagement: Schema.Literal(...AIRWAY_OPTIONS),
+  department: Schema.Literal(...DEPARTMENT_OPTIONS),
   departmentOther: Schema.String,
   specialFeatures: Schema.Boolean,
   specialFeaturesText: Schema.String,
@@ -100,8 +100,8 @@ export default function UpsertItem() {
       patientAgeMonths: 0,
       operationDate: DateTime.unsafeMake(new Date()),
       asaScore: 1,
-      airwayManagement: '',
-      department: '',
+      airwayManagement: 'tube',
+      department: 'PSY',
       departmentOther: '',
       specialFeatures: false,
       specialFeaturesText: '',
