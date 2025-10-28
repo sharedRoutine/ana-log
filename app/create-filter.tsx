@@ -1,5 +1,5 @@
 import { Stack, router } from 'expo-router';
-import { Text as RNText, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import {
   Button,
   Form,
@@ -17,12 +17,14 @@ import {
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
-import { FIELDS, Filter, TextCondition } from '~/lib/condition';
+import { FIELDS, Filter, FilterCondition, BooleanCondition } from '~/lib/condition';
 import { db } from '~/db/db';
 import { filterConditionTable, filterTable } from '~/db/schema';
 import { Fragment } from 'react/jsx-runtime';
 import { frame } from '@expo/ui/swift-ui/modifiers';
 import { useRef } from 'react';
+import { ChevronLeftCircle, Save } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 
 // TODO: Better errors
 const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
@@ -33,6 +35,9 @@ const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
     if (typeof value.goal !== 'number' || isNaN(value.goal)) {
       return 'Invalid goal value';
     }
+  }
+  if (value.conditions.length === 0) {
+    return 'At least one condition required';
   }
   for (const condition of value.conditions) {
     const returnVal = Match.value(condition).pipe(
@@ -84,9 +89,7 @@ export default function CreateFilter() {
     defaultValues: {
       ...Filter.make({
         name: '',
-        conditions: [
-          TextCondition.make({ field: '', operators: new Set(['eq', 'ct'] as const), value: '' }),
-        ],
+        conditions: [] as (typeof FilterCondition.Type)[],
       }),
       hasGoal: false,
     },
@@ -173,6 +176,8 @@ export default function CreateFilter() {
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
+  const { colorScheme } = useColorScheme();
+
   return (
     <>
       <Stack.Screen
@@ -181,6 +186,7 @@ export default function CreateFilter() {
           presentation: 'modal',
           headerLeft: () => (
             <TouchableOpacity
+              className="px-2"
               onPress={async () => {
                 await nameRef.current?.blur();
                 await goalRef.current?.blur();
@@ -188,19 +194,16 @@ export default function CreateFilter() {
 
                 router.back();
               }}>
-              <RNText className="font-medium text-blue-500">
-                {intl.formatMessage({ id: 'create-filter.cancel' })}
-              </RNText>
+              <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity
+              className="px-2"
               disabled={!canSubmit || isSubmitting}
               style={{ opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}
               onPress={() => form.handleSubmit()}>
-              <RNText className="font-medium text-blue-500">
-                {intl.formatMessage({ id: 'create-filter.save' })}
-              </RNText>
+              <Save size={24} color="#3B82F6" />
             </TouchableOpacity>
           ),
         }}
@@ -208,7 +211,7 @@ export default function CreateFilter() {
       <Host style={{ flex: 1 }}>
         <Form>
           <>
-            <Section title="A">
+            <Section title={intl.formatMessage({ id: 'create-filter.filter-details' })}>
               <form.Field name="name">
                 {({ state, handleChange }) => (
                   <TextField
@@ -301,21 +304,7 @@ export default function CreateFilter() {
                                           conditionField.handleChange(condition);
                                         }
                                         subField.handleChange(field);
-                                      }}>
-                                      {/* <Picker.Item
-                                          label={intl.formatMessage({
-                                            id: 'create-filter.select-field',
-                                          })}
-                                          value=""
-                                        />
-                                        {FieldsWithName.map((option) => (
-                                          <Picker.Item
-                                            key={option.value}
-                                            label={option.label}
-                                            value={option.value}
-                                          />
-                                        ))} */}
-                                    </Picker>
+                                      }}></Picker>
                                   )}
                                 </form.Field>
 
@@ -456,7 +445,9 @@ export default function CreateFilter() {
                                               selectedIndex={0}
                                               variant="menu"
                                               onOptionSelected={(newValue) => {
-                                                // valueField.handleChange(newValue);
+                                                const selectedOption =
+                                                  sortedOptions[newValue.nativeEvent.index];
+                                                valueField.handleChange(selectedOption.value);
                                               }}
                                               options={sortedOptions.map((o) => o.label)}
                                             />
@@ -469,54 +460,18 @@ export default function CreateFilter() {
                               </>
                             )}
                           </form.Field>
-                          {/* <View className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-800">
-                          <View className="mb-4 flex-row items-center justify-between">
-                            <Text className="text-base font-medium dark:text-white">
-                              {intl.formatMessage(
-                                { id: 'create-filter.condition' },
-                                { index: i + 1 }
-                              )}
-                            </Text>
-                            {conditions.length > 1 && (
-                              <TouchableOpacity
-                                onPress={() => field.removeValue(i)}
-                                className="rounded bg-red-100 px-3 py-1 dark:bg-red-900">
-                                <Text className="text-sm text-red-800 dark:text-red-200">
-                                  {intl.formatMessage({ id: 'create-filter.remove' })}
-                                </Text>
-                              </TouchableOpacity>
-                            )}
-                          </View>
-                        </View> */}
                         </Fragment>
                       </Section>
                     );
                   })}
-                  {/* <TouchableOpacity
-                    onPress={() =>
-                      field.pushValue(
-                        // @ts-expect-error Not sure why TS is unhappy here
-                        TextCondition.make({
-                          field: '',
-                          operators: new Set(['eq', 'ct']),
-                          value: '',
-                        })
-                      )
-                    }
-                    className="items-center rounded-lg bg-blue-500 p-3">
-                    <Text className="font-medium text-white">
-                      {intl.formatMessage({ id: 'create-filter.add-condition' })}
-                    </Text>
-                  </TouchableOpacity> */}
                   <Section title="">
                     <Button
                       onPress={() => {
                         field.pushValue(
                           // @ts-expect-error Not sure why TS is unhappy here
-                          TextCondition.make({
-                            field: '',
-                            operators: new Set(['eq', 'ct'] as const),
-                            value: '',
+                          BooleanCondition.make({
+                            field: 'age',
+                            value: false,
                           })
                         );
                       }}>
