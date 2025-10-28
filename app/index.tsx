@@ -13,6 +13,7 @@ import { useColors } from '~/hooks/useColors';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, PlusCircle } from 'lucide-react-native';
+import { AnimatedPressable } from '~/components/ui/AnimatedPressable';
 
 export default function Home() {
   const router = useRouter();
@@ -74,7 +75,9 @@ export default function Home() {
             </View>
           </View>
 
-          <View style={styles.createFilterCard}>
+          <AnimatedPressable
+            style={styles.createFilterCard}
+            onPress={() => router.push('/create-filter')}>
             <View className="mb-4">
               <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
             </View>
@@ -83,9 +86,9 @@ export default function Home() {
                 ? intl.formatMessage({ id: 'home.create-first-filter' })
                 : intl.formatMessage({ id: 'home.create-another-filter' })}
             </Text>
-          </View>
+          </AnimatedPressable>
 
-          <View className="flex-row flex-wrap gap-4">
+          <View className="mb-8 flex-row flex-wrap gap-4">
             {filters?.map((filter, index) => (
               <FilterCard
                 key={filter.id}
