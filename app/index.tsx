@@ -13,7 +13,7 @@ import { useColors } from '~/hooks/useColors';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, PlusCircle } from 'lucide-react-native';
-import { AnimatedPressable } from '~/components/ui/AnimatedPressable';
+import { PressableScale } from 'pressto';
 
 export default function Home() {
   const router = useRouter();
@@ -75,7 +75,7 @@ export default function Home() {
             </View>
           </View>
 
-          <AnimatedPressable
+          <PressableScale
             style={styles.createFilterCard}
             onPress={() => router.push('/create-filter')}>
             <View className="mb-4">
@@ -86,7 +86,7 @@ export default function Home() {
                 ? intl.formatMessage({ id: 'home.create-first-filter' })
                 : intl.formatMessage({ id: 'home.create-another-filter' })}
             </Text>
-          </AnimatedPressable>
+          </PressableScale>
 
           <View className="mb-8 flex-row flex-wrap gap-4">
             {filters?.map((filter, index) => (

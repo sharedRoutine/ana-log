@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { itemTable } from '~/db/schema';
 import { useIntl } from 'react-intl';
-import { AnimatedPressable } from './AnimatedPressable';
+import { PressableScale } from 'pressto';
 
 interface ProcedureCardProps {
   item: typeof itemTable.$inferSelect;
@@ -21,7 +21,7 @@ export function ProcedureCard({
   const router = useRouter();
 
   return (
-    <AnimatedPressable
+    <PressableScale
       style={styles.entryCard}
       onPress={() => router.push(`/upsert-item?caseNumber=${item.caseNumber}`)}>
       <View className="mb-4 flex-row items-center justify-between">
@@ -55,7 +55,7 @@ export function ProcedureCard({
           <Text className="text-white">{`${item.ageYears} Jahre`}</Text>
         </View>
       </View>
-    </AnimatedPressable>
+    </PressableScale>
   );
 }
 

@@ -7,6 +7,7 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { db } from '~/db/db';
 import migrations from '../drizzle/migrations';
 import { useColorScheme } from 'nativewind';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Layout() {
   const { success, error } = useMigrations(db, migrations);
@@ -14,44 +15,46 @@ export default function Layout() {
   const { colorScheme } = useColorScheme();
 
   return (
-    <IntlProvider locale="de" messages={deMessages}>
-      <Stack>
-        <Stack.Screen
-          name="index"
-          options={{
-            headerShown: true,
-            headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-            headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
-          }}
-        />
-        <Stack.Screen
-          name="upsert-item"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-            headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
-          }}
-        />
-        <Stack.Screen
-          name="settings"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-            headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
-          }}
-        />
-        <Stack.Screen
-          name="create-filter"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-            headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
-          }}
-        />
-      </Stack>
-    </IntlProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <IntlProvider locale="de" messages={deMessages}>
+        <Stack>
+          <Stack.Screen
+            name="index"
+            options={{
+              headerShown: true,
+              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+            }}
+          />
+          <Stack.Screen
+            name="upsert-item"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+            }}
+          />
+          <Stack.Screen
+            name="settings"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+            }}
+          />
+          <Stack.Screen
+            name="create-filter"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+            }}
+          />
+        </Stack>
+      </IntlProvider>
+    </GestureHandlerRootView>
   );
 }
