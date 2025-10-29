@@ -1,18 +1,15 @@
-import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import { View } from 'react-native';
 import { useIntl } from 'react-intl';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { eq } from 'drizzle-orm';
-import { db } from '~/db/db';
+import { useCallback, useRef } from 'react';
 import { itemTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
-import { DateTime, Schema } from 'effect';
+import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import {
   Host,
   Picker,
   DateTimePicker,
-  Text,
   Switch,
   Section,
   Form,
@@ -22,26 +19,9 @@ import {
 } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { listRowBackground, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
-import { ChevronLeftCircle, Save } from 'lucide-react-native';
+import { Item } from '~/lib/schema';
 
-const Item = Schema.Struct({
-  caseNumber: Schema.String,
-  patientAgeYears: Schema.NonNegative,
-  patientAgeMonths: Schema.NonNegative,
-  operationDate: Schema.DateTimeUtc,
-  asaScore: Schema.Literal(1, 2, 3, 4, 5, 6),
-  airwayManagement: Schema.Literal(...AIRWAY_OPTIONS),
-  department: Schema.Literal(...DEPARTMENT_OPTIONS),
-  departmentOther: Schema.String,
-  specialFeatures: Schema.Boolean,
-  specialFeaturesText: Schema.String,
-  regionalAnesthesia: Schema.Boolean,
-  regionalAnesthesiaText: Schema.String,
-  outpatient: Schema.Boolean,
-  procedure: Schema.String,
-});
-
-const validateForm = (value: typeof Item.Type) => {
+const validateFormInternally = (value: typeof Item.Type) => {
   if (!value.caseNumber) {
     return 'No case number';
   }
@@ -53,64 +33,29 @@ const validateForm = (value: typeof Item.Type) => {
   }
 };
 
-export default function UpsertItem() {
+type ProcedureFormProps = {
+  procedure: typeof Item.Type;
+  validateForm?: (value: typeof Item.Type) => string | undefined;
+  onSubmit: (values: typeof itemTable.$inferSelect) => Promise<void>;
+  children?: ({
+    canSubmit,
+    dismiss,
+    save,
+  }: {
+    canSubmit: boolean;
+    dismiss: () => void;
+    save: () => void;
+  }) => React.ReactNode;
+};
+
+export default function ProcedureForm({
+  procedure,
+  validateForm,
+  onSubmit,
+  children,
+}: ProcedureFormProps) {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
-
-  const { caseNumber } = useLocalSearchParams<{ caseNumber?: string }>();
-
-  const [existingItem, setExistingItem] = useState<typeof itemTable.$inferSelect | null>(null);
-
-  useEffect(() => {
-    if (caseNumber) {
-      db.select()
-        .from(itemTable)
-        .where(eq(itemTable.caseNumber, caseNumber))
-        .then((result) => setExistingItem(result[0] || null));
-    }
-  }, [caseNumber]);
-
-  const isEditing = Boolean(caseNumber && existingItem);
-
-  const getDefaultValues = useCallback(() => {
-    if (isEditing && existingItem) {
-      const operationDate = DateTime.unsafeMake(existingItem.date);
-
-      return Item.make({
-        caseNumber: existingItem.caseNumber,
-        patientAgeYears: existingItem.ageYears,
-        patientAgeMonths: existingItem.ageMonths,
-        operationDate,
-        asaScore: existingItem.asaScore as 1 | 2 | 3 | 4 | 5 | 6,
-        airwayManagement: existingItem.airwayManagement,
-        department: existingItem.department,
-        departmentOther: '',
-        specialFeatures: Boolean(existingItem.specials),
-        specialFeaturesText: existingItem.specials || '',
-        regionalAnesthesia: existingItem.localAnesthetics,
-        regionalAnesthesiaText: '',
-        outpatient: existingItem.outpatient,
-        procedure: existingItem.procedure,
-      });
-    }
-
-    return Item.make({
-      caseNumber: '',
-      patientAgeYears: 0,
-      patientAgeMonths: 0,
-      operationDate: DateTime.unsafeMake(new Date()),
-      asaScore: 1,
-      airwayManagement: 'tube',
-      department: 'PSY',
-      departmentOther: '',
-      specialFeatures: false,
-      specialFeaturesText: '',
-      regionalAnesthesia: false,
-      regionalAnesthesiaText: '',
-      outpatient: false,
-      procedure: '',
-    });
-  }, [isEditing, existingItem]);
 
   const caseNumberRef = useRef<TextFieldRef>(null);
   const departmentOtherRef = useRef<TextFieldRef>(null);
@@ -119,11 +64,11 @@ export default function UpsertItem() {
   const procedureRef = useRef<TextFieldRef>(null);
 
   const form = useForm({
-    defaultValues: getDefaultValues(),
+    defaultValues: procedure,
     validators: {
-      onBlur: ({ value }) => validateForm(value),
-      onMount: ({ value }) => validateForm(value),
-      onChange: ({ value }) => validateForm(value),
+      onBlur: ({ value }) => (validateForm ? validateForm(value) : validateFormInternally(value)),
+      onMount: ({ value }) => (validateForm ? validateForm(value) : validateFormInternally(value)),
+      onChange: ({ value }) => (validateForm ? validateForm(value) : validateFormInternally(value)),
     },
     onSubmit: async ({ value }) => {
       await caseNumberRef.current?.blur();
@@ -146,11 +91,7 @@ export default function UpsertItem() {
         procedure: value.procedure,
       };
 
-      if (isEditing && caseNumber) {
-        await db.update(itemTable).set(itemValues).where(eq(itemTable.caseNumber, caseNumber));
-      } else {
-        await db.insert(itemTable).values(itemValues);
-      }
+      await onSubmit(itemValues);
 
       router.back();
       form.reset();
@@ -174,37 +115,25 @@ export default function UpsertItem() {
     label: intl.formatMessage({ id: `enum.department.${option}` }),
   })).sort((a, b) => a.label.localeCompare(b.label));
 
+  const dismiss = useCallback(async () => {
+    await caseNumberRef.current?.blur();
+    await departmentOtherRef.current?.blur();
+    await specialFeaturesTextRef.current?.blur();
+    await regionalAnesthesiaTextRef.current?.blur();
+    await procedureRef.current?.blur();
+    router.back();
+  }, []);
+  const save = useCallback(() => form.handleSubmit(), [form]);
+
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: intl.formatMessage({ id: isEditing ? 'edit-item.title' : 'add-item.title' }),
-          presentation: 'modal',
-          headerLeft: () => (
-            <TouchableOpacity
-              className="px-2"
-              onPress={async () => {
-                await caseNumberRef.current?.blur();
-                await departmentOtherRef.current?.blur();
-                await specialFeaturesTextRef.current?.blur();
-                await regionalAnesthesiaTextRef.current?.blur();
-                await procedureRef.current?.blur();
-                router.back();
-              }}>
-              <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity
-              className="px-2"
-              disabled={!canSubmit || isSubmitting}
-              style={{ opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}
-              onPress={() => form.handleSubmit()}>
-              <Save size={24} color="#3B82F6" />
-            </TouchableOpacity>
-          ),
-        }}
-      />
+      {children
+        ? children({
+            canSubmit: canSubmit && !isSubmitting,
+            dismiss,
+            save,
+          })
+        : null}
       <View className="flex-1 bg-black">
         <Host style={{ flex: 1 }}>
           <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
@@ -213,20 +142,16 @@ export default function UpsertItem() {
                 title={intl.formatMessage({ id: 'add-item.basic-info' })}
                 modifiers={[listRowBackground('#1C1C1E')]}>
                 <form.Field name="caseNumber">
-                  {({ state, handleChange }) =>
-                    isEditing ? (
-                      <Text key={state.value}>{state.value}</Text>
-                    ) : (
-                      <TextField
-                        autocorrection={false}
-                        onChangeText={(text) => handleChange(text)}
-                        defaultValue={state.value}
-                        placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
-                        ref={caseNumberRef}
-                        keyboardType="numeric"
-                      />
-                    )
-                  }
+                  {({ state, handleChange }) => (
+                    <TextField
+                      autocorrection={false}
+                      onChangeText={(text) => handleChange(text)}
+                      defaultValue={state.value}
+                      placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
+                      ref={caseNumberRef}
+                      keyboardType="numeric"
+                    />
+                  )}
                 </form.Field>
               </Section>
               <Section title={'Daten'} modifiers={[listRowBackground('#1C1C1E')]}>

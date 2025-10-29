@@ -57,7 +57,7 @@ export default function Home() {
           title: intl.formatMessage({ id: 'app.title' }),
           headerRight: () => (
             <TouchableOpacity
-              onPress={() => router.push('/upsert-item')}
+              onPress={() => router.push('/procedure/create')}
               className="px-2 text-center">
               <PlusCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
             </TouchableOpacity>
@@ -77,7 +77,7 @@ export default function Home() {
 
           <PressableScale
             style={styles.createFilterCard}
-            onPress={() => router.push('/create-filter')}>
+            onPress={() => router.push('/filter/create')}>
             <View className="mb-4">
               <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
             </View>

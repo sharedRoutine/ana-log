@@ -27,7 +27,25 @@ export default function Layout() {
             }}
           />
           <Stack.Screen
-            name="upsert-item"
+            name="procedure/create"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+            }}
+          />
+          <Stack.Screen
+            name="procedure/[procedureId]/edit"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+            }}
+          />
+          <Stack.Screen
+            name="filter/create"
             options={{
               presentation: 'modal',
               headerShown: true,
@@ -37,15 +55,6 @@ export default function Layout() {
           />
           <Stack.Screen
             name="settings"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-              headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
-            }}
-          />
-          <Stack.Screen
-            name="create-filter"
             options={{
               presentation: 'modal',
               headerShown: true,

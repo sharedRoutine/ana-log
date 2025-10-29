@@ -23,7 +23,7 @@ export function ProcedureCard({
   return (
     <PressableScale
       style={styles.entryCard}
-      onPress={() => router.push(`/upsert-item?caseNumber=${item.caseNumber}`)}>
+      onPress={() => router.push(`/procedure/${item.caseNumber}/edit`)}>
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
           <Text className="text-2xl font-bold text-white">{item.caseNumber}</Text>
