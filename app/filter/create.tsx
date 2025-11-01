@@ -1,5 +1,4 @@
 import { Stack, router } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
 import {
   Button,
   Form,
@@ -25,6 +24,7 @@ import { frame } from '@expo/ui/swift-ui/modifiers';
 import { useRef } from 'react';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
 
 // TODO: Better errors
 const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
@@ -185,8 +185,8 @@ export default function CreateFilter() {
           title: intl.formatMessage({ id: 'create-filter.title' }),
           presentation: 'modal',
           headerLeft: () => (
-            <TouchableOpacity
-              className="px-2"
+            <PressableScale
+              style={{ paddingHorizontal: 8 }}
               onPress={async () => {
                 await nameRef.current?.blur();
                 await goalRef.current?.blur();
@@ -195,16 +195,17 @@ export default function CreateFilter() {
                 router.back();
               }}>
               <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
-            </TouchableOpacity>
+            </PressableScale>
           ),
           headerRight: () => (
-            <TouchableOpacity
-              className="px-2"
-              disabled={!canSubmit || isSubmitting}
-              style={{ opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}
-              onPress={() => form.handleSubmit()}>
+            <PressableScale
+              style={{ paddingHorizontal: 8, opacity: canSubmit && !isSubmitting ? 1 : 0.5 }}
+              onPress={() => {
+                if (!canSubmit || isSubmitting) return;
+                form.handleSubmit();
+              }}>
               <Save size={24} color="#3B82F6" />
-            </TouchableOpacity>
+            </PressableScale>
           ),
         }}
       />
