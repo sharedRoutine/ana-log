@@ -17,7 +17,7 @@ export function FilterCard({ filter, index, conditionText, matchingCount }: Filt
   return (
     <PressableScale
       onPress={() => {
-        router.push(`/filter/${filter.id}`);
+        router.push(`/filter/${filter.id}/show`);
       }}
       key={filter.id}
       style={{
