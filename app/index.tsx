@@ -56,7 +56,9 @@ export default function Home() {
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
           headerRight: () => (
-            <PressableScale style={{ padding: 8 }} onPress={() => router.push('/procedure/create')}>
+            <PressableScale
+              style={{ paddingHorizontal: 8 }}
+              onPress={() => router.push('/procedure/create')}>
               <PlusCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
             </PressableScale>
           ),
