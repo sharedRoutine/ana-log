@@ -14,4 +14,4 @@ Is an app for anesthesiologists to track their procedures.
 - [ ] Add more Tags to Procedures Card
 - [ ] Filters
 - [ ] Statistics
-- [ ] Fix Keyboard Issues on real device (dismiss button)
+- [x] Fix Keyboard Issues on real device (dismiss button)

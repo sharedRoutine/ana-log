@@ -1,6 +1,5 @@
 import { Stack } from 'expo-router';
 import { useIntl } from 'react-intl';
-import { useState, useEffect } from 'react';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
@@ -12,24 +11,22 @@ import ProcedureForm from '~/components/ui/ProcedureForm';
 import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
 import { View } from 'react-native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function EditProcedure() {
   const intl = useIntl();
+  const queryClient = useQueryClient();
   const { colorScheme } = useColorScheme();
   const { procedureId } = useLocalSearchParams<{ procedureId: string }>();
 
-  const [existingItem, setExistingItem] = useState<typeof itemTable.$inferSelect | null>(null);
+  const { data, isPending } = useQuery({
+    queryKey: ['procedure', procedureId],
+    queryFn: () => db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId)),
+  });
 
-  // TODO: React Query
-  useEffect(() => {
-    db.select()
-      .from(itemTable)
-      .where(eq(itemTable.caseNumber, procedureId))
-      .then((result) => setExistingItem(result[0] || null));
-  }, [procedureId]);
+  if (!data || isPending) return <View className="flex-1 bg-black" />;
 
-  if (existingItem === null) return <View className="flex-1 bg-black" />;
-
+  const existingItem = data[0];
   const procedure = Item.make({
     caseNumber: existingItem.caseNumber,
     patientAgeYears: existingItem.ageYears,
@@ -51,7 +48,8 @@ export default function EditProcedure() {
     <ProcedureForm
       procedure={procedure}
       onSubmit={async (values) => {
-        // TODO: Update DB
+        await db.update(itemTable).set(values).where(eq(itemTable.caseNumber, procedureId));
+        await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
       }}>
       {({ canSubmit, dismiss, save }) => (
         <Stack.Screen
