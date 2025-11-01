@@ -81,7 +81,7 @@ export const FIELDS = [
     value: false,
   }),
   BooleanCondition.make({
-    field: 'regional-anesthesia',
+    field: 'local-anesthetics',
     value: false,
   }),
   TextCondition.make({

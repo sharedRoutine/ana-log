@@ -60,7 +60,7 @@ export default function ProcedureForm({
   const caseNumberRef = useRef<TextFieldRef>(null);
   const departmentOtherRef = useRef<TextFieldRef>(null);
   const specialFeaturesTextRef = useRef<TextFieldRef>(null);
-  const regionalAnesthesiaTextRef = useRef<TextFieldRef>(null);
+  const localAnestheticsTextRef = useRef<TextFieldRef>(null);
   const procedureRef = useRef<TextFieldRef>(null);
 
   const form = useForm({
@@ -74,7 +74,7 @@ export default function ProcedureForm({
       await caseNumberRef.current?.blur();
       await departmentOtherRef.current?.blur();
       await specialFeaturesTextRef.current?.blur();
-      await regionalAnesthesiaTextRef.current?.blur();
+      await localAnestheticsTextRef.current?.blur();
       await procedureRef.current?.blur();
 
       const itemValues = {
@@ -86,7 +86,7 @@ export default function ProcedureForm({
         airwayManagement: value.airwayManagement,
         department: value.department,
         specials: value.specialFeatures ? value.specialFeaturesText : null,
-        localAnesthetics: value.regionalAnesthesia,
+        localAnesthetics: value.localAnesthetics,
         outpatient: value.outpatient,
         procedure: value.procedure,
       };
@@ -100,7 +100,7 @@ export default function ProcedureForm({
 
   const departmentValue = useStore(form.store, (state) => state.values.department);
   const specialFeaturesValue = useStore(form.store, (state) => state.values.specialFeatures);
-  const regionalAnesthesiaValue = useStore(form.store, (state) => state.values.regionalAnesthesia);
+  const localAnestheticsValue = useStore(form.store, (state) => state.values.localAnesthetics);
 
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
@@ -119,7 +119,7 @@ export default function ProcedureForm({
     await caseNumberRef.current?.blur();
     await departmentOtherRef.current?.blur();
     await specialFeaturesTextRef.current?.blur();
-    await regionalAnesthesiaTextRef.current?.blur();
+    await localAnestheticsTextRef.current?.blur();
     await procedureRef.current?.blur();
     router.back();
   }, []);
@@ -139,7 +139,7 @@ export default function ProcedureForm({
           <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
             <>
               <Section
-                title={intl.formatMessage({ id: 'add-item.basic-info' })}
+                title={intl.formatMessage({ id: 'procedure.form.section.basic-info' })}
                 modifiers={[listRowBackground('#1C1C1E')]}>
                 <form.Field name="caseNumber">
                   {({ state, handleChange }) => (
@@ -147,7 +147,7 @@ export default function ProcedureForm({
                       autocorrection={false}
                       onChangeText={(text) => handleChange(text)}
                       defaultValue={state.value}
-                      placeholder={intl.formatMessage({ id: 'add-item.case-number' })}
+                      placeholder={intl.formatMessage({ id: 'procedure.form.case-number' })}
                       ref={caseNumberRef}
                       keyboardType="numeric"
                     />
@@ -163,7 +163,7 @@ export default function ProcedureForm({
                       }}
                       key={state.value.epochMillis}
                       color={colorScheme === 'dark' ? 'white' : 'black'}
-                      title={intl.formatMessage({ id: 'add-item.operation-date' })}
+                      title={intl.formatMessage({ id: 'procedure.form.operation-date' })}
                       displayedComponents="date"
                       initialDate={DateTime.toDate(state.value).toISOString()}
                       variant="compact"
@@ -173,7 +173,10 @@ export default function ProcedureForm({
                 <form.Field name="patientAgeYears">
                   {({ state, handleChange }) => (
                     <Stepper
-                      label={`Alter in Jahren: ${state.value}`}
+                      label={intl.formatMessage(
+                        { id: 'procedure.form.age-in-years' },
+                        { years: state.value }
+                      )}
                       max={120}
                       min={0}
                       step={1}
@@ -185,7 +188,10 @@ export default function ProcedureForm({
                 <form.Field name="patientAgeMonths">
                   {({ state, handleChange }) => (
                     <Stepper
-                      label={`Alter in Monaten: ${state.value}`}
+                      label={intl.formatMessage(
+                        { id: 'procedure.form.age-in-months' },
+                        { months: state.value }
+                      )}
                       max={11}
                       min={0}
                       step={1}
@@ -196,12 +202,12 @@ export default function ProcedureForm({
                 </form.Field>
               </Section>
               <Section
-                title={intl.formatMessage({ id: 'add-item.details' })}
+                title={intl.formatMessage({ id: 'procedure.form.section.details' })}
                 modifiers={[listRowBackground('#1C1C1E')]}>
                 <form.Field name="asaScore">
                   {({ state, handleChange }) => (
                     <Picker
-                      label={intl.formatMessage({ id: 'add-item.asa-score' })}
+                      label={intl.formatMessage({ id: 'procedure.form.asa-score' })}
                       variant="menu"
                       options={['1', '2', '3', '4', '5', '6']}
                       selectedIndex={state.value ? state.value - 1 : -1}
@@ -215,7 +221,7 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <Picker
                       variant="menu"
-                      label={intl.formatMessage({ id: 'add-item.airway-management' })}
+                      label={intl.formatMessage({ id: 'procedure.form.airway-management' })}
                       options={SORTED_AIRWAY_OPTIONS.map((option) => option.label)}
                       selectedIndex={
                         state.value
@@ -232,7 +238,7 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <Picker
                       variant="menu"
-                      label={intl.formatMessage({ id: 'add-item.department' })}
+                      label={intl.formatMessage({ id: 'procedure.form.department' })}
                       options={SORTED_DEPARTMENT_OPTIONS.map((option) => option.label)}
                       selectedIndex={
                         state.value
@@ -253,7 +259,7 @@ export default function ProcedureForm({
                       {departmentValue === 'other' && (
                         <TextField
                           placeholder={intl.formatMessage({
-                            id: 'add-item.department.other.placeholder',
+                            id: 'procedure.form.department.other.placeholder',
                           })}
                           defaultValue={state.value}
                           onChangeText={handleChange}
@@ -265,11 +271,13 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section title={'Einstellungen'} modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section
+                title={intl.formatMessage({ id: 'procedure.form.section.settings' })}
+                modifiers={[listRowBackground('#1C1C1E')]}>
                 <form.Field name="specialFeatures">
                   {({ state, handleChange }) => (
                     <Switch
-                      label={intl.formatMessage({ id: 'add-item.special-features' })}
+                      label={intl.formatMessage({ id: 'procedure.form.special-features' })}
                       value={state.value}
                       onValueChange={handleChange}
                     />
@@ -281,7 +289,7 @@ export default function ProcedureForm({
                       {specialFeaturesValue && (
                         <TextField
                           placeholder={intl.formatMessage({
-                            id: 'add-item.special-features.placeholder',
+                            id: 'procedure.form.special-features.placeholder',
                           })}
                           defaultValue={state.value}
                           onChangeText={handleChange}
@@ -295,22 +303,22 @@ export default function ProcedureForm({
                     </>
                   )}
                 </form.Field>
-                <form.Field name="regionalAnesthesia">
+                <form.Field name="localAnesthetics">
                   {({ state, handleChange }) => (
                     <Switch
-                      label={intl.formatMessage({ id: 'add-item.regional-anesthesia' })}
+                      label={intl.formatMessage({ id: 'procedure.form.local-anesthetics' })}
                       value={state.value}
                       onValueChange={handleChange}
                     />
                   )}
                 </form.Field>
-                <form.Field name="regionalAnesthesiaText">
+                <form.Field name="localAnestheticsText">
                   {({ state, handleChange }) => (
                     <>
-                      {regionalAnesthesiaValue && (
+                      {localAnestheticsValue && (
                         <TextField
                           placeholder={intl.formatMessage({
-                            id: 'add-item.regional-anesthesia.placeholder',
+                            id: 'procedure.form.local-anesthetics.placeholder',
                           })}
                           defaultValue={state.value}
                           onChangeText={handleChange}
@@ -318,7 +326,7 @@ export default function ProcedureForm({
                           numberOfLines={3}
                           autocorrection={false}
                           allowNewlines={true}
-                          ref={regionalAnesthesiaTextRef}
+                          ref={localAnestheticsTextRef}
                         />
                       )}
                     </>
@@ -327,18 +335,22 @@ export default function ProcedureForm({
                 <form.Field name="outpatient">
                   {({ state, handleChange }) => (
                     <Switch
-                      label={intl.formatMessage({ id: 'add-item.outpatient' })}
+                      label={intl.formatMessage({ id: 'procedure.form.outpatient' })}
                       value={state.value}
                       onValueChange={handleChange}
                     />
                   )}
                 </form.Field>
               </Section>
-              <Section title={'Eingriff'} modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section
+                title={intl.formatMessage({ id: 'procedure.form.procedure' })}
+                modifiers={[listRowBackground('#1C1C1E')]}>
                 <form.Field name="procedure">
                   {({ state, handleChange }) => (
                     <TextField
-                      placeholder={intl.formatMessage({ id: 'add-item.procedure.placeholder' })}
+                      placeholder={intl.formatMessage({
+                        id: 'procedure.form.procedure.placeholder',
+                      })}
                       defaultValue={state.value}
                       onChangeText={handleChange}
                       multiline

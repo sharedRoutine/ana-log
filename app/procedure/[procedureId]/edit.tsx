@@ -38,8 +38,8 @@ export default function EditProcedure() {
     departmentOther: '',
     specialFeatures: Boolean(existingItem.specials),
     specialFeaturesText: existingItem.specials || '',
-    regionalAnesthesia: existingItem.localAnesthetics,
-    regionalAnesthesiaText: '',
+    localAnesthetics: existingItem.localAnesthetics,
+    localAnestheticsText: '',
     outpatient: existingItem.outpatient,
     procedure: existingItem.procedure,
   });

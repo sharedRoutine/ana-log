@@ -129,8 +129,8 @@ export function useFilterLogic() {
       Match.when('special-features', () =>
         intl.formatMessage({ id: 'create-filter.field.special-features' })
       ),
-      Match.when('regional-anesthesia', () =>
-        intl.formatMessage({ id: 'create-filter.field.regional-anesthesia' })
+      Match.when('local-anesthetics', () =>
+        intl.formatMessage({ id: 'create-filter.field.local-anesthetics' })
       ),
       Match.orElse(() => condition.field)
     );

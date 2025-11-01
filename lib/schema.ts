@@ -12,8 +12,8 @@ export const Item = Schema.Struct({
   departmentOther: Schema.String,
   specialFeatures: Schema.Boolean,
   specialFeaturesText: Schema.String,
-  regionalAnesthesia: Schema.Boolean,
-  regionalAnesthesiaText: Schema.String,
+  localAnesthetics: Schema.Boolean,
+  localAnestheticsText: Schema.String,
   outpatient: Schema.Boolean,
   procedure: Schema.String,
 });
