@@ -1,5 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import { View, TouchableOpacity, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { desc, count } from 'drizzle-orm';
@@ -56,18 +56,16 @@ export default function Home() {
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => router.push('/procedure/create')}
-              className="px-2 text-center">
+            <PressableScale style={{ padding: 8 }} onPress={() => router.push('/procedure/create')}>
               <PlusCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
-            </TouchableOpacity>
+            </PressableScale>
           ),
         }}
       />
       <SafeAreaView edges={['bottom']}>
         <View className="bg-white px-4 pt-4 dark:bg-black">
           <View className="mb-6 flex-row items-center gap-4">
-            <Text className="text-[28px] font-semibold text-white">
+            <Text className="text-[28px] font-semibold text-black dark:text-white">
               {intl.formatMessage({ id: 'home.my-filters' })}
             </Text>
             <View style={styles.countBadge}>
@@ -105,7 +103,7 @@ export default function Home() {
           </View>
 
           <View className="mb-6 flex-row items-center gap-4">
-            <Text className="text-[28px] font-semibold text-white">
+            <Text className="text-[28px] font-semibold text-black dark:text-white">
               {intl.formatMessage({ id: 'home.my-procedures' })}
             </Text>
             <View style={styles.countBadge}>

@@ -18,7 +18,7 @@ import {
   Stepper,
 } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
-import { listRowBackground, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
+import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Item } from '~/lib/schema';
 
 const validateFormInternally = (value: typeof Item.Type) => {
@@ -134,13 +134,11 @@ export default function ProcedureForm({
             save,
           })
         : null}
-      <View className="flex-1 bg-black">
+      <View className="flex-1 bg-white dark:bg-black">
         <Host style={{ flex: 1 }}>
           <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
             <>
-              <Section
-                title={intl.formatMessage({ id: 'procedure.form.section.basic-info' })}
-                modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.basic-info' })}>
                 <form.Field name="caseNumber">
                   {({ state, handleChange }) => (
                     <TextField
@@ -154,7 +152,7 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section title={'Daten'} modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section title={'Daten'}>
                 <form.Field name="operationDate">
                   {({ state, handleChange }) => (
                     <DateTimePicker
@@ -201,9 +199,7 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section
-                title={intl.formatMessage({ id: 'procedure.form.section.details' })}
-                modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.details' })}>
                 <form.Field name="asaScore">
                   {({ state, handleChange }) => (
                     <Picker
@@ -271,9 +267,7 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section
-                title={intl.formatMessage({ id: 'procedure.form.section.settings' })}
-                modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.settings' })}>
                 <form.Field name="specialFeatures">
                   {({ state, handleChange }) => (
                     <Switch
@@ -342,9 +336,7 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section
-                title={intl.formatMessage({ id: 'procedure.form.procedure' })}
-                modifiers={[listRowBackground('#1C1C1E')]}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.procedure' })}>
                 <form.Field name="procedure">
                   {({ state, handleChange }) => (
                     <TextField
