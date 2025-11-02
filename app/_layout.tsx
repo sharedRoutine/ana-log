@@ -9,6 +9,7 @@ import migrations from '../drizzle/migrations';
 import { useColorScheme } from 'nativewind';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { View, Text } from 'react-native';
 
 const queryClient = new QueryClient();
 
@@ -16,6 +17,15 @@ export default function Layout() {
   const { success, error } = useMigrations(db, migrations);
 
   const { colorScheme } = useColorScheme();
+
+  // TODO: Proper Error View with retry button
+  if (!success) {
+    return (
+      <View>
+        <Text>DB Error: {error?.message}</Text>
+      </View>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -59,6 +69,15 @@ export default function Layout() {
             />
             <Stack.Screen
               name="filter/[filterId]/show"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+                headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+              }}
+            />
+            <Stack.Screen
+              name="filter/[filterId]/edit"
               options={{
                 presentation: 'modal',
                 headerShown: true,

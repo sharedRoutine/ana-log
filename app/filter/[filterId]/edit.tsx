@@ -1,32 +1,62 @@
-import { Stack } from 'expo-router';
+import { Text, View } from 'react-native';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { Match } from 'effect';
-import { Filter, FilterCondition } from '~/lib/condition';
-import { db } from '~/db/db';
-import { filterConditionTable, filterTable } from '~/db/schema';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { PressableScale } from 'pressto';
 import FilterForm from '~/components/ui/FilterForm';
+import { db } from '~/db/db';
+import { Match } from 'effect';
+import { filterConditionTable, filterTable } from '~/db/schema';
+import { Filter } from '~/lib/condition';
+import { useQuery } from '@tanstack/react-query';
+import { eq } from 'drizzle-orm';
+import { convertConditions } from '~/db/conversions';
 
-export default function CreateFilter() {
+export default function EditFilter() {
   const intl = useIntl();
-
   const { colorScheme } = useColorScheme();
+
+  const { filterId: filterIdParam } = useLocalSearchParams<{ filterId: string }>();
+  const filterId = parseInt(filterIdParam, 10);
+
+  const { data, isPending } = useQuery({
+    queryKey: ['filter', filterId],
+    queryFn: () => db.select().from(filterTable).where(eq(filterTable.id, filterId)),
+  });
+
+  const { data: conditions, isPending: isConditionsPending } = useQuery({
+    queryKey: ['filter', filterId, 'conditions'],
+    queryFn: () =>
+      db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId)),
+  });
+
+  if (isPending || isConditionsPending) return <View className="flex-1 bg-black" />;
+
+  if (!data || data.length === 0) {
+    // TODO: Proper Empty Screen
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text>No filter found.</Text>
+      </View>
+    );
+  }
 
   return (
     <FilterForm
       filter={Filter.make({
-        name: '',
-        conditions: [] as (typeof FilterCondition.Type)[],
+        name: data[0].name,
+        goal: data[0].goal ?? undefined,
+        conditions: convertConditions(conditions || []),
       })}
-      hasGoal={false}
+      hasGoal={data[0].goal !== null}
       onSubmit={async (value) => {
         await db.transaction(async (tx) => {
-          const [f] = await tx
-            .insert(filterTable)
-            .values({ name: value.name, goal: value.goal })
-            .returning({ id: filterTable.id });
+          await tx
+            .update(filterTable)
+            .set({ name: value.name, goal: value.goal })
+            .where(eq(filterTable.id, filterId));
+          await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
 
           for (const condition of value.conditions) {
             await Match.value(condition).pipe(
@@ -34,7 +64,7 @@ export default function CreateFilter() {
                 tx
                   .insert(filterConditionTable)
                   .values({
-                    filterId: f.id,
+                    filterId,
                     type: 'TEXT_CONDITION',
                     field: textCondition.field,
                     operator: textCondition.operator,
@@ -46,7 +76,7 @@ export default function CreateFilter() {
                 tx
                   .insert(filterConditionTable)
                   .values({
-                    filterId: f.id,
+                    filterId,
                     type: 'NUMBER_CONDITION',
                     field: numberCondition.field,
                     operator: numberCondition.operator,
@@ -58,7 +88,7 @@ export default function CreateFilter() {
                 tx
                   .insert(filterConditionTable)
                   .values({
-                    filterId: f.id,
+                    filterId,
                     type: 'BOOLEAN_CONDITION',
                     field: booleanCondition.field,
                     valueBoolean: booleanCondition.value,
@@ -69,7 +99,7 @@ export default function CreateFilter() {
                 tx
                   .insert(filterConditionTable)
                   .values({
-                    filterId: f.id,
+                    filterId,
                     type: 'ENUM_CONDITION',
                     field: enumCondition.field,
                     valueEnum: enumCondition.value,
@@ -81,10 +111,10 @@ export default function CreateFilter() {
           }
         });
       }}>
-      {({ canSubmit, dismiss, save }) => (
+      {({ dismiss, canSubmit, save }) => (
         <Stack.Screen
           options={{
-            title: intl.formatMessage({ id: 'create-filter.title' }),
+            title: intl.formatMessage({ id: 'edit-filter.title' }),
             presentation: 'modal',
             headerLeft: () => (
               <PressableScale style={{ paddingHorizontal: 8 }} onPress={dismiss}>

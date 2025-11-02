@@ -2,7 +2,7 @@ import { PlatformColor, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { ChevronLeftCircle } from 'lucide-react-native';
+import { ChevronLeftCircle, Edit } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '~/db/db';
@@ -97,6 +97,15 @@ export default function ShowFilter() {
                 router.back();
               }}>
               <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+            </PressableScale>
+          ),
+          headerRight: () => (
+            <PressableScale
+              style={{ paddingHorizontal: 8 }}
+              onPress={async () => {
+                router.push(`/filter/${filterId}/edit`);
+              }}>
+              <Edit size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
             </PressableScale>
           ),
         }}

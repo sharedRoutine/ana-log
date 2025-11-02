@@ -10,7 +10,7 @@ import { useLocalSearchParams } from 'expo-router/build/hooks';
 import ProcedureForm from '~/components/ui/ProcedureForm';
 import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function EditProcedure() {
@@ -24,7 +24,16 @@ export default function EditProcedure() {
     queryFn: () => db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId)),
   });
 
-  if (!data || isPending) return <View className="flex-1 bg-black" />;
+  if (isPending) return <View className="flex-1 bg-black" />;
+
+  if (!data || data.length === 0) {
+    // TODO: Proper Empty Screen
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text>No procedure found.</Text>
+      </View>
+    );
+  }
 
   const existingItem = data[0];
   const procedure = Item.make({

@@ -2,7 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { desc, count } from 'drizzle-orm';
+import { desc, count, eq } from 'drizzle-orm';
 import { FlashList } from '@shopify/flash-list';
 import { db } from '~/db/db';
 import { filterTable, itemTable, filterConditionTable } from '~/db/schema';
@@ -14,6 +14,7 @@ import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, PlusCircle } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
+import { useCallback } from 'react';
 
 export default function Home() {
   const router = useRouter();
@@ -38,17 +39,19 @@ export default function Home() {
   const { getDepartmentColor } = useColors();
   const { getMatchingProceduresCount, getConditionText } = useFilterLogic();
 
-  const getTranslatedAirwayManagement = (airway: string) => {
-    return intl.formatMessage({ id: `enum.airway-management.${airway}` });
-  };
+  const getTranslatedAirwayManagement = useCallback(
+    (airway: string) => {
+      return intl.formatMessage({ id: `enum.airway-management.${airway}` });
+    },
+    [intl]
+  );
 
-  const getTranslatedDepartment = (department: string) => {
-    try {
+  const getTranslatedDepartment = useCallback(
+    (department: string) => {
       return intl.formatMessage({ id: `enum.department.${department}` });
-    } catch {
-      return department; // fallback to original if translation missing
-    }
-  };
+    },
+    [intl]
+  );
 
   return (
     <ScrollView className="flex-1 bg-white dark:bg-black">
@@ -89,17 +92,22 @@ export default function Home() {
           </PressableScale>
 
           <View className="mb-8 flex-row flex-wrap gap-4">
-            {filters?.map((filter, index) => (
+            {filters?.map((filter) => (
               <FilterCard
                 key={filter.id}
                 filter={filter}
-                index={index + 1}
                 conditionText={getConditionText(
                   filter.id,
                   filterConditions || [],
                   allFilterConditions || []
                 )}
                 matchingCount={getMatchingProceduresCount(filter.id, allFilterConditions || [])}
+                onDelete={async (filterId) => {
+                  await db
+                    .delete(filterConditionTable)
+                    .where(eq(filterConditionTable.filterId, filterId));
+                  await db.delete(filterTable).where(eq(filterTable.id, filterId));
+                }}
               />
             ))}
           </View>

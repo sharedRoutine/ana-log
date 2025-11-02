@@ -17,6 +17,7 @@
   "home.my-filters": "Meine Filter",
   "home.asa-score": "ASA Score {score}",
   "create-filter.title": "Filter erstellen",
+  "edit-filter.title": "Filter bearbeiten",
   "create-filter.cancel": "Abbrechen",
   "create-filter.save": "Speichern",
   "create-filter.filter-name": "Filter Name",
