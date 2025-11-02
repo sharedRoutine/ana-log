@@ -12,13 +12,13 @@ import {
   Switch,
   Section,
   Form,
-  TextField,
   TextFieldRef,
   Stepper,
 } from '@expo/ui/swift-ui';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Item } from '~/lib/schema';
+import { DismissableTextField } from './DismissableTextField';
 
 const validateFormInternally = (value: typeof Item.Type) => {
   if (!value.caseNumber) {
@@ -138,7 +138,7 @@ export default function ProcedureForm({
               <Section title={intl.formatMessage({ id: 'procedure.form.section.basic-info' })}>
                 <form.Field name="caseNumber">
                   {({ state, handleChange }) => (
-                    <TextField
+                    <DismissableTextField
                       autocorrection={false}
                       onChangeText={(text) => handleChange(text)}
                       defaultValue={state.value}
@@ -250,7 +250,7 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <>
                       {departmentValue === 'other' && (
-                        <TextField
+                        <DismissableTextField
                           placeholder={intl.formatMessage({
                             id: 'procedure.form.department.other.placeholder',
                           })}
@@ -278,7 +278,7 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <>
                       {specialFeaturesValue && (
-                        <TextField
+                        <DismissableTextField
                           placeholder={intl.formatMessage({
                             id: 'procedure.form.special-features.placeholder',
                           })}
@@ -307,7 +307,7 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <>
                       {localAnestheticsValue && (
-                        <TextField
+                        <DismissableTextField
                           placeholder={intl.formatMessage({
                             id: 'procedure.form.local-anesthetics.placeholder',
                           })}
@@ -336,7 +336,7 @@ export default function ProcedureForm({
               <Section title={intl.formatMessage({ id: 'procedure.form.procedure' })}>
                 <form.Field name="procedure">
                   {({ state, handleChange }) => (
-                    <TextField
+                    <DismissableTextField
                       placeholder={intl.formatMessage({
                         id: 'procedure.form.procedure.placeholder',
                       })}

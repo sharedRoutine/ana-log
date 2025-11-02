@@ -5,7 +5,6 @@ import {
   Picker,
   Section,
   Switch,
-  TextField,
   Text,
   Spacer,
   HStack,
@@ -20,6 +19,7 @@ import { Fragment } from 'react/jsx-runtime';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { useCallback, useRef } from 'react';
 import { View } from 'react-native';
+import { DismissableTextField } from './DismissableTextField';
 
 // TODO: Better errors
 const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
@@ -158,7 +158,7 @@ export default function FilterForm({
               <Section title={intl.formatMessage({ id: 'create-filter.filter-details' })}>
                 <form.Field name="name">
                   {({ state, handleChange }) => (
-                    <TextField
+                    <DismissableTextField
                       placeholder={intl.formatMessage({
                         id: 'create-filter.filter-name.placeholder',
                       })}
@@ -300,7 +300,7 @@ export default function FilterForm({
                                               <Text>
                                                 {intl.formatMessage({ id: 'create-filter.value' })}
                                               </Text>
-                                              <TextField
+                                              <DismissableTextField
                                                 onChangeText={(newText) =>
                                                   valueField.handleChange(newText)
                                                 }
