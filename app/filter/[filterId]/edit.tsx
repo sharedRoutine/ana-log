@@ -9,13 +9,15 @@ import { db } from '~/db/db';
 import { Match } from 'effect';
 import { filterConditionTable, filterTable } from '~/db/schema';
 import { Filter } from '~/lib/condition';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
 import { convertConditions } from '~/db/conversions';
 
 export default function EditFilter() {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
+
+  const queryClient = useQueryClient();
 
   const { filterId: filterIdParam } = useLocalSearchParams<{ filterId: string }>();
   const filterId = parseInt(filterIdParam, 10);
@@ -110,6 +112,7 @@ export default function EditFilter() {
             );
           }
         });
+        await queryClient.invalidateQueries({ queryKey: ['filter', filterId] });
       }}>
       {({ dismiss, canSubmit, save }) => (
         <Stack.Screen
