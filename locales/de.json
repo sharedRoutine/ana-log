@@ -16,6 +16,8 @@
   "home.my-procedures": "Meine Eingriffe",
   "home.my-filters": "Meine Filter",
   "home.asa-score": "ASA Score {score}",
+  "home.export-data": "Daten sichern",
+  "home.import-data": "Daten importieren",
   "create-filter.title": "Filter erstellen",
   "edit-filter.title": "Filter bearbeiten",
   "edit-filter.delete": "Filter löschen",

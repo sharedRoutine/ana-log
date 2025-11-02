@@ -12,9 +12,13 @@ import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, PlusCircle } from 'lucide-react-native';
+import { Plus, PlusCircle, Settings } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useCallback } from 'react';
+import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
+import * as DocumentPicker from 'expo-document-picker';
+import * as Sharing from 'expo-sharing';
+import { File, Paths } from 'expo-file-system';
 
 export default function Home() {
   const router = useRouter();
@@ -58,6 +62,76 @@ export default function Home() {
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
+          headerLeft: () => (
+            <View className="px-2">
+              <Host matchContents>
+                <ContextMenu>
+                  <ContextMenu.Items>
+                    <Button
+                      variant="bordered"
+                      systemImage="square.and.arrow.up"
+                      onPress={async () => {
+                        const file = new File(Paths.cache, `ana-log-export-${Date.now()}.json`);
+                        file.create();
+                        file.write(
+                          JSON.stringify({
+                            filters: filters.map((f) => ({
+                              ...f,
+                              conditions: allFilterConditions.filter((fc) => fc.filterId === f.id),
+                            })),
+                            procedures,
+                          }),
+                          {
+                            encoding: 'utf8',
+                          }
+                        );
+                        await Sharing.shareAsync(file.uri, {
+                          mimeType: 'application/json',
+                          dialogTitle: intl.formatMessage({ id: 'home.export-data' }),
+                        });
+                      }}>
+                      {intl.formatMessage({ id: 'home.export-data' })}
+                    </Button>
+                    <Button
+                      systemImage="square.and.arrow.down"
+                      onPress={async () => {
+                        const result = await DocumentPicker.getDocumentAsync({
+                          type: ['application/json'],
+                          copyToCacheDirectory: true,
+                          multiple: false,
+                          base64: false,
+                        });
+                        if (result.canceled) {
+                          return;
+                        }
+                        const fileUri = result.assets[0].uri;
+                        const file = new File(fileUri);
+                        const { filters, procedures } = JSON.parse(file.textSync()) as {
+                          filters: (typeof filterTable.$inferSelect & {
+                            conditions: (typeof filterConditionTable.$inferSelect)[];
+                          })[];
+                          procedures: (typeof itemTable.$inferSelect)[];
+                        };
+                        await db.transaction(async (tx) => {
+                          await tx.insert(itemTable).values(procedures);
+                          await tx
+                            .insert(filterTable)
+                            .values(filters.map(({ conditions, ...f }) => f));
+                          await tx
+                            .insert(filterConditionTable)
+                            .values(filters.flatMap((f) => f.conditions));
+                        });
+                      }}>
+                      {intl.formatMessage({ id: 'home.import-data' })}
+                    </Button>
+                  </ContextMenu.Items>
+                  <ContextMenu.Trigger>
+                    <Settings size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+                  </ContextMenu.Trigger>
+                </ContextMenu>
+              </Host>
+            </View>
+          ),
           headerRight: () => (
             <PressableScale
               style={{ paddingHorizontal: 8 }}
@@ -125,7 +199,7 @@ export default function Home() {
             renderItem={({ item }) => (
               <ProcedureCard
                 item={item}
-                onPress={() => router.push(`/procedure/${item.caseNumber}/edit`)}
+                onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}
                 getDepartmentColor={getDepartmentColor}
                 getTranslatedDepartment={getTranslatedDepartment}
                 getTranslatedAirwayManagement={getTranslatedAirwayManagement}
