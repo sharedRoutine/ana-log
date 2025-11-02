@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useIntl } from 'react-intl';
 import { Match } from 'effect';
 import { Filter, FilterCondition } from '~/lib/condition';
@@ -12,6 +12,7 @@ import FilterForm from '~/components/ui/FilterForm';
 export default function CreateFilter() {
   const intl = useIntl();
 
+  const router = useRouter();
   const { colorScheme } = useColorScheme();
 
   return (
@@ -87,7 +88,12 @@ export default function CreateFilter() {
             title: intl.formatMessage({ id: 'create-filter.title' }),
             presentation: 'modal',
             headerLeft: () => (
-              <PressableScale style={{ paddingHorizontal: 8 }} onPress={dismiss}>
+              <PressableScale
+                style={{ paddingHorizontal: 8 }}
+                onPress={() => {
+                  dismiss();
+                  router.back();
+                }}>
                 <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
               </PressableScale>
             ),

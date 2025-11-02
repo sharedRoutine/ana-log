@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
@@ -17,6 +17,7 @@ export default function EditFilter() {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
 
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { filterId: filterIdParam } = useLocalSearchParams<{ filterId: string }>();
@@ -52,6 +53,15 @@ export default function EditFilter() {
         conditions: convertConditions(conditions || []),
       })}
       hasGoal={data[0].goal !== null}
+      isEditing={true}
+      onDelete={async () => {
+        await db.transaction(async (tx) => {
+          await tx.delete(filterTable).where(eq(filterTable.id, filterId));
+          await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
+        });
+        await queryClient.invalidateQueries({ queryKey: ['filter', filterId] });
+        router.dismissAll();
+      }}
       onSubmit={async (value) => {
         await db.transaction(async (tx) => {
           await tx
