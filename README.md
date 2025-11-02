@@ -10,9 +10,9 @@ Is an app for anesthesiologists to track their procedures.
 ## TODO
 
 - [ ] Exports & Backups for data in case of phone change
-- [ ] Show Details of a Procedure in Bottom Sheet
 - [ ] Empty, Loading and Error UI
 - [ ] Add more Tags to Procedures Card
+- [x] Show Details of a Procedure in Bottom Sheet
 - [x] Filters
   - [x] Create Filters
   - [x] Show procedures based on filters

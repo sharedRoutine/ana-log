@@ -40,8 +40,9 @@ export default function Home() {
   const { data: allFilterConditions } = useLiveQuery(db.select().from(filterConditionTable));
 
   const { colorScheme } = useColorScheme();
-  const { getDepartmentColor } = useColors();
   const { getMatchingProceduresCount, getConditionText } = useFilterLogic();
+
+  const { getDepartmentColor } = useColors();
 
   const getTranslatedAirwayManagement = useCallback(
     (airway: string) => {

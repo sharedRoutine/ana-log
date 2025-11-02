@@ -59,6 +59,15 @@ export default function Layout() {
               }}
             />
             <Stack.Screen
+              name="procedure/[procedureId]/show"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
+                headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+              }}
+            />
+            <Stack.Screen
               name="filter/create"
               options={{
                 presentation: 'modal',
