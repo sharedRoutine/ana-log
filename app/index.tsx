@@ -2,7 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { desc, count, eq } from 'drizzle-orm';
+import { desc, count } from 'drizzle-orm';
 import { FlashList } from '@shopify/flash-list';
 import { db } from '~/db/db';
 import { filterTable, itemTable, filterConditionTable } from '~/db/schema';
@@ -102,11 +102,8 @@ export default function Home() {
                   allFilterConditions || []
                 )}
                 matchingCount={getMatchingProceduresCount(filter.id, allFilterConditions || [])}
-                onDelete={async (filterId) => {
-                  await db
-                    .delete(filterConditionTable)
-                    .where(eq(filterConditionTable.filterId, filterId));
-                  await db.delete(filterTable).where(eq(filterTable.id, filterId));
+                onPress={() => {
+                  router.push(`/filter/${filter.id}/show`);
                 }}
               />
             ))}
@@ -128,6 +125,7 @@ export default function Home() {
             renderItem={({ item }) => (
               <ProcedureCard
                 item={item}
+                onPress={() => router.push(`/procedure/${item.caseNumber}/edit`)}
                 getDepartmentColor={getDepartmentColor}
                 getTranslatedDepartment={getTranslatedDepartment}
                 getTranslatedAirwayManagement={getTranslatedAirwayManagement}

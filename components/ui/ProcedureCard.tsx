@@ -1,11 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
 import { itemTable } from '~/db/schema';
 import { useIntl } from 'react-intl';
 import { PressableScale } from 'pressto';
 
 interface ProcedureCardProps {
   item: typeof itemTable.$inferSelect;
+  onPress?: () => void;
   getDepartmentColor: (department: string) => string;
   getTranslatedDepartment: (department: string) => string;
   getTranslatedAirwayManagement: (airway: string) => string;
@@ -13,17 +13,15 @@ interface ProcedureCardProps {
 
 export function ProcedureCard({
   item,
+  onPress,
   getDepartmentColor,
   getTranslatedDepartment,
   getTranslatedAirwayManagement,
 }: ProcedureCardProps) {
   const intl = useIntl();
-  const router = useRouter();
 
   return (
-    <PressableScale
-      style={styles.entryCard}
-      onPress={() => router.push(`/procedure/${item.caseNumber}/edit`)}>
+    <PressableScale style={styles.entryCard} onPress={onPress}>
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
           <Text className="text-2xl font-bold text-white">{item.caseNumber}</Text>

@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useIntl } from 'react-intl';
 import { useMemo } from 'react';
 import { DateTime } from 'effect';
@@ -7,9 +7,12 @@ import { ChevronLeftCircle, Save } from 'lucide-react-native';
 import ProcedureForm from '~/components/ui/ProcedureForm';
 import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
+import { db } from '~/db/db';
+import { itemTable } from '~/db/schema';
 
 export default function UpsertItem() {
   const intl = useIntl();
+  const router = useRouter();
   const { colorScheme } = useColorScheme();
 
   const procedure = useMemo(
@@ -34,7 +37,12 @@ export default function UpsertItem() {
   );
 
   return (
-    <ProcedureForm procedure={procedure} onSubmit={async (values) => {}}>
+    <ProcedureForm
+      procedure={procedure}
+      onSubmit={async (values) => {
+        await db.insert(itemTable).values(values);
+        router.back();
+      }}>
       {({ canSubmit, dismiss, save }) => (
         <Stack.Screen
           options={{

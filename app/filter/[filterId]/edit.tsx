@@ -123,6 +123,7 @@ export default function EditFilter() {
           }
         });
         await queryClient.invalidateQueries({ queryKey: ['filter', filterId] });
+        router.back();
       }}>
       {({ dismiss, canSubmit, save }) => (
         <Stack.Screen

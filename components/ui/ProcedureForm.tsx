@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useCallback, useRef } from 'react';
@@ -56,7 +55,6 @@ export default function ProcedureForm({
 }: ProcedureFormProps) {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
-  const router = useRouter();
 
   const caseNumberRef = useRef<TextFieldRef>(null);
   const departmentOtherRef = useRef<TextFieldRef>(null);
@@ -94,7 +92,6 @@ export default function ProcedureForm({
 
       await onSubmit(itemValues);
 
-      router.back();
       form.reset();
     },
   });
@@ -122,8 +119,7 @@ export default function ProcedureForm({
     await specialFeaturesTextRef.current?.blur();
     await localAnestheticsTextRef.current?.blur();
     await procedureRef.current?.blur();
-    router.back();
-  }, [router]);
+  }, []);
   const save = useCallback(() => form.handleSubmit(), [form]);
 
   return (

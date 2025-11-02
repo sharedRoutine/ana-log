@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import { PressableScale } from 'pressto';
 import { View, Text } from 'react-native';
 
@@ -9,17 +8,13 @@ interface FilterCardProps {
   };
   conditionText: string;
   matchingCount: number;
-  onDelete?: (filterId: number) => void;
+  onPress?: () => void;
 }
 
-export function FilterCard({ filter, conditionText, matchingCount, onDelete }: FilterCardProps) {
-  const router = useRouter();
-
+export function FilterCard({ filter, conditionText, matchingCount, onPress }: FilterCardProps) {
   return (
     <PressableScale
-      onPress={() => {
-        router.push(`/filter/${filter.id}/show`);
-      }}
+      onPress={onPress}
       key={filter.id}
       style={{
         backgroundColor: '#1C1C1E',

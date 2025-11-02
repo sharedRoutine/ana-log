@@ -6,7 +6,7 @@ import { itemTable } from '~/db/schema';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
-import { useLocalSearchParams } from 'expo-router/build/hooks';
+import { useLocalSearchParams, useRouter } from 'expo-router/build/hooks';
 import ProcedureForm from '~/components/ui/ProcedureForm';
 import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
@@ -15,7 +15,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function EditProcedure() {
   const intl = useIntl();
+  const router = useRouter();
   const queryClient = useQueryClient();
+
   const { colorScheme } = useColorScheme();
   const { procedureId } = useLocalSearchParams<{ procedureId: string }>();
 
@@ -59,6 +61,7 @@ export default function EditProcedure() {
       onSubmit={async (values) => {
         await db.update(itemTable).set(values).where(eq(itemTable.caseNumber, procedureId));
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
+        router.back();
       }}>
       {({ canSubmit, dismiss, save }) => (
         <Stack.Screen
