@@ -113,13 +113,15 @@ export default function Home() {
                           procedures: (typeof itemTable.$inferSelect)[];
                         };
                         await db.transaction(async (tx) => {
-                          await tx.insert(itemTable).values(procedures);
+                          await tx.insert(itemTable).values(procedures).onConflictDoNothing();
                           await tx
                             .insert(filterTable)
-                            .values(filters.map(({ conditions, ...f }) => f));
+                            .values(filters.map(({ conditions, ...f }) => f))
+                            .onConflictDoNothing();
                           await tx
                             .insert(filterConditionTable)
-                            .values(filters.flatMap((f) => f.conditions));
+                            .values(filters.flatMap((f) => f.conditions))
+                            .onConflictDoNothing();
                         });
                       }}>
                       {intl.formatMessage({ id: 'home.import-data' })}
