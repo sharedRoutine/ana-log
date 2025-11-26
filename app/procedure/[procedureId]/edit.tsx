@@ -58,6 +58,12 @@ export default function EditProcedure() {
   return (
     <ProcedureForm
       procedure={procedure}
+      isEditing={true}
+      onDelete={async () => {
+        await db.delete(itemTable).where(eq(itemTable.caseNumber, procedureId));
+        await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
+        router.dismissAll();
+      }}
       onSubmit={async (values) => {
         await db.update(itemTable).set(values).where(eq(itemTable.caseNumber, procedureId));
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });

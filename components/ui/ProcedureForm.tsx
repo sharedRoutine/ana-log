@@ -1,20 +1,13 @@
 import { View } from 'react-native';
+import { Button, Form, Host, Picker, DateTimePicker, Switch, Section, TextFieldRef, Stepper, Text } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useCallback, useRef } from 'react';
 import { itemTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
-import {
-  Host,
-  Picker,
-  DateTimePicker,
-  Switch,
-  Section,
-  Form,
-  TextFieldRef,
-  Stepper,
-} from '@expo/ui/swift-ui';
+
+
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Item } from '~/lib/schema';
@@ -36,6 +29,8 @@ type ProcedureFormProps = {
   procedure: typeof Item.Type;
   validateForm?: (value: typeof Item.Type) => string | undefined;
   onSubmit: (values: typeof itemTable.$inferSelect) => Promise<void>;
+  isEditing?: boolean;
+  onDelete?: () => Promise<void>;
   children?: ({
     canSubmit,
     dismiss,
@@ -51,6 +46,8 @@ export default function ProcedureForm({
   procedure,
   validateForm,
   onSubmit,
+  isEditing,
+  onDelete,
   children,
 }: ProcedureFormProps) {
   const intl = useIntl();
@@ -350,7 +347,15 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
+
             </>
+            {isEditing && (
+              <Section>
+                <Button role="destructive" onPress={onDelete}>
+                  <Text>{intl.formatMessage({ id: 'edit-item.delete' })}</Text>
+                </Button>
+              </Section>
+            )}
           </Form>
         </Host>
       </View>

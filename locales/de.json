@@ -108,5 +108,6 @@
   "procedure.form.procedure.placeholder": "Eingriff beschreiben",
   "procedure.form.save-failed": "Medizinischer Eingriff konnte nicht gespeichert werden. Bitte versuche es erneut.",
   "add-item.title": "Eintrag hinzufügen",
-  "edit-item.title": "Eintrag bearbeiten"
+  "edit-item.title": "Eintrag bearbeiten",
+  "edit-item.delete": "Eintrag löschen"
 }
