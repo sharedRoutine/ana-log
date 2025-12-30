@@ -14,7 +14,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
-import { FIELDS, Filter, BooleanCondition } from '~/lib/condition';
+import { FIELDS, Filter, BooleanCondition, FilterCondition } from '~/lib/condition';
 import { Fragment } from 'react/jsx-runtime';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { useCallback, useRef } from 'react';
@@ -221,21 +221,27 @@ export default function FilterForm({
                                 <>
                                   {/* Field Selection Renderer */}
                                   <form.Field name={`conditions[${i}].field`}>
-                                    {(subField) => (
-                                      <Picker
-                                        label={intl.formatMessage({ id: 'create-filter.field' })}
-                                        selectedIndex={0}
-                                        options={FieldsWithName.map((o) => o.label)}
-                                        variant="menu"
-                                        onOptionSelected={({ nativeEvent: { index } }) => {
-                                          const field = FieldsWithName[index].value;
-                                          const condition = FIELDS.find((f) => f.field === field);
-                                          if (condition) {
-                                            conditionField.handleChange(condition);
-                                          }
-                                          subField.handleChange(field);
-                                        }}></Picker>
-                                    )}
+                                    {(subField) => {
+                                      const currentFieldIndex = FieldsWithName.findIndex(
+                                        (f) => f.value === subField.state.value
+                                      );
+                                      return (
+                                        <Picker
+                                          label={intl.formatMessage({ id: 'create-filter.field' })}
+                                          selectedIndex={currentFieldIndex >= 0 ? currentFieldIndex : 0}
+                                          options={FieldsWithName.map((o) => o.label)}
+                                          variant="menu"
+                                          onOptionSelected={({ nativeEvent: { index } }) => {
+                                            const field = FieldsWithName[index].value;
+                                            const condition = FIELDS.find((f) => f.field === field);
+                                            if (condition) {
+                                              conditionField.handleChange(condition);
+                                            }
+                                            subField.handleChange(field);
+                                          }}
+                                        />
+                                      );
+                                    }}
                                   </form.Field>
 
                                   {/* Operator Renderer */}
@@ -243,46 +249,56 @@ export default function FilterForm({
                                     Match.value(value).pipe(
                                       Match.tag('TEXT_CONDITION', (textField) => (
                                         <form.Field name={`conditions[${i}].operator`}>
-                                          {(operatorField) => (
-                                            <Picker
-                                              label={intl.formatMessage({
-                                                id: 'create-filter.operator',
-                                              })}
-                                              options={Array.from(textField.operators).map((op) =>
-                                                intl.formatMessage({
-                                                  id: `create-filter.operator.${op}`,
-                                                })
-                                              )}
-                                              selectedIndex={0}
-                                              onOptionSelected={({ nativeEvent: { index } }) => {
-                                                const ops = Array.from(textField.operators);
-                                                const selectedOp = ops[index];
-                                                operatorField.handleChange(selectedOp);
-                                              }}
-                                            />
-                                          )}
+                                          {(operatorField) => {
+                                            const ops = Array.from(textField.operators);
+                                            const currentOpIndex = ops.findIndex(
+                                              (op) => op === operatorField.state.value
+                                            );
+                                            return (
+                                              <Picker
+                                                label={intl.formatMessage({
+                                                  id: 'create-filter.operator',
+                                                })}
+                                                options={ops.map((op) =>
+                                                  intl.formatMessage({
+                                                    id: `create-filter.operator.${op}`,
+                                                  })
+                                                )}
+                                                selectedIndex={currentOpIndex >= 0 ? currentOpIndex : 0}
+                                                onOptionSelected={({ nativeEvent: { index } }) => {
+                                                  const selectedOp = ops[index];
+                                                  operatorField.handleChange(selectedOp);
+                                                }}
+                                              />
+                                            );
+                                          }}
                                         </form.Field>
                                       )),
                                       Match.tag('NUMBER_CONDITION', (numberField) => (
                                         <form.Field name={`conditions[${i}].operator`}>
-                                          {(operatorField) => (
-                                            <Picker
-                                              label={intl.formatMessage({
-                                                id: 'create-filter.operator',
-                                              })}
-                                              options={Array.from(numberField.operators).map((op) =>
-                                                intl.formatMessage({
-                                                  id: `create-filter.operator.${op}`,
-                                                })
-                                              )}
-                                              selectedIndex={0}
-                                              onOptionSelected={({ nativeEvent: { index } }) => {
-                                                const ops = Array.from(numberField.operators);
-                                                const selectedOp = ops[index];
-                                                operatorField.handleChange(selectedOp);
-                                              }}
-                                            />
-                                          )}
+                                          {(operatorField) => {
+                                            const ops = Array.from(numberField.operators);
+                                            const currentOpIndex = ops.findIndex(
+                                              (op) => op === operatorField.state.value
+                                            );
+                                            return (
+                                              <Picker
+                                                label={intl.formatMessage({
+                                                  id: 'create-filter.operator',
+                                                })}
+                                                options={ops.map((op) =>
+                                                  intl.formatMessage({
+                                                    id: `create-filter.operator.${op}`,
+                                                  })
+                                                )}
+                                                selectedIndex={currentOpIndex >= 0 ? currentOpIndex : 0}
+                                                onOptionSelected={({ nativeEvent: { index } }) => {
+                                                  const selectedOp = ops[index];
+                                                  operatorField.handleChange(selectedOp);
+                                                }}
+                                              />
+                                            );
+                                          }}
                                         </form.Field>
                                       )),
                                       Match.tag('BOOLEAN_CONDITION', () => null),
@@ -326,7 +342,11 @@ export default function FilterForm({
                                                   })}
                                                   variant="menu"
                                                   options={['1', '2', '3', '4', '5', '6']}
-                                                  selectedIndex={0}
+                                                  selectedIndex={
+                                                    typeof valueField.state.value === 'number'
+                                                      ? valueField.state.value - 1
+                                                      : 0
+                                                  }
                                                   onOptionSelected={({
                                                     nativeEvent: { index },
                                                   }) => {
@@ -350,7 +370,7 @@ export default function FilterForm({
                                                 intl.formatMessage({ id: 'create-filter.no' }),
                                               ]}
                                               variant="segmented"
-                                              selectedIndex={1}
+                                              selectedIndex={valueField.state.value === true ? 0 : 1}
                                               onOptionSelected={({ nativeEvent: { index } }) => {
                                                 valueField.handleChange(index === 0);
                                               }}
@@ -369,21 +389,28 @@ export default function FilterForm({
                                           .sort((a, b) => a.label.localeCompare(b.label));
                                         return (
                                           <form.Field name={`conditions[${i}].value`}>
-                                            {(valueField) => (
-                                              <Picker
-                                                label={intl.formatMessage({
-                                                  id: 'create-filter.value',
-                                                })}
-                                                selectedIndex={0}
-                                                variant="menu"
-                                                onOptionSelected={(newValue) => {
-                                                  const selectedOption =
-                                                    sortedOptions[newValue.nativeEvent.index];
-                                                  valueField.handleChange(selectedOption.value);
-                                                }}
-                                                options={sortedOptions.map((o) => o.label)}
-                                              />
-                                            )}
+                                            {(valueField) => {
+                                              const currentValueIndex = sortedOptions.findIndex(
+                                                (o) => o.value === valueField.state.value
+                                              );
+                                              return (
+                                                <Picker
+                                                  label={intl.formatMessage({
+                                                    id: 'create-filter.value',
+                                                  })}
+                                                  selectedIndex={
+                                                    currentValueIndex >= 0 ? currentValueIndex : 0
+                                                  }
+                                                  variant="menu"
+                                                  onOptionSelected={(newValue) => {
+                                                    const selectedOption =
+                                                      sortedOptions[newValue.nativeEvent.index];
+                                                    valueField.handleChange(selectedOption.value);
+                                                  }}
+                                                  options={sortedOptions.map((o) => o.label)}
+                                                />
+                                              );
+                                            }}
                                           </form.Field>
                                         );
                                       }),
@@ -411,13 +438,12 @@ export default function FilterForm({
                     <Section title="">
                       <Button
                         onPress={() => {
-                          field.pushValue(
-                            // @ts-expect-error Not sure why TS is unhappy here
-                            BooleanCondition.make({
-                              field: 'age',
-                              value: false,
-                            })
-                          );
+                          // Create a default condition and cast to the union type
+                          const defaultCondition = BooleanCondition.make({
+                            field: 'age',
+                            value: false,
+                          }) as typeof FilterCondition.Type;
+                          field.pushValue(defaultCondition);
                         }}>
                         <Text>{intl.formatMessage({ id: 'create-filter.add-condition' })}</Text>
                       </Button>
