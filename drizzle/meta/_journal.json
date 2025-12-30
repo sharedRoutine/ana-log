@@ -15,6 +15,13 @@
       "when": 1754820689765,
       "tag": "0001_amazing_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1767124761568,
+      "tag": "0002_mighty_tusk",
+      "breakpoints": true
     }
   ]
 }
