@@ -81,8 +81,10 @@ export default function ProcedureForm({
         asaScore: value.asaScore,
         airwayManagement: value.airwayManagement,
         department: value.department,
+        departmentOther: value.department === 'other' ? value.departmentOther : null,
         specials: value.specialFeatures ? value.specialFeaturesText : null,
         localAnesthetics: value.localAnesthetics,
+        localAnestheticsText: value.localAnesthetics ? value.localAnestheticsText : null,
         outpatient: value.outpatient,
         procedure: value.procedure,
       };

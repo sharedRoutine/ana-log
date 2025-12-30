@@ -46,11 +46,11 @@ export default function EditProcedure() {
     asaScore: existingItem.asaScore as 1 | 2 | 3 | 4 | 5 | 6,
     airwayManagement: existingItem.airwayManagement,
     department: existingItem.department,
-    departmentOther: '',
+    departmentOther: existingItem.departmentOther || '',
     specialFeatures: Boolean(existingItem.specials),
     specialFeaturesText: existingItem.specials || '',
     localAnesthetics: existingItem.localAnesthetics,
-    localAnestheticsText: '',
+    localAnestheticsText: existingItem.localAnestheticsText || '',
     outpatient: existingItem.outpatient,
     procedure: existingItem.procedure,
   });
