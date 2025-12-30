@@ -1,8 +1,7 @@
-import { Text, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { ChevronLeftCircle, Save } from 'lucide-react-native';
+import { ChevronLeftCircle, Save, FilterX } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import FilterForm from '~/components/ui/FilterForm';
 import { db } from '~/db/db';
@@ -12,6 +11,8 @@ import { Filter } from '~/lib/condition';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
 import { convertConditions } from '~/db/conversions';
+import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import { EmptyState } from '~/components/layout/EmptyState';
 
 export default function EditFilter() {
   const intl = useIntl();
@@ -34,14 +35,19 @@ export default function EditFilter() {
       db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId)),
   });
 
-  if (isPending || isConditionsPending) return <View className="flex-1 bg-black" />;
+  if (isPending || isConditionsPending) {
+    return <LoadingScreen />;
+  }
 
   if (!data || data.length === 0) {
-    // TODO: Proper Empty Screen
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text>No filter found.</Text>
-      </View>
+      <EmptyState
+        icon={FilterX}
+        title={intl.formatMessage({ id: 'filter.not-found.title' })}
+        message={intl.formatMessage({ id: 'filter.not-found.message' })}
+        actionLabel={intl.formatMessage({ id: 'common.go-back' })}
+        onAction={() => router.back()}
+      />
     );
   }
 

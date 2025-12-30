@@ -1,6 +1,5 @@
-import { Stack } from 'expo-router';
-import { ChevronLeftCircle, Edit } from 'lucide-react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router/build/hooks';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { ChevronLeftCircle, Edit, FileQuestion } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
@@ -8,11 +7,12 @@ import { db } from '~/db/db';
 import { itemTable } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { View } from 'react-native';
-import { Text } from '@expo/ui/swift-ui';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
 import { useCallback } from 'react';
 import { useIntl } from 'react-intl';
+import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import { EmptyState } from '~/components/layout/EmptyState';
 
 export default function ShowProcedure() {
   const intl = useIntl();
@@ -42,14 +42,19 @@ export default function ShowProcedure() {
     [intl]
   );
 
-  if (isPending) return <View className="flex-1 bg-black" />;
+  if (isPending) {
+    return <LoadingScreen />;
+  }
 
   if (!data || data.length === 0) {
-    // TODO: Proper Empty Screen
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text>No procedure found.</Text>
-      </View>
+      <EmptyState
+        icon={FileQuestion}
+        title={intl.formatMessage({ id: 'procedure.not-found.title' })}
+        message={intl.formatMessage({ id: 'procedure.not-found.message' })}
+        actionLabel={intl.formatMessage({ id: 'common.go-back' })}
+        onAction={() => router.back()}
+      />
     );
   }
 
