@@ -20,8 +20,23 @@ export function ProcedureCard({
 }: ProcedureCardProps) {
   const intl = useIntl();
 
+  const accessibilityLabel = intl.formatMessage(
+    { id: 'procedure.accessibility.card' },
+    {
+      caseNumber: item.caseNumber,
+      date: intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' }),
+      department: getTranslatedDepartment(item.department),
+      asa: item.asaScore,
+    }
+  );
+
   return (
-    <PressableScale style={styles.entryCard} onPress={onPress}>
+    <PressableScale
+      style={styles.entryCard}
+      onPress={onPress}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityHint={intl.formatMessage({ id: 'procedure.accessibility.hint' })}>
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
           <Text className="text-2xl font-bold text-white">{item.caseNumber}</Text>
@@ -50,7 +65,9 @@ export function ProcedureCard({
           </Text>
         </View>
         <View style={[styles.tag, { backgroundColor: '#3B82F6' }]}>
-          <Text className="text-white">{`${item.ageYears} Jahre`}</Text>
+          <Text className="text-white">
+            {intl.formatMessage({ id: 'procedure.age-years' }, { years: item.ageYears })}
+          </Text>
         </View>
       </View>
     </PressableScale>

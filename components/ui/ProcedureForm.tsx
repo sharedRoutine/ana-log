@@ -148,7 +148,7 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section title={'Daten'}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.data' })}>
                 <form.Field name="operationDate">
                   {({ state, handleChange }) => (
                     <DateTimePicker

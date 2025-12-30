@@ -1,5 +1,6 @@
 import { PressableScale } from 'pressto';
 import { View, Text } from 'react-native';
+import { useIntl } from 'react-intl';
 
 interface FilterCardProps {
   filter: {
@@ -12,10 +13,18 @@ interface FilterCardProps {
 }
 
 export function FilterCard({ filter, conditionText, matchingCount, onPress }: FilterCardProps) {
+  const intl = useIntl();
+
   return (
     <PressableScale
       onPress={onPress}
       key={filter.id}
+      accessibilityLabel={intl.formatMessage(
+        { id: 'filter.accessibility.card' },
+        { name: filter.name, count: matchingCount }
+      )}
+      accessibilityRole="button"
+      accessibilityHint={intl.formatMessage({ id: 'filter.accessibility.hint' })}
       style={{
         backgroundColor: '#1C1C1E',
         borderColor: '#2C2C2E',
@@ -27,7 +36,7 @@ export function FilterCard({ filter, conditionText, matchingCount, onPress }: Fi
         padding: 12,
         position: 'relative',
       }}>
-      <View className="flex-row items-start justify-between">
+      <View className="flex-row items-center justify-between">
         <Text className="text-sm font-medium text-white" numberOfLines={1}>
           {filter.name}
         </Text>
