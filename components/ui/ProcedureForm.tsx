@@ -1,12 +1,22 @@
 import { View } from 'react-native';
-import { Button, Form, Host, Picker, DateTimePicker, Switch, Section, TextFieldRef, Stepper, Text } from '@expo/ui/swift-ui';
+import {
+  Button,
+  Form,
+  Host,
+  Picker,
+  DateTimePicker,
+  Switch,
+  Section,
+  TextFieldRef,
+  Stepper,
+  Text,
+} from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useCallback, useRef } from 'react';
 import { itemTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
-
 
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
@@ -349,7 +359,6 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-
             </>
             {isEditing && (
               <Section>

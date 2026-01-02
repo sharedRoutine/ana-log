@@ -29,8 +29,12 @@ export const filterTable = sqliteTable('filter', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   goal: integer('goal'),
-  createdAt: integer('created_at', { mode: 'number' }).notNull().$defaultFn(() => Date.now()),
-  updatedAt: integer('updated_at', { mode: 'number' }).notNull().$defaultFn(() => Date.now()),
+  createdAt: integer('created_at', { mode: 'number' })
+    .notNull()
+    .$defaultFn(() => Date.now()),
+  updatedAt: integer('updated_at', { mode: 'number' })
+    .notNull()
+    .$defaultFn(() => Date.now()),
 });
 
 export const filterConditionTable = sqliteTable(
@@ -51,8 +55,12 @@ export const filterConditionTable = sqliteTable(
     valueNumber: real('value_number'),
     valueBoolean: integer('value_boolean', { mode: 'boolean' }),
     valueEnum: text('value_enum'),
-    createdAt: integer('created_at', { mode: 'number' }).notNull().$defaultFn(() => Date.now()),
-    updatedAt: integer('updated_at', { mode: 'number' }).notNull().$defaultFn(() => Date.now()),
+    createdAt: integer('created_at', { mode: 'number' })
+      .notNull()
+      .$defaultFn(() => Date.now()),
+    updatedAt: integer('updated_at', { mode: 'number' })
+      .notNull()
+      .$defaultFn(() => Date.now()),
   },
   (table) => [index('filter_condition_filter_id_idx').on(table.filterId)]
 );

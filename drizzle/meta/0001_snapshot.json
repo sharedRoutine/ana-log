@@ -93,12 +93,8 @@
           "name": "filter_condition_filter_id_filter_id_fk",
           "tableFrom": "filter_condition",
           "tableTo": "filter",
-          "columnsFrom": [
-            "filter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["filter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -238,9 +234,7 @@
       "indexes": {
         "item_caseNumber_unique": {
           "name": "item_caseNumber_unique",
-          "columns": [
-            "caseNumber"
-          ],
+          "columns": ["caseNumber"],
           "isUnique": true
         }
       },

@@ -88,9 +88,7 @@
       "indexes": {
         "item_caseNumber_unique": {
           "name": "item_caseNumber_unique",
-          "columns": [
-            "caseNumber"
-          ],
+          "columns": ["caseNumber"],
           "isUnique": true
         }
       },

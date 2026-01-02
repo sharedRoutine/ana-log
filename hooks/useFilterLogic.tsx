@@ -72,7 +72,7 @@ export const buildWhereClauseFromConditions = (
         Match.exhaustive
       );
     })
-    .filter(Boolean) as SQL[];
+    .filter(Boolean) as Array<SQL>;
 
   return whereConditions.length > 0 ? and(...whereConditions) : undefined;
 };
@@ -301,30 +301,40 @@ export function useFilterMatchCounts(
             const operator = condition.operator ?? 'eq';
             return Match.value(operator).pipe(
               Match.when('eq', () => procedureValue === conditionValue),
-              Match.when('ct', () =>
-                typeof procedureValue === 'string' &&
-                typeof conditionValue === 'string' &&
-                procedureValue.toLowerCase().includes(conditionValue.toLowerCase())
+              Match.when(
+                'ct',
+                () =>
+                  typeof procedureValue === 'string' &&
+                  typeof conditionValue === 'string' &&
+                  procedureValue.toLowerCase().includes(conditionValue.toLowerCase())
               ),
-              Match.when('gt', () =>
-                typeof procedureValue === 'number' &&
-                typeof conditionValue === 'number' &&
-                procedureValue > conditionValue
+              Match.when(
+                'gt',
+                () =>
+                  typeof procedureValue === 'number' &&
+                  typeof conditionValue === 'number' &&
+                  procedureValue > conditionValue
               ),
-              Match.when('gte', () =>
-                typeof procedureValue === 'number' &&
-                typeof conditionValue === 'number' &&
-                procedureValue >= conditionValue
+              Match.when(
+                'gte',
+                () =>
+                  typeof procedureValue === 'number' &&
+                  typeof conditionValue === 'number' &&
+                  procedureValue >= conditionValue
               ),
-              Match.when('lt', () =>
-                typeof procedureValue === 'number' &&
-                typeof conditionValue === 'number' &&
-                procedureValue < conditionValue
+              Match.when(
+                'lt',
+                () =>
+                  typeof procedureValue === 'number' &&
+                  typeof conditionValue === 'number' &&
+                  procedureValue < conditionValue
               ),
-              Match.when('lte', () =>
-                typeof procedureValue === 'number' &&
-                typeof conditionValue === 'number' &&
-                procedureValue <= conditionValue
+              Match.when(
+                'lte',
+                () =>
+                  typeof procedureValue === 'number' &&
+                  typeof conditionValue === 'number' &&
+                  procedureValue <= conditionValue
               ),
               Match.exhaustive
             );

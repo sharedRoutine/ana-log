@@ -39,4 +39,3 @@ export async function updateProcedure(caseNumber: string, updates: Partial<NewPr
 export async function deleteProcedure(caseNumber: string) {
   await db.delete(itemTable).where(eq(itemTable.caseNumber, caseNumber));
 }
-

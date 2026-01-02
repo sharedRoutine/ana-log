@@ -25,13 +25,17 @@ const queryClient = new QueryClient({
   },
 });
 
-const getHeaderOptions = (colorScheme: 'light' | 'dark' | undefined): NativeStackNavigationOptions => ({
+const getHeaderOptions = (
+  colorScheme: 'light' | 'dark' | undefined
+): NativeStackNavigationOptions => ({
   headerShown: true,
   headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
   headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
 });
 
-const getModalOptions = (colorScheme: 'light' | 'dark' | undefined): NativeStackNavigationOptions => ({
+const getModalOptions = (
+  colorScheme: 'light' | 'dark' | undefined
+): NativeStackNavigationOptions => ({
   ...getHeaderOptions(colorScheme),
   presentation: 'modal',
 });

@@ -228,7 +228,9 @@ export default function FilterForm({
                                       return (
                                         <Picker
                                           label={intl.formatMessage({ id: 'create-filter.field' })}
-                                          selectedIndex={currentFieldIndex >= 0 ? currentFieldIndex : 0}
+                                          selectedIndex={
+                                            currentFieldIndex >= 0 ? currentFieldIndex : 0
+                                          }
                                           options={FieldsWithName.map((o) => o.label)}
                                           variant="menu"
                                           onOptionSelected={({ nativeEvent: { index } }) => {
@@ -264,7 +266,9 @@ export default function FilterForm({
                                                     id: `create-filter.operator.${op}`,
                                                   })
                                                 )}
-                                                selectedIndex={currentOpIndex >= 0 ? currentOpIndex : 0}
+                                                selectedIndex={
+                                                  currentOpIndex >= 0 ? currentOpIndex : 0
+                                                }
                                                 onOptionSelected={({ nativeEvent: { index } }) => {
                                                   const selectedOp = ops[index];
                                                   operatorField.handleChange(selectedOp);
@@ -291,7 +295,9 @@ export default function FilterForm({
                                                     id: `create-filter.operator.${op}`,
                                                   })
                                                 )}
-                                                selectedIndex={currentOpIndex >= 0 ? currentOpIndex : 0}
+                                                selectedIndex={
+                                                  currentOpIndex >= 0 ? currentOpIndex : 0
+                                                }
                                                 onOptionSelected={({ nativeEvent: { index } }) => {
                                                   const selectedOp = ops[index];
                                                   operatorField.handleChange(selectedOp);
@@ -370,7 +376,9 @@ export default function FilterForm({
                                                 intl.formatMessage({ id: 'create-filter.no' }),
                                               ]}
                                               variant="segmented"
-                                              selectedIndex={valueField.state.value === true ? 0 : 1}
+                                              selectedIndex={
+                                                valueField.state.value === true ? 0 : 1
+                                              }
                                               onOptionSelected={({ nativeEvent: { index } }) => {
                                                 valueField.handleChange(index === 0);
                                               }}
