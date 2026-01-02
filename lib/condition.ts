@@ -48,7 +48,7 @@ export const FilterCondition = Schema.Union(
 export const Filter = Schema.Struct({
   name: Schema.String,
   goal: Schema.Number.pipe(Schema.optional),
-  conditions: Schema.Array(FilterCondition),
+  conditions: Schema.mutable(Schema.Array(FilterCondition)),
 });
 
 export const FIELDS = [
