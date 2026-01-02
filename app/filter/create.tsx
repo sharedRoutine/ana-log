@@ -80,6 +80,7 @@ export default function CreateFilter() {
               Match.exhaustive
             );
           }
+          router.back();
         });
       }}>
       {({ canSubmit, dismiss, save }) => (
