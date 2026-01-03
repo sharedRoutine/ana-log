@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ana-log",
+    "name": "Ana|Log",
     "slug": "ana-log",
     "version": "1.0.0",
     "scheme": "ana-log",
@@ -20,7 +20,11 @@
       "tsconfigPaths": true
     },
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": {
+      "light": "./assets/icon.png",
+      "dark": "./assets/icon.png",
+      "tinted": "./assets/icon.png"
+    },
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
     "ios": {
