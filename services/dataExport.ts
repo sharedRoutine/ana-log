@@ -84,6 +84,7 @@ const filterToExport = (
   f: typeof filterTable.$inferSelect,
   conditions: Array<typeof filterConditionTable.$inferSelect>
 ) => ({
+  id: f.id,
   name: f.name,
   goal: f.goal,
   conditions: conditions.filter((c) => c.filterId === f.id).map((item) => conditionToExport(item)),
@@ -153,10 +154,12 @@ export async function importData({
         .values([...procedures])
         .onConflictDoNothing();
     }
+
     for (const filter of filters) {
       const [inserted] = await tx
         .insert(filterTable)
-        .values({ name: filter.name, goal: filter.goal })
+        .values({ id: filter.id, name: filter.name, goal: filter.goal })
+        .onConflictDoNothing()
         .returning({ id: filterTable.id });
       if (inserted && filter.conditions.length > 0) {
         await tx

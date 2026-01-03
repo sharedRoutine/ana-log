@@ -14,6 +14,7 @@ const EnumCondition = BaseEnumCondition.pipe(Schema.omit('options'));
 const Condition = Schema.Union(TextCondition, NumberCondition, BooleanCondition, EnumCondition);
 
 const Filter = Schema.Struct({
+  id: Schema.Number,
   name: Schema.String,
   goal: Schema.NullOr(Schema.Number),
   conditions: Schema.Array(Condition),
