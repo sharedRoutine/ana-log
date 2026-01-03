@@ -32,7 +32,7 @@ export async function getFilterConditions(filterId: number) {
 
 export async function createFilter(
   filter: Omit<NewFilter, 'id' | 'createdAt' | 'updatedAt'>,
-  conditions: (typeof FilterCondition.Type)[]
+  conditions: Array<typeof FilterCondition.Type>
 ) {
   return db.transaction(async (tx) => {
     const [createdFilter] = await tx
@@ -49,7 +49,7 @@ export async function createFilter(
 export async function updateFilter(
   filterId: number,
   filter: Partial<Omit<NewFilter, 'id' | 'createdAt'>>,
-  conditions: (typeof FilterCondition.Type)[]
+  conditions: Array<typeof FilterCondition.Type>
 ) {
   return db.transaction(async (tx) => {
     await tx
@@ -71,7 +71,7 @@ export async function deleteFilter(filterId: number) {
 export async function insertFilterConditions(
   tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
   filterId: number,
-  conditions: (typeof FilterCondition.Type)[]
+  conditions: Array<typeof FilterCondition.Type>
 ) {
   for (const condition of conditions) {
     await Match.value(condition).pipe(

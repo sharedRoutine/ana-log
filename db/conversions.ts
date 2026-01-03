@@ -3,7 +3,7 @@ import { filterConditionTable } from './schema';
 import { BooleanCondition, EnumCondition, NumberCondition, TextCondition } from '~/lib/condition';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 
-export const convertConditions = (conditions: (typeof filterConditionTable.$inferSelect)[]) => {
+export const convertConditions = (conditions: Array<typeof filterConditionTable.$inferSelect>) => {
   return conditions.map((condition) => convertCondition(condition));
 };
 

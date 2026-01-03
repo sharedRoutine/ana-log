@@ -19,7 +19,7 @@ export default function CreateFilter() {
     <FilterForm
       filter={Filter.make({
         name: '',
-        conditions: [] as (typeof FilterCondition.Type)[],
+        conditions: [] as Array<typeof FilterCondition.Type>,
       })}
       hasGoal={false}
       onSubmit={async (value) => {

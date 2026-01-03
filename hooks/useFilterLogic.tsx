@@ -25,7 +25,7 @@ const getTableField = (fieldName: string) => {
 };
 
 export const buildWhereClauseFromConditions = (
-  conditions: (typeof filterConditionTable.$inferSelect)[]
+  conditions: Array<typeof filterConditionTable.$inferSelect>
 ): SQL | undefined => {
   if (!conditions || conditions.length === 0) return undefined;
 
@@ -81,7 +81,7 @@ export function useFilterLogic() {
   const intl = useIntl();
 
   const buildWhereClause = useCallback(
-    (conditions: (typeof filterConditionTable.$inferSelect)[]) => {
+    (conditions: Array<typeof filterConditionTable.$inferSelect>) => {
       return buildWhereClauseFromConditions(conditions);
     },
     []
@@ -90,7 +90,7 @@ export function useFilterLogic() {
   const getMatchingProceduresCount = useCallback(
     (
       filterId: number,
-      allFilterConditions: (typeof filterConditionTable.$inferSelect)[],
+      allFilterConditions: Array<typeof filterConditionTable.$inferSelect>,
       precomputedCounts?: Map<number, number>
     ): number => {
       if (precomputedCounts?.has(filterId)) {
@@ -119,7 +119,7 @@ export function useFilterLogic() {
   const getConditionCount = useCallback(
     (
       filterId: number,
-      filterConditions: { filterId: number; conditionCount: number }[]
+      filterConditions: Array<{ filterId: number; conditionCount: number }>
     ): number => {
       const conditionData = filterConditions?.find((fc) => fc.filterId === filterId);
       return conditionData?.conditionCount || 0;
@@ -199,8 +199,8 @@ export function useFilterLogic() {
   const getConditionText = useCallback(
     (
       filterId: number,
-      filterConditions: { filterId: number; conditionCount: number }[],
-      allFilterConditions?: (typeof filterConditionTable.$inferSelect)[]
+      filterConditions: Array<{ filterId: number; conditionCount: number }>,
+      allFilterConditions?: Array<typeof filterConditionTable.$inferSelect>
     ): string => {
       const count = getConditionCount(filterId, filterConditions);
 
