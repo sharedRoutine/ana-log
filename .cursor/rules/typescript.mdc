@@ -1,0 +1,9 @@
+---
+description: TypeScript coding conventions
+globs: ['**/*.ts', '**/*.tsx']
+---
+
+# TypeScript
+
+- Do not define explicit types when TypeScript can infer them
+- Avoid using tacit (point-free) function calls; prefer explicit arrow functions with parameters
