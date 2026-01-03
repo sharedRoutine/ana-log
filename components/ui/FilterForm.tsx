@@ -17,7 +17,7 @@ import { Match } from 'effect';
 import { FIELDS, Filter, BooleanCondition, FilterCondition } from '~/lib/condition';
 import { Fragment } from 'react/jsx-runtime';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import { View } from 'react-native';
 import { DismissableTextField } from './DismissableTextField';
 
@@ -135,12 +135,12 @@ export default function FilterForm({
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
-  const dismiss = useCallback(async () => {
+  const dismiss = async () => {
     await nameRef.current?.blur();
     await goalRef.current?.blur();
     await textConditionRef.current?.blur();
-  }, []);
-  const save = useCallback(() => form.handleSubmit(), [form]);
+  };
+  const save = () => form.handleSubmit();
 
   return (
     <>

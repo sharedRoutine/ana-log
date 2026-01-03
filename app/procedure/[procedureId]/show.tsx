@@ -9,7 +9,6 @@ import { eq } from 'drizzle-orm';
 import { View } from 'react-native';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
-import { useCallback } from 'react';
 import { useIntl } from 'react-intl';
 import { LoadingScreen } from '~/components/layout/LoadingScreen';
 import { EmptyState } from '~/components/layout/EmptyState';
@@ -28,19 +27,13 @@ export default function ShowProcedure() {
   });
 
   const { getDepartmentColor } = useColors();
-  const getTranslatedAirwayManagement = useCallback(
-    (airway: string) => {
-      return intl.formatMessage({ id: `enum.airway-management.${airway}` });
-    },
-    [intl]
-  );
+  const getTranslatedAirwayManagement = (airway: string) => {
+    return intl.formatMessage({ id: `enum.airway-management.${airway}` });
+  };
 
-  const getTranslatedDepartment = useCallback(
-    (department: string) => {
-      return intl.formatMessage({ id: `enum.department.${department}` });
-    },
-    [intl]
-  );
+  const getTranslatedDepartment = (department: string) => {
+    return intl.formatMessage({ id: `enum.department.${department}` });
+  };
 
   if (isPending) {
     return <LoadingScreen />;

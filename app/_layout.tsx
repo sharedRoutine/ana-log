@@ -11,7 +11,7 @@ import { useColorScheme } from 'nativewind';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useMemo, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
 import { PressableScale } from 'pressto';
 import { Duration } from 'effect';
@@ -77,12 +77,12 @@ export default function Layout() {
   const { success, error } = useMigrations(db, migrations);
   const { colorScheme } = useColorScheme();
 
-  const handleRetry = useCallback(() => {
+  const handleRetry = () => {
     setRetryKey((k) => k + 1);
-  }, []);
+  };
 
-  const headerOptions = useMemo(() => getHeaderOptions(colorScheme), [colorScheme]);
-  const modalOptions = useMemo(() => getModalOptions(colorScheme), [colorScheme]);
+  const headerOptions = getHeaderOptions(colorScheme);
+  const modalOptions = getModalOptions(colorScheme);
 
   if (!success && !error) {
     return (

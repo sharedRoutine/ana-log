@@ -1,36 +1,23 @@
-import { useCallback } from 'react';
 import { useIntl } from 'react-intl';
 
 export function useTranslations() {
   const intl = useIntl();
 
-  const translateDepartment = useCallback(
-    (department: string) => {
-      return intl.formatMessage({ id: `enum.department.${department}` });
-    },
-    [intl]
-  );
+  const translateDepartment = (department: string) => {
+    return intl.formatMessage({ id: `enum.department.${department}` });
+  };
 
-  const translateAirwayManagement = useCallback(
-    (airway: string) => {
-      return intl.formatMessage({ id: `enum.airway-management.${airway}` });
-    },
-    [intl]
-  );
+  const translateAirwayManagement = (airway: string) => {
+    return intl.formatMessage({ id: `enum.airway-management.${airway}` });
+  };
 
-  const translateField = useCallback(
-    (field: string) => {
-      return intl.formatMessage({ id: `create-filter.field.${field}` });
-    },
-    [intl]
-  );
+  const translateField = (field: string) => {
+    return intl.formatMessage({ id: `create-filter.field.${field}` });
+  };
 
-  const translateOperator = useCallback(
-    (operator: string) => {
-      return intl.formatMessage({ id: `create-filter.operator.${operator}` });
-    },
-    [intl]
-  );
+  const translateOperator = (operator: string) => {
+    return intl.formatMessage({ id: `create-filter.operator.${operator}` });
+  };
 
   return {
     intl,

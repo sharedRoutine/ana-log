@@ -13,7 +13,6 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { FlashList } from '@shopify/flash-list';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
-import { useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Gauge, Host } from '@expo/ui/swift-ui';
 
@@ -40,10 +39,7 @@ export default function ShowFilter() {
       db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId)),
   });
 
-  const whereClause = useMemo(
-    () => (isConditionsPending ? sql`1 = 0` : buildWhereClause(conditions || [])),
-    [isConditionsPending, conditions, buildWhereClause]
-  );
+  const whereClause = isConditionsPending ? sql`1 = 0` : buildWhereClause(conditions || []);
 
   const { data: procedures } = useLiveQuery(
     db.select().from(itemTable).where(whereClause).orderBy(desc(itemTable.date)),

@@ -14,7 +14,6 @@ import { useFilterLogic, useFilterMatchCounts } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, PlusCircle, Settings } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
-import { useCallback } from 'react';
 import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
 import { exportData, importData } from '~/services/dataExport';
 
@@ -116,86 +115,65 @@ export default function Home() {
 
   const { getDepartmentColor } = useColors();
 
-  const getTranslatedAirwayManagement = useCallback(
-    (airway: string) => {
-      return intl.formatMessage({ id: `enum.airway-management.${airway}` });
-    },
-    [intl]
+  const getTranslatedAirwayManagement = (airway: string) => {
+    return intl.formatMessage({ id: `enum.airway-management.${airway}` });
+  };
+
+  const getTranslatedDepartment = (department: string) => {
+    return intl.formatMessage({ id: `enum.department.${department}` });
+  };
+
+  const renderItem = ({ item }: { item: typeof itemTable.$inferSelect }) => (
+    <ProcedureCard
+      item={item}
+      onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}
+      getDepartmentColor={getDepartmentColor}
+      getTranslatedDepartment={getTranslatedDepartment}
+      getTranslatedAirwayManagement={getTranslatedAirwayManagement}
+    />
   );
 
-  const getTranslatedDepartment = useCallback(
-    (department: string) => {
-      return intl.formatMessage({ id: `enum.department.${department}` });
-    },
-    [intl]
-  );
+  const handleCreateFilter = () => router.push('/filter/create');
+  const handleFilterPress = (filterId: number) => router.push(`/filter/${filterId}/show`);
 
-  const renderItem = useCallback(
-    ({ item }: { item: typeof itemTable.$inferSelect }) => (
-      <ProcedureCard
-        item={item}
-        onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}
-        getDepartmentColor={getDepartmentColor}
-        getTranslatedDepartment={getTranslatedDepartment}
-        getTranslatedAirwayManagement={getTranslatedAirwayManagement}
-      />
-    ),
-    [router, getDepartmentColor, getTranslatedDepartment, getTranslatedAirwayManagement]
-  );
-
-  const handleCreateFilter = useCallback(() => router.push('/filter/create'), [router]);
-  const handleFilterPress = useCallback(
-    (filterId: number) => router.push(`/filter/${filterId}/show`),
-    [router]
-  );
-
-  const handleImportError = useCallback(() => {
+  const handleImportError = () => {
     Alert.alert(
       intl.formatMessage({ id: 'import.error.title' }),
       intl.formatMessage({ id: 'import.error.invalid-format' })
     );
-  }, [intl]);
+  };
 
-  const handleImportComplete = useCallback(
-    ({ proceduresCount, filtersCount }: { proceduresCount: number; filtersCount: number }) => {
-      Alert.alert(
-        intl.formatMessage({ id: 'import.success.title' }),
-        intl.formatMessage(
-          { id: 'import.success.message' },
-          { procedures: proceduresCount, filters: filtersCount }
-        )
-      );
-    },
-    [intl]
-  );
+  const handleImportComplete = ({
+    proceduresCount,
+    filtersCount,
+  }: {
+    proceduresCount: number;
+    filtersCount: number;
+  }) => {
+    Alert.alert(
+      intl.formatMessage({ id: 'import.success.title' }),
+      intl.formatMessage(
+        { id: 'import.success.message' },
+        { procedures: proceduresCount, filters: filtersCount }
+      )
+    );
+  };
 
-  const handleImport = useCallback(() => {
+  const handleImport = () => {
     importData({ onError: handleImportError, onComplete: handleImportComplete });
-  }, [handleImportError, handleImportComplete]);
+  };
 
-  const renderListHeader = useCallback(
-    () => (
-      <ListHeader
-        filters={filters}
-        filterConditions={filterConditions || []}
-        allFilterConditions={allFilterConditions || []}
-        filterMatchCounts={filterMatchCounts}
-        proceduresCount={procedures.length}
-        getConditionText={getConditionText}
-        onCreateFilter={handleCreateFilter}
-        onFilterPress={handleFilterPress}
-      />
-    ),
-    [
-      filters,
-      filterConditions,
-      allFilterConditions,
-      filterMatchCounts,
-      procedures.length,
-      getConditionText,
-      handleCreateFilter,
-      handleFilterPress,
-    ]
+  const renderListHeader = () => (
+    <ListHeader
+      filters={filters}
+      filterConditions={filterConditions || []}
+      allFilterConditions={allFilterConditions || []}
+      filterMatchCounts={filterMatchCounts}
+      proceduresCount={procedures.length}
+      getConditionText={getConditionText}
+      onCreateFilter={handleCreateFilter}
+      onFilterPress={handleFilterPress}
+    />
   );
 
   return (

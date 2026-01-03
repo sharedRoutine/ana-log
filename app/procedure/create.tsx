@@ -1,6 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
 import { useIntl } from 'react-intl';
-import { useMemo } from 'react';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
@@ -15,26 +14,22 @@ export default function UpsertItem() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const procedure = useMemo(
-    () =>
-      Item.make({
-        caseNumber: '',
-        patientAgeYears: 0,
-        patientAgeMonths: 0,
-        operationDate: DateTime.unsafeMake(new Date()),
-        asaScore: 1,
-        airwayManagement: 'tube',
-        department: 'PSY',
-        departmentOther: '',
-        specialFeatures: false,
-        specialFeaturesText: '',
-        localAnesthetics: false,
-        localAnestheticsText: '',
-        outpatient: false,
-        procedure: '',
-      }),
-    []
-  );
+  const procedure = Item.make({
+    caseNumber: '',
+    patientAgeYears: 0,
+    patientAgeMonths: 0,
+    operationDate: DateTime.unsafeMake(new Date()),
+    asaScore: 1,
+    airwayManagement: 'tube',
+    department: 'PSY',
+    departmentOther: '',
+    specialFeatures: false,
+    specialFeaturesText: '',
+    localAnesthetics: false,
+    localAnestheticsText: '',
+    outpatient: false,
+    procedure: '',
+  });
 
   return (
     <ProcedureForm

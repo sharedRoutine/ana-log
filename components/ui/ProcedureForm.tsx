@@ -12,7 +12,7 @@ import {
   Text,
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import { itemTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
@@ -122,14 +122,14 @@ export default function ProcedureForm({
     label: intl.formatMessage({ id: `enum.department.${option}` }),
   })).sort((a, b) => a.label.localeCompare(b.label));
 
-  const dismiss = useCallback(async () => {
+  const dismiss = async () => {
     await caseNumberRef.current?.blur();
     await departmentOtherRef.current?.blur();
     await specialFeaturesTextRef.current?.blur();
     await localAnestheticsTextRef.current?.blur();
     await procedureRef.current?.blur();
-  }, []);
-  const save = useCallback(() => form.handleSubmit(), [form]);
+  };
+  const save = () => form.handleSubmit();
 
   return (
     <>
