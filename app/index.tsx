@@ -1,5 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { desc, count } from 'drizzle-orm';
@@ -10,15 +10,86 @@ import { useColorScheme } from 'nativewind';
 import { FilterCard } from '~/components/ui/FilterCard';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
-import { useFilterLogic } from '~/hooks/useFilterLogic';
+import { useFilterLogic, useFilterMatchCounts } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, PlusCircle, Settings } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useCallback } from 'react';
 import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
-import * as DocumentPicker from 'expo-document-picker';
-import * as Sharing from 'expo-sharing';
-import { File, Paths } from 'expo-file-system';
+import { exportData, importData } from '~/services/dataExport';
+
+interface ListHeaderProps {
+  filters: Array<typeof filterTable.$inferSelect>;
+  filterConditions: Array<{ filterId: number; conditionCount: number }>;
+  allFilterConditions: Array<typeof filterConditionTable.$inferSelect>;
+  filterMatchCounts: Map<number, number>;
+  proceduresCount: number;
+  getConditionText: (
+    filterId: number,
+    conditionCounts: Array<{ filterId: number; conditionCount: number }>,
+    conditions: Array<typeof filterConditionTable.$inferSelect>
+  ) => string;
+  onCreateFilter: () => void;
+  onFilterPress: (filterId: number) => void;
+}
+
+const ListHeader = ({
+  filters,
+  filterConditions,
+  allFilterConditions,
+  filterMatchCounts,
+  proceduresCount,
+  getConditionText,
+  onCreateFilter,
+  onFilterPress,
+}: ListHeaderProps) => {
+  const intl = useIntl();
+
+  return (
+    <View className="bg-white px-4 pt-4 dark:bg-black">
+      <View className="mb-6 flex-row items-center gap-4">
+        <Text className="text-[28px] font-semibold text-black dark:text-white">
+          {intl.formatMessage({ id: 'home.my-filters' })}
+        </Text>
+        <View style={styles.countBadge}>
+          <Text className="font-semibold text-[#8E8E93]">{filters.length}</Text>
+        </View>
+      </View>
+
+      <PressableScale style={styles.createFilterCard} onPress={onCreateFilter}>
+        <View className="mb-4">
+          <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
+        </View>
+        <Text className="text-[16px] font-semibold text-white">
+          {filters.length === 0
+            ? intl.formatMessage({ id: 'home.create-first-filter' })
+            : intl.formatMessage({ id: 'home.create-another-filter' })}
+        </Text>
+      </PressableScale>
+
+      <View className="mb-8 flex-row flex-wrap gap-4">
+        {filters?.map((filter) => (
+          <FilterCard
+            key={filter.id}
+            filter={filter}
+            conditionText={getConditionText(filter.id, filterConditions, allFilterConditions)}
+            matchingCount={filterMatchCounts.get(filter.id) ?? 0}
+            onPress={() => onFilterPress(filter.id)}
+          />
+        ))}
+      </View>
+
+      <View className="mb-6 flex-row items-center gap-4">
+        <Text className="text-[28px] font-semibold text-black dark:text-white">
+          {intl.formatMessage({ id: 'home.my-procedures' })}
+        </Text>
+        <View style={styles.countBadge}>
+          <Text className="font-semibold text-[#8E8E93]">{proceduresCount}</Text>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 export default function Home() {
   const router = useRouter();
@@ -40,7 +111,8 @@ export default function Home() {
   const { data: allFilterConditions } = useLiveQuery(db.select().from(filterConditionTable));
 
   const { colorScheme } = useColorScheme();
-  const { getMatchingProceduresCount, getConditionText } = useFilterLogic();
+  const { getConditionText } = useFilterLogic();
+  const filterMatchCounts = useFilterMatchCounts(filters, allFilterConditions);
 
   const { getDepartmentColor } = useColors();
 
@@ -58,8 +130,76 @@ export default function Home() {
     [intl]
   );
 
+  const renderItem = useCallback(
+    ({ item }: { item: typeof itemTable.$inferSelect }) => (
+      <ProcedureCard
+        item={item}
+        onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}
+        getDepartmentColor={getDepartmentColor}
+        getTranslatedDepartment={getTranslatedDepartment}
+        getTranslatedAirwayManagement={getTranslatedAirwayManagement}
+      />
+    ),
+    [router, getDepartmentColor, getTranslatedDepartment, getTranslatedAirwayManagement]
+  );
+
+  const handleCreateFilter = useCallback(() => router.push('/filter/create'), [router]);
+  const handleFilterPress = useCallback(
+    (filterId: number) => router.push(`/filter/${filterId}/show`),
+    [router]
+  );
+
+  const handleImportError = useCallback(() => {
+    Alert.alert(
+      intl.formatMessage({ id: 'import.error.title' }),
+      intl.formatMessage({ id: 'import.error.invalid-format' })
+    );
+  }, [intl]);
+
+  const handleImportComplete = useCallback(
+    ({ proceduresCount, filtersCount }: { proceduresCount: number; filtersCount: number }) => {
+      Alert.alert(
+        intl.formatMessage({ id: 'import.success.title' }),
+        intl.formatMessage(
+          { id: 'import.success.message' },
+          { procedures: proceduresCount, filters: filtersCount }
+        )
+      );
+    },
+    [intl]
+  );
+
+  const handleImport = useCallback(() => {
+    importData({ onError: handleImportError, onComplete: handleImportComplete });
+  }, [handleImportError, handleImportComplete]);
+
+  const renderListHeader = useCallback(
+    () => (
+      <ListHeader
+        filters={filters}
+        filterConditions={filterConditions || []}
+        allFilterConditions={allFilterConditions || []}
+        filterMatchCounts={filterMatchCounts}
+        proceduresCount={procedures.length}
+        getConditionText={getConditionText}
+        onCreateFilter={handleCreateFilter}
+        onFilterPress={handleFilterPress}
+      />
+    ),
+    [
+      filters,
+      filterConditions,
+      allFilterConditions,
+      filterMatchCounts,
+      procedures.length,
+      getConditionText,
+      handleCreateFilter,
+      handleFilterPress,
+    ]
+  );
+
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-black">
+    <SafeAreaView edges={['bottom']} className="flex-1 bg-white dark:bg-black">
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
@@ -71,60 +211,10 @@ export default function Home() {
                     <Button
                       variant="bordered"
                       systemImage="square.and.arrow.up"
-                      onPress={async () => {
-                        const file = new File(Paths.cache, `ana-log-export-${Date.now()}.json`);
-                        file.create();
-                        file.write(
-                          JSON.stringify({
-                            filters: filters.map((f) => ({
-                              ...f,
-                              conditions: allFilterConditions.filter((fc) => fc.filterId === f.id),
-                            })),
-                            procedures,
-                          }),
-                          {
-                            encoding: 'utf8',
-                          }
-                        );
-                        await Sharing.shareAsync(file.uri, {
-                          mimeType: 'application/json',
-                          dialogTitle: intl.formatMessage({ id: 'home.export-data' }),
-                        });
-                      }}>
+                      onPress={() => exportData(filters, allFilterConditions, procedures, intl)}>
                       {intl.formatMessage({ id: 'home.export-data' })}
                     </Button>
-                    <Button
-                      systemImage="square.and.arrow.down"
-                      onPress={async () => {
-                        const result = await DocumentPicker.getDocumentAsync({
-                          type: ['application/json'],
-                          copyToCacheDirectory: true,
-                          multiple: false,
-                          base64: false,
-                        });
-                        if (result.canceled) {
-                          return;
-                        }
-                        const fileUri = result.assets[0].uri;
-                        const file = new File(fileUri);
-                        const { filters, procedures } = JSON.parse(file.textSync()) as {
-                          filters: (typeof filterTable.$inferSelect & {
-                            conditions: (typeof filterConditionTable.$inferSelect)[];
-                          })[];
-                          procedures: (typeof itemTable.$inferSelect)[];
-                        };
-                        await db.transaction(async (tx) => {
-                          await tx.insert(itemTable).values(procedures).onConflictDoNothing();
-                          await tx
-                            .insert(filterTable)
-                            .values(filters.map(({ conditions, ...f }) => f))
-                            .onConflictDoNothing();
-                          await tx
-                            .insert(filterConditionTable)
-                            .values(filters.flatMap((f) => f.conditions))
-                            .onConflictDoNothing();
-                        });
-                      }}>
+                    <Button systemImage="square.and.arrow.down" onPress={() => handleImport()}>
                       {intl.formatMessage({ id: 'home.import-data' })}
                     </Button>
                   </ContextMenu.Items>
@@ -144,77 +234,15 @@ export default function Home() {
           ),
         }}
       />
-      <SafeAreaView edges={['bottom']}>
-        <View className="bg-white px-4 pt-4 dark:bg-black">
-          <View className="mb-6 flex-row items-center gap-4">
-            <Text className="text-[28px] font-semibold text-black dark:text-white">
-              {intl.formatMessage({ id: 'home.my-filters' })}
-            </Text>
-            <View style={styles.countBadge}>
-              <Text className="font-semibold text-[#8E8E93]">{filters.length}</Text>
-            </View>
-          </View>
-
-          <PressableScale
-            style={styles.createFilterCard}
-            onPress={() => router.push('/filter/create')}>
-            <View className="mb-4">
-              <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
-            </View>
-            <Text className="text-[16px] font-semibold text-white">
-              {filters.length === 0
-                ? intl.formatMessage({ id: 'home.create-first-filter' })
-                : intl.formatMessage({ id: 'home.create-another-filter' })}
-            </Text>
-          </PressableScale>
-
-          <View className="mb-8 flex-row flex-wrap gap-4">
-            {filters?.map((filter) => (
-              <FilterCard
-                key={filter.id}
-                filter={filter}
-                conditionText={getConditionText(
-                  filter.id,
-                  filterConditions || [],
-                  allFilterConditions || []
-                )}
-                matchingCount={getMatchingProceduresCount(filter.id, allFilterConditions || [])}
-                onPress={() => {
-                  router.push(`/filter/${filter.id}/show`);
-                }}
-              />
-            ))}
-          </View>
-
-          <View className="mb-6 flex-row items-center gap-4">
-            <Text className="text-[28px] font-semibold text-black dark:text-white">
-              {intl.formatMessage({ id: 'home.my-procedures' })}
-            </Text>
-            <View style={styles.countBadge}>
-              <Text className="font-semibold text-[#8E8E93]">{procedures.length}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View className="flex-1 px-4">
-          <FlashList
-            data={procedures}
-            renderItem={({ item }) => (
-              <ProcedureCard
-                item={item}
-                onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}
-                getDepartmentColor={getDepartmentColor}
-                getTranslatedDepartment={getTranslatedDepartment}
-                getTranslatedAirwayManagement={getTranslatedAirwayManagement}
-              />
-            )}
-            getItemType={() => 'procedure'}
-            keyExtractor={(item) => item.caseNumber}
-            ItemSeparatorComponent={() => <View className="h-4" />}
-          />
-        </View>
-      </SafeAreaView>
-    </ScrollView>
+      <FlashList
+        data={procedures}
+        renderItem={renderItem}
+        ListHeaderComponent={renderListHeader}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
+        keyExtractor={(item) => item.caseNumber}
+        ItemSeparatorComponent={() => <View className="h-4" />}
+      />
+    </SafeAreaView>
   );
 }
 

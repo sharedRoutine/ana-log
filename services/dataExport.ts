@@ -1,6 +1,5 @@
 import { Match, Option, Schema } from 'effect';
 import { IntlShape } from 'react-intl';
-import { Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import { File, Paths } from 'expo-file-system';
@@ -111,7 +110,19 @@ export async function exportData(
   });
 }
 
-export async function importData(intl: IntlShape) {
+export async function importData({
+  onError,
+  onComplete,
+}: {
+  onError?: () => void;
+  onComplete?: ({
+    proceduresCount,
+    filtersCount,
+  }: {
+    proceduresCount: number;
+    filtersCount: number;
+  }) => void;
+}) {
   const result = await DocumentPicker.getDocumentAsync({
     type: ['application/json'],
     copyToCacheDirectory: true,
@@ -129,10 +140,7 @@ export async function importData(intl: IntlShape) {
 
   const parseResult = Schema.decodeUnknownOption(ImportDataSchema)(rawData);
   if (Option.isNone(parseResult)) {
-    Alert.alert(
-      intl.formatMessage({ id: 'import.error.title' }),
-      intl.formatMessage({ id: 'import.error.invalid-format' })
-    );
+    onError?.();
     return;
   }
 
@@ -158,11 +166,5 @@ export async function importData(intl: IntlShape) {
     }
   });
 
-  Alert.alert(
-    intl.formatMessage({ id: 'import.success.title' }),
-    intl.formatMessage(
-      { id: 'import.success.message' },
-      { procedures: procedures.length, filters: filters.length }
-    )
-  );
+  onComplete?.({ proceduresCount: procedures.length, filtersCount: filters.length });
 }
