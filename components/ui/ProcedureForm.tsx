@@ -8,7 +8,6 @@ import {
   Switch,
   Section,
   TextFieldRef,
-  Stepper,
   Text,
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
@@ -22,6 +21,7 @@ import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Item } from '~/lib/schema';
 import { DismissableTextField } from './DismissableTextField';
+import { AgePicker } from './AgePicker';
 
 const validateFormInternally = (value: typeof Item.Type) => {
   if (!value.caseNumber) {
@@ -175,33 +175,19 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
                 <form.Field name="patientAgeYears">
-                  {({ state, handleChange }) => (
-                    <Stepper
-                      label={intl.formatMessage(
-                        { id: 'procedure.form.age-in-years' },
-                        { years: state.value }
+                  {({ state: yearsState, handleChange: handleYearsChange }) => (
+                    <form.Field name="patientAgeMonths">
+                      {({ state: monthsState, handleChange: handleMonthsChange }) => (
+                        <AgePicker
+                          years={yearsState.value}
+                          months={monthsState.value}
+                          onYearsChange={handleYearsChange}
+                          onMonthsChange={handleMonthsChange}
+                          maxYears={99}
+                          maxMonths={11}
+                        />
                       )}
-                      max={120}
-                      min={0}
-                      step={1}
-                      defaultValue={state.value}
-                      onValueChanged={(value) => handleChange(value)}
-                    />
-                  )}
-                </form.Field>
-                <form.Field name="patientAgeMonths">
-                  {({ state, handleChange }) => (
-                    <Stepper
-                      label={intl.formatMessage(
-                        { id: 'procedure.form.age-in-months' },
-                        { months: state.value }
-                      )}
-                      max={11}
-                      min={0}
-                      step={1}
-                      defaultValue={state.value}
-                      onValueChanged={(value) => handleChange(value)}
-                    />
+                    </form.Field>
                   )}
                 </form.Field>
               </Section>
