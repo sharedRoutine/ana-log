@@ -137,7 +137,12 @@ export default function EditFilter() {
             title: intl.formatMessage({ id: 'edit-filter.title' }),
             presentation: 'modal',
             headerLeft: () => (
-              <PressableScale style={{ paddingHorizontal: 8 }} onPress={dismiss}>
+              <PressableScale
+                style={{ paddingHorizontal: 8 }}
+                onPress={() => {
+                  dismiss();
+                  router.back();
+                }}>
                 <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
               </PressableScale>
             ),
