@@ -201,6 +201,22 @@ export default function FilterForm({
                     )}
                   </form.Field>
                 )}
+                <form.Field name="combinator">
+                  {({ state, handleChange }) => (
+                    <Picker
+                      label={intl.formatMessage({ id: 'create-filter.combinator' })}
+                      options={[
+                        intl.formatMessage({ id: 'create-filter.combinator.AND' }),
+                        intl.formatMessage({ id: 'create-filter.combinator.OR' }),
+                      ]}
+                      variant="segmented"
+                      selectedIndex={state.value === 'OR' ? 1 : 0}
+                      onOptionSelected={({ nativeEvent: { index } }) => {
+                        handleChange(index === 0 ? 'AND' : 'OR');
+                      }}
+                    />
+                  )}
+                </form.Field>
               </Section>
               <form.Field name="conditions" mode="array">
                 {(field) => (

@@ -29,6 +29,7 @@ export const filterTable = sqliteTable('filter', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   goal: integer('goal'),
+  combinator: text('combinator', { enum: ['AND', 'OR'] }).notNull().default('AND'),
   createdAt: integer('created_at', { mode: 'number' })
     .notNull()
     .$defaultFn(() => Date.now()),

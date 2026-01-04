@@ -81,13 +81,14 @@ const conditionToDb = (c: ReturnType<typeof conditionToExport>, filterId: number
   );
 
 const filterToExport = (
-  f: typeof filterTable.$inferSelect,
+  { id, name, goal, combinator }: typeof filterTable.$inferSelect,
   conditions: Array<typeof filterConditionTable.$inferSelect>
 ) => ({
-  id: f.id,
-  name: f.name,
-  goal: f.goal,
-  conditions: conditions.filter((c) => c.filterId === f.id).map((item) => conditionToExport(item)),
+  id,
+  name,
+  goal,
+  combinator,
+  conditions: conditions.filter((c) => c.filterId === id).map((item) => conditionToExport(item)),
 });
 
 export async function exportData(
@@ -155,16 +156,21 @@ export async function importData({
         .onConflictDoNothing();
     }
 
-    for (const filter of filters) {
+    for (const { id, name, goal, combinator, conditions } of filters) {
       const [inserted] = await tx
         .insert(filterTable)
-        .values({ id: filter.id, name: filter.name, goal: filter.goal })
+        .values({
+          id,
+          name,
+          goal,
+          combinator,
+        })
         .onConflictDoNothing()
         .returning({ id: filterTable.id });
-      if (inserted && filter.conditions.length > 0) {
+      if (inserted && conditions.length > 0) {
         await tx
           .insert(filterConditionTable)
-          .values(filter.conditions.map((c) => conditionToDb(c, inserted.id)));
+          .values(conditions.map((c) => conditionToDb(c, inserted.id)));
       }
     }
   });

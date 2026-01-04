@@ -56,6 +56,7 @@ export default function EditFilter() {
       filter={Filter.make({
         name: data[0].name,
         goal: data[0].goal ?? undefined,
+        combinator: data[0].combinator,
         conditions: convertConditions(conditions || []),
       })}
       hasGoal={data[0].goal !== null}
@@ -72,7 +73,7 @@ export default function EditFilter() {
         await db.transaction(async (tx) => {
           await tx
             .update(filterTable)
-            .set({ name: value.name, goal: value.goal })
+            .set({ name: value.name, goal: value.goal, combinator: value.combinator })
             .where(eq(filterTable.id, filterId));
           await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
 

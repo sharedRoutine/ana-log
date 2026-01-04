@@ -1,0 +1,1 @@
+ALTER TABLE `filter` ADD `combinator` text DEFAULT 'AND' NOT NULL;

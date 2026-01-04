@@ -48,6 +48,13 @@ export const FilterCondition = Schema.Union(
 export const Filter = Schema.Struct({
   name: Schema.String,
   goal: Schema.Number.pipe(Schema.optional),
+  combinator: Schema.Literal('AND', 'OR').pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => 'AND' as const,
+      constructor: () => 'AND' as const,
+    })
+  ),
   conditions: Schema.mutable(Schema.Array(FilterCondition)),
 });
 
@@ -76,9 +83,10 @@ export const FIELDS = [
     field: 'outpatient',
     value: false,
   }),
-  BooleanCondition.make({
+  TextCondition.make({
     field: 'special-features',
-    value: false,
+    operators: new Set(['eq', 'ct']),
+    value: '',
   }),
   BooleanCondition.make({
     field: 'local-anesthetics',

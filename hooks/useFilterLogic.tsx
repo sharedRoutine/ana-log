@@ -1,4 +1,4 @@
-import { and, count, eq, gte, gt, like, lt, lte, sql, SQL } from 'drizzle-orm';
+import { and, count, eq, gte, gt, like, lt, lte, or, sql, SQL } from 'drizzle-orm';
 import { Match } from 'effect';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
@@ -24,7 +24,8 @@ const getTableField = (fieldName: string) => {
 };
 
 export const buildWhereClauseFromConditions = (
-  conditions: Array<typeof filterConditionTable.$inferSelect>
+  conditions: Array<typeof filterConditionTable.$inferSelect>,
+  combinator: 'AND' | 'OR' = 'AND'
 ): SQL | undefined => {
   if (!conditions || conditions.length === 0) return undefined;
 
@@ -73,7 +74,9 @@ export const buildWhereClauseFromConditions = (
     })
     .filter(Boolean) as Array<SQL>;
 
-  return whereConditions.length > 0 ? and(...whereConditions) : undefined;
+  if (whereConditions.length === 0) return undefined;
+
+  return combinator === 'OR' ? or(...whereConditions) : and(...whereConditions);
 };
 
 export function useFilterLogic() {
@@ -231,87 +234,95 @@ export function useFilterMatchCounts(
       continue;
     }
 
-    const whereClause = buildWhereClauseFromConditions(conditions);
+    const whereClause = buildWhereClauseFromConditions(conditions, filter.combinator);
     if (!whereClause) {
       countsMap.set(filter.id, 0);
       continue;
     }
 
+    const matchCondition = (
+      procedure: (typeof procedures)[number],
+      condition: (typeof conditions)[number]
+    ) => {
+      const field = getTableField(condition.field);
+      if (!field) return true;
+
+      const conditionValue = Match.value(condition.type).pipe(
+        Match.when('TEXT_CONDITION', () => condition.valueText),
+        Match.when('NUMBER_CONDITION', () => condition.valueNumber),
+        Match.when('BOOLEAN_CONDITION', () => condition.valueBoolean),
+        Match.when('ENUM_CONDITION', () => condition.valueEnum),
+        Match.exhaustive
+      );
+
+      if (conditionValue === null || conditionValue === undefined) return true;
+
+      if (condition.field === 'age' && condition.type === 'BOOLEAN_CONDITION') {
+        const ageInYears = procedure.ageYears + procedure.ageMonths / 12.0;
+        return conditionValue === true ? ageInYears < 5 : ageInYears >= 5;
+      }
+
+      const procedureValue = Match.value(condition.field).pipe(
+        Match.when('department', () => procedure.department),
+        Match.when('asa-score', () => procedure.asaScore),
+        Match.when('airway-management', () => procedure.airwayManagement),
+        Match.when('case-number', () => procedure.caseNumber),
+        Match.when('procedure', () => procedure.procedure),
+        Match.when('outpatient', () => procedure.outpatient),
+        Match.when('specials', () => procedure.specials),
+        Match.when('local-anesthetics', () => procedure.localAnesthetics),
+        Match.orElse(() => undefined)
+      );
+
+      if (procedureValue === undefined) return true;
+
+      const operator = condition.operator ?? 'eq';
+      return Match.value(operator).pipe(
+        Match.when('eq', () => procedureValue === conditionValue),
+        Match.when(
+          'ct',
+          () =>
+            typeof procedureValue === 'string' &&
+            typeof conditionValue === 'string' &&
+            procedureValue.toLowerCase().includes(conditionValue.toLowerCase())
+        ),
+        Match.when(
+          'gt',
+          () =>
+            typeof procedureValue === 'number' &&
+            typeof conditionValue === 'number' &&
+            procedureValue > conditionValue
+        ),
+        Match.when(
+          'gte',
+          () =>
+            typeof procedureValue === 'number' &&
+            typeof conditionValue === 'number' &&
+            procedureValue >= conditionValue
+        ),
+        Match.when(
+          'lt',
+          () =>
+            typeof procedureValue === 'number' &&
+            typeof conditionValue === 'number' &&
+            procedureValue < conditionValue
+        ),
+        Match.when(
+          'lte',
+          () =>
+            typeof procedureValue === 'number' &&
+            typeof conditionValue === 'number' &&
+            procedureValue <= conditionValue
+        ),
+        Match.exhaustive
+      );
+    };
+
     const matchingCount = procedures.filter((procedure) => {
-      return conditions.every((condition) => {
-        const field = getTableField(condition.field);
-        if (!field) return true;
-
-        const conditionValue = Match.value(condition.type).pipe(
-          Match.when('TEXT_CONDITION', () => condition.valueText),
-          Match.when('NUMBER_CONDITION', () => condition.valueNumber),
-          Match.when('BOOLEAN_CONDITION', () => condition.valueBoolean),
-          Match.when('ENUM_CONDITION', () => condition.valueEnum),
-          Match.exhaustive
-        );
-
-        if (conditionValue === null || conditionValue === undefined) return true;
-
-        if (condition.field === 'age' && condition.type === 'BOOLEAN_CONDITION') {
-          const ageInYears = procedure.ageYears + procedure.ageMonths / 12.0;
-          return conditionValue === true ? ageInYears < 5 : ageInYears >= 5;
-        }
-
-        const procedureValue = Match.value(condition.field).pipe(
-          Match.when('department', () => procedure.department),
-          Match.when('asa-score', () => procedure.asaScore),
-          Match.when('airway-management', () => procedure.airwayManagement),
-          Match.when('case-number', () => procedure.caseNumber),
-          Match.when('procedure', () => procedure.procedure),
-          Match.when('outpatient', () => procedure.outpatient),
-          Match.when('specials', () => procedure.specials),
-          Match.when('local-anesthetics', () => procedure.localAnesthetics),
-          Match.orElse(() => undefined)
-        );
-
-        if (procedureValue === undefined) return true;
-
-        const operator = condition.operator ?? 'eq';
-        return Match.value(operator).pipe(
-          Match.when('eq', () => procedureValue === conditionValue),
-          Match.when(
-            'ct',
-            () =>
-              typeof procedureValue === 'string' &&
-              typeof conditionValue === 'string' &&
-              procedureValue.toLowerCase().includes(conditionValue.toLowerCase())
-          ),
-          Match.when(
-            'gt',
-            () =>
-              typeof procedureValue === 'number' &&
-              typeof conditionValue === 'number' &&
-              procedureValue > conditionValue
-          ),
-          Match.when(
-            'gte',
-            () =>
-              typeof procedureValue === 'number' &&
-              typeof conditionValue === 'number' &&
-              procedureValue >= conditionValue
-          ),
-          Match.when(
-            'lt',
-            () =>
-              typeof procedureValue === 'number' &&
-              typeof conditionValue === 'number' &&
-              procedureValue < conditionValue
-          ),
-          Match.when(
-            'lte',
-            () =>
-              typeof procedureValue === 'number' &&
-              typeof conditionValue === 'number' &&
-              procedureValue <= conditionValue
-          ),
-          Match.exhaustive
-        );
-      });
+      if (filter.combinator === 'OR') {
+        return conditions.some((condition) => matchCondition(procedure, condition));
+      }
+      return conditions.every((condition) => matchCondition(procedure, condition));
     }).length;
 
     countsMap.set(filter.id, matchingCount);

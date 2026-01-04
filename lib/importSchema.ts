@@ -17,6 +17,13 @@ const Filter = Schema.Struct({
   id: Schema.Number,
   name: Schema.String,
   goal: Schema.NullOr(Schema.Number),
+  combinator: Schema.Literal('AND', 'OR').pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => 'AND' as const,
+      constructor: () => 'AND' as const,
+    })
+  ),
   conditions: Schema.Array(Condition),
 });
 
