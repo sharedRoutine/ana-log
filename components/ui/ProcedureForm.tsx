@@ -140,9 +140,11 @@ export default function ProcedureForm({
             save,
           })
         : null}
-      <View className="flex-1 bg-white dark:bg-black">
+      <View
+        className="flex-1"
+        style={{ backgroundColor: colorScheme === 'light' ? '#F2F2F7' : '#000000' }}>
         <Host style={{ flex: 1 }}>
-          <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
+          <Form modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}>
             <>
               <Section title={intl.formatMessage({ id: 'procedure.form.section.basic-info' })}>
                 <form.Field name="caseNumber">

@@ -19,6 +19,7 @@ import { Fragment } from 'react/jsx-runtime';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { useRef } from 'react';
 import { View } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import { DismissableTextField } from './DismissableTextField';
 
 // TODO: Better errors
@@ -99,6 +100,7 @@ export default function FilterForm({
   children,
 }: FilterFormProps) {
   const intl = useIntl();
+  const { colorScheme } = useColorScheme();
 
   const nameRef = useRef<TextFieldRef>(null);
   const goalRef = useRef<TextFieldRef>(null);
@@ -151,9 +153,11 @@ export default function FilterForm({
             save,
           })
         : null}
-      <View className="flex-1 bg-white dark:bg-black">
+      <View
+        className="flex-1"
+        style={{ backgroundColor: colorScheme === 'light' ? '#F2F2F7' : '#000000' }}>
         <Host style={{ flex: 1 }}>
-          <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
+          <Form modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}>
             <>
               <Section title={intl.formatMessage({ id: 'create-filter.filter-details' })}>
                 <form.Field name="name">
