@@ -1,6 +1,7 @@
 import { PressableScale } from 'pressto';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useIntl } from 'react-intl';
+import { useColorScheme } from 'nativewind';
 
 interface FilterCardProps {
   filter: {
@@ -14,6 +15,8 @@ interface FilterCardProps {
 
 export function FilterCard({ filter, conditionText, matchingCount, onPress }: FilterCardProps) {
   const intl = useIntl();
+  const { colorScheme } = useColorScheme();
+  const isLight = colorScheme === 'light';
 
   return (
     <PressableScale
@@ -25,29 +28,62 @@ export function FilterCard({ filter, conditionText, matchingCount, onPress }: Fi
       )}
       accessibilityRole="button"
       accessibilityHint={intl.formatMessage({ id: 'filter.accessibility.hint' })}
-      style={{
-        backgroundColor: '#1C1C1E',
-        borderColor: '#2C2C2E',
-        borderWidth: 1,
-        height: 96,
-        width: '48%',
-        justifyContent: 'space-between',
-        borderRadius: 16,
-        padding: 12,
-        position: 'relative',
-      }}>
+      style={[styles.card, isLight ? styles.cardLight : styles.cardDark]}>
       <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-medium text-white" numberOfLines={1}>
+        <Text
+          className="text-sm font-medium"
+          style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
+          numberOfLines={1}>
           {filter.name}
         </Text>
-        <Text className="text-lg font-bold text-white">{matchingCount}</Text>
+        <Text className="text-lg font-bold" style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}>
+          {matchingCount}
+        </Text>
       </View>
 
       <View className="flex-row flex-wrap gap-1">
-        <View className="rounded-full bg-[#4A5568] px-2 py-1">
-          <Text className="text-xs text-white">{conditionText}</Text>
+        <View style={[styles.tag, isLight ? styles.tagLight : styles.tagDark]}>
+          <Text className="text-xs" style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}>
+            {conditionText}
+          </Text>
         </View>
       </View>
     </PressableScale>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    height: 96,
+    width: '47%',
+    justifyContent: 'space-between',
+    borderRadius: 16,
+    padding: 12,
+    position: 'relative',
+    borderWidth: 1,
+  },
+  cardLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#E2E8F0',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardDark: {
+    backgroundColor: '#1C1C1E',
+    borderColor: '#2C2C2E',
+  },
+  tag: {
+    borderRadius: 9999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  tagLight: {
+    backgroundColor: '#E2E8F0',
+  },
+  tagDark: {
+    backgroundColor: '#4A5568',
+  },
+});

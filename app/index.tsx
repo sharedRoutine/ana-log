@@ -12,7 +12,7 @@ import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { useColors } from '~/hooks/useColors';
 import { useFilterLogic, useFilterMatchCounts } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, PlusCircle, Settings } from 'lucide-react-native';
+import { Plus, Settings } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
 import { exportData, importData } from '~/services/dataExport';
@@ -29,7 +29,9 @@ interface ListHeaderProps {
     conditions: Array<typeof filterConditionTable.$inferSelect>
   ) => string;
   onCreateFilter: () => void;
+  onCreateProcedure: () => void;
   onFilterPress: (filterId: number) => void;
+  isLight: boolean;
 }
 
 const ListHeader = ({
@@ -40,7 +42,9 @@ const ListHeader = ({
   proceduresCount,
   getConditionText,
   onCreateFilter,
+  onCreateProcedure,
   onFilterPress,
+  isLight,
 }: ListHeaderProps) => {
   const intl = useIntl();
 
@@ -50,23 +54,22 @@ const ListHeader = ({
         <Text className="text-[28px] font-semibold text-black dark:text-white">
           {intl.formatMessage({ id: 'home.my-filters' })}
         </Text>
-        <View style={styles.countBadge}>
-          <Text className="font-semibold text-[#8E8E93]">{filters.length}</Text>
+        <View style={[styles.countBadge, isLight ? styles.countBadgeLight : styles.countBadgeDark]}>
+          <Text style={{ fontWeight: '600', color: isLight ? '#6B7280' : '#8E8E93' }}>
+            {filters.length}
+          </Text>
         </View>
       </View>
 
-      <PressableScale style={styles.createFilterCard} onPress={onCreateFilter}>
-        <View className="mb-4">
-          <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
-        </View>
-        <Text className="text-[16px] font-semibold text-white">
-          {filters.length === 0
-            ? intl.formatMessage({ id: 'home.create-first-filter' })
-            : intl.formatMessage({ id: 'home.create-another-filter' })}
-        </Text>
-      </PressableScale>
-
       <View className="mb-8 flex-row flex-wrap gap-4">
+        <PressableScale style={styles.createFilterCard} onPress={onCreateFilter}>
+          <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
+          <Text className="mt-2 text-center text-[13px] font-semibold text-white" numberOfLines={2}>
+            {filters.length === 0
+              ? intl.formatMessage({ id: 'home.create-first-filter' })
+              : intl.formatMessage({ id: 'home.create-another-filter' })}
+          </Text>
+        </PressableScale>
         {filters?.map((filter) => (
           <FilterCard
             key={filter.id}
@@ -82,10 +85,19 @@ const ListHeader = ({
         <Text className="text-[28px] font-semibold text-black dark:text-white">
           {intl.formatMessage({ id: 'home.my-procedures' })}
         </Text>
-        <View style={styles.countBadge}>
-          <Text className="font-semibold text-[#8E8E93]">{proceduresCount}</Text>
+        <View style={[styles.countBadge, isLight ? styles.countBadgeLight : styles.countBadgeDark]}>
+          <Text style={{ fontWeight: '600', color: isLight ? '#6B7280' : '#8E8E93' }}>
+            {proceduresCount}
+          </Text>
         </View>
       </View>
+
+      <PressableScale style={styles.createProcedureCard} onPress={onCreateProcedure}>
+        <Plus size={20} color="#FFFFFF" strokeWidth={2.5} />
+        <Text className="ml-2 text-[14px] font-semibold text-white">
+          {intl.formatMessage({ id: 'home.add-procedure' })}
+        </Text>
+      </PressableScale>
     </View>
   );
 };
@@ -163,6 +175,10 @@ export default function Home() {
     importData({ onError: handleImportError, onComplete: handleImportComplete });
   };
 
+  const isLight = colorScheme === 'light';
+
+  const handleCreateProcedure = () => router.push('/procedure/create');
+
   const renderListHeader = () => (
     <ListHeader
       filters={filters}
@@ -172,7 +188,9 @@ export default function Home() {
       proceduresCount={procedures.length}
       getConditionText={getConditionText}
       onCreateFilter={handleCreateFilter}
+      onCreateProcedure={handleCreateProcedure}
       onFilterPress={handleFilterPress}
+      isLight={isLight}
     />
   );
 
@@ -203,13 +221,6 @@ export default function Home() {
               </Host>
             </View>
           ),
-          headerRight: () => (
-            <PressableScale
-              style={{ paddingHorizontal: 8 }}
-              onPress={() => router.push('/procedure/create')}>
-              <PlusCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
-            </PressableScale>
-          ),
         }}
       />
       <FlashList
@@ -227,23 +238,45 @@ export default function Home() {
 const styles = StyleSheet.create({
   createFilterCard: {
     backgroundColor: '#3B82F6',
-    borderRadius: 20,
-    padding: 32,
+    borderRadius: 16,
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 32,
-    shadowColor: '#5B8DEF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    height: 96,
+    width: '47%',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  createProcedureCard: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   countBadge: {
-    backgroundColor: '#1C1C1E',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
+  },
+  countBadgeLight: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+  },
+  countBadgeDark: {
+    backgroundColor: '#1C1C1E',
     borderColor: '#2C2C2E',
   },
 });

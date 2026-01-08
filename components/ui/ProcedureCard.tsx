@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { itemTable } from '~/db/schema';
 import { useIntl } from 'react-intl';
 import { PressableScale } from 'pressto';
+import { useColorScheme } from 'nativewind';
 
 interface ProcedureCardProps {
   item: typeof itemTable.$inferSelect;
@@ -19,6 +20,8 @@ export function ProcedureCard({
   getTranslatedAirwayManagement,
 }: ProcedureCardProps) {
   const intl = useIntl();
+  const { colorScheme } = useColorScheme();
+  const isLight = colorScheme === 'light';
 
   const accessibilityLabel = intl.formatMessage(
     { id: 'procedure.accessibility.card' },
@@ -32,15 +35,21 @@ export function ProcedureCard({
 
   return (
     <PressableScale
-      style={styles.entryCard}
+      style={[styles.entryCard, isLight ? styles.entryCardLight : styles.entryCardDark]}
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       accessibilityHint={intl.formatMessage({ id: 'procedure.accessibility.hint' })}>
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
-          <Text className="text-2xl font-bold text-white">{item.caseNumber}</Text>
-          <Text className="text-sm font-medium text-gray-400">
+          <Text
+            className="text-2xl font-bold"
+            style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}>
+            {item.caseNumber}
+          </Text>
+          <Text
+            className="text-sm font-medium"
+            style={{ color: isLight ? '#6B7280' : '#9CA3AF' }}>
             {intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' })}
           </Text>
         </View>
@@ -59,8 +68,8 @@ export function ProcedureCard({
         <View style={[styles.tag, { backgroundColor: '#10B981' }]}>
           <Text className="text-white">{getTranslatedAirwayManagement(item.airwayManagement)}</Text>
         </View>
-        <View style={[styles.tag, { backgroundColor: '#4A5568' }]}>
-          <Text className="text-white">
+        <View style={[styles.tag, isLight ? styles.asaTagLight : styles.asaTagDark]}>
+          <Text style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}>
             {intl.formatMessage({ id: 'home.asa-score' }, { score: item.asaScore })}
           </Text>
         </View>
@@ -76,10 +85,21 @@ export function ProcedureCard({
 
 const styles = StyleSheet.create({
   entryCard: {
-    backgroundColor: '#1C1C1E',
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
+  },
+  entryCardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E5E7EB',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  entryCardDark: {
+    backgroundColor: '#1C1C1E',
     borderColor: '#2C2C2E',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
@@ -91,5 +111,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 12,
+  },
+  asaTagLight: {
+    backgroundColor: '#E5E7EB',
+  },
+  asaTagDark: {
+    backgroundColor: '#4A5568',
   },
 });

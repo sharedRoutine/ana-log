@@ -110,7 +110,9 @@ export default function ShowFilter() {
         {filters[0].goal ? (
           <View className="px-4 pt-6">
             <View className="flex flex-row items-center justify-between">
-              <Text className="text-3xl font-bold text-white">Ziel</Text>
+              <Text className="text-3xl font-bold text-black dark:text-white">
+                {intl.formatMessage({ id: 'filter.goal' })}
+              </Text>
               <Host matchContents>
                 <Gauge
                   max={{ value: filters[0].goal, label: `${filters[0].goal}` }}
@@ -132,7 +134,7 @@ export default function ShowFilter() {
           </View>
         ) : null}
         <View className="flex-row flex-wrap px-4 py-4">
-          <Text className="text-white">
+          <Text className="text-gray-600 dark:text-gray-300">
             {conditions.map((condition) => stringifyCondition(condition)).join(', ')}
           </Text>
         </View>

@@ -43,18 +43,21 @@ const getModalOptions = (
 function MigrationErrorScreen({
   error,
   onRetry,
+  colorScheme,
 }: {
   error: Error | undefined;
   onRetry: () => void;
+  colorScheme: 'light' | 'dark' | undefined;
 }) {
+  const isLight = colorScheme === 'light';
   return (
-    <View style={styles.errorContainer}>
+    <View style={[styles.errorContainer, isLight && styles.errorContainerLight]}>
       <View style={styles.errorContent}>
-        <Text style={styles.errorTitle}>Datenbank-Fehler</Text>
-        <Text style={styles.errorMessage}>
+        <Text style={[styles.errorTitle, isLight && styles.errorTitleLight]}>Datenbank-Fehler</Text>
+        <Text style={[styles.errorMessage, isLight && styles.errorMessageLight]}>
           Die Datenbank konnte nicht initialisiert werden. Bitte starte die App neu.
         </Text>
-        {error && <Text style={styles.errorDetails}>{error.message}</Text>}
+        {error && <Text style={[styles.errorDetails, isLight && styles.errorDetailsLight]}>{error.message}</Text>}
         <PressableScale style={styles.retryButton} onPress={onRetry}>
           <Text style={styles.retryButtonText}>Erneut versuchen</Text>
         </PressableScale>
@@ -63,11 +66,12 @@ function MigrationErrorScreen({
   );
 }
 
-function LoadingScreen() {
+function LoadingScreen({ colorScheme }: { colorScheme: 'light' | 'dark' | undefined }) {
+  const isLight = colorScheme === 'light';
   return (
-    <View style={styles.loadingContainer}>
+    <View style={[styles.loadingContainer, isLight && styles.loadingContainerLight]}>
       <ActivityIndicator size="large" color="#3B82F6" />
-      <Text style={styles.loadingText}>Datenbank wird initialisiert...</Text>
+      <Text style={[styles.loadingText, isLight && styles.loadingTextLight]}>Datenbank wird initialisiert...</Text>
     </View>
   );
 }
@@ -87,7 +91,7 @@ export default function Layout() {
   if (!success && !error) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <LoadingScreen />
+        <LoadingScreen colorScheme={colorScheme} />
       </GestureHandlerRootView>
     );
   }
@@ -95,7 +99,7 @@ export default function Layout() {
   if (!success && error) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <MigrationErrorScreen error={error} onRetry={handleRetry} />
+        <MigrationErrorScreen error={error} onRetry={handleRetry} colorScheme={colorScheme} />
       </GestureHandlerRootView>
     );
   }
@@ -130,6 +134,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
   },
+  errorContainerLight: {
+    backgroundColor: '#F8FAFC',
+  },
   errorContent: {
     alignItems: 'center',
     maxWidth: 320,
@@ -141,6 +148,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'center',
   },
+  errorTitleLight: {
+    color: '#1F2937',
+  },
   errorMessage: {
     fontSize: 16,
     color: '#8E8E93',
@@ -148,12 +158,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 22,
   },
+  errorMessageLight: {
+    color: '#6B7280',
+  },
   errorDetails: {
     fontSize: 12,
     color: '#666',
     textAlign: 'center',
     marginBottom: 24,
     fontFamily: 'monospace',
+  },
+  errorDetailsLight: {
+    color: '#9CA3AF',
   },
   retryButton: {
     backgroundColor: '#3B82F6',
@@ -172,9 +188,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingContainerLight: {
+    backgroundColor: '#F8FAFC',
+  },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
     color: '#8E8E93',
+  },
+  loadingTextLight: {
+    color: '#6B7280',
   },
 });

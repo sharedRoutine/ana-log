@@ -20,11 +20,7 @@
       "tsconfigPaths": true
     },
     "orientation": "portrait",
-    "icon": {
-      "light": "./assets/icon.png",
-      "dark": "./assets/icon.png",
-      "tinted": "./assets/icon.png"
-    },
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
     "ios": {

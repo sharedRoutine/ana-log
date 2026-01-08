@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { PressableScale } from 'pressto';
 import { LucideIcon } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -11,15 +12,18 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon: Icon, title, message, actionLabel, onAction }: EmptyStateProps) {
+  const { colorScheme } = useColorScheme();
+  const isLight = colorScheme === 'light';
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isLight && styles.containerLight]}>
       {Icon && (
         <View style={styles.iconContainer}>
-          <Icon size={48} color="#8E8E93" />
+          <Icon size={48} color={isLight ? '#6B7280' : '#8E8E93'} />
         </View>
       )}
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={[styles.title, isLight && styles.titleLight]}>{title}</Text>
+      <Text style={[styles.message, isLight && styles.messageLight]}>{message}</Text>
       {actionLabel && onAction && (
         <PressableScale style={styles.actionButton} onPress={onAction}>
           <Text style={styles.actionButtonText}>{actionLabel}</Text>
@@ -37,6 +41,9 @@ const styles = StyleSheet.create({
     padding: 32,
     backgroundColor: '#000',
   },
+  containerLight: {
+    backgroundColor: '#F8FAFC',
+  },
   iconContainer: {
     marginBottom: 16,
     opacity: 0.6,
@@ -48,12 +55,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
+  titleLight: {
+    color: '#1F2937',
+  },
   message: {
     fontSize: 16,
     color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
+  },
+  messageLight: {
+    color: '#6B7280',
   },
   actionButton: {
     backgroundColor: '#3B82F6',
