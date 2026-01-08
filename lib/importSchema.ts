@@ -36,7 +36,13 @@ const Procedure = Schema.Struct({
   airwayManagement: Schema.Literal(...AIRWAY_OPTIONS),
   department: Schema.Literal(...DEPARTMENT_OPTIONS),
   departmentOther: Schema.NullOr(Schema.String),
-  specials: Schema.NullOr(Schema.String),
+  specials: Schema.NullOr(Schema.Array(Schema.String)).pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => [],
+      constructor: () => [],
+    })
+  ),
   localAnesthetics: Schema.Boolean,
   localAnestheticsText: Schema.NullOr(Schema.String),
   outpatient: Schema.Boolean,

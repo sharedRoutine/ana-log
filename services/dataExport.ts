@@ -91,6 +91,12 @@ const filterToExport = (
   conditions: conditions.filter((c) => c.filterId === id).map((item) => conditionToExport(item)),
 });
 
+const procedureToExport = (procedure: typeof itemTable.$inferSelect) => ({
+  ...procedure,
+  // Only export specials if it's an array, otherwise export null
+  specials: Array.isArray(procedure.specials) ? procedure.specials : null,
+});
+
 export async function exportData(
   filters: Array<typeof filterTable.$inferSelect>,
   allFilterConditions: Array<typeof filterConditionTable.$inferSelect>,
@@ -102,7 +108,7 @@ export async function exportData(
   file.write(
     JSON.stringify({
       filters: filters.map((f) => filterToExport(f, allFilterConditions)),
-      procedures,
+      procedures: procedures.map((procedure) => procedureToExport(procedure)),
     }),
     { encoding: 'utf8' }
   );
@@ -150,10 +156,12 @@ export async function importData({
 
   await db.transaction(async (tx) => {
     if (procedures.length > 0) {
-      await tx
-        .insert(itemTable)
-        .values([...procedures])
-        .onConflictDoNothing();
+      // Only import procedures with valid specials (array or null, not string)
+      const validProcedures = procedures.map((p) => ({
+        ...p,
+        specials: Array.isArray(p.specials) ? p.specials : null,
+      }));
+      await tx.insert(itemTable).values(validProcedures).onConflictDoNothing();
     }
 
     for (const { id, name, goal, combinator, conditions } of filters) {

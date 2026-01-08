@@ -1,5 +1,5 @@
 import { Schema } from 'effect';
-import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from './options';
+import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from './options';
 
 export const Item = Schema.Struct({
   caseNumber: Schema.String,
@@ -10,8 +10,7 @@ export const Item = Schema.Struct({
   airwayManagement: Schema.Literal(...AIRWAY_OPTIONS),
   department: Schema.Literal(...DEPARTMENT_OPTIONS),
   departmentOther: Schema.String,
-  specialFeatures: Schema.Boolean,
-  specialFeaturesText: Schema.String,
+  specials: Schema.Array(Schema.Literal(...SPECIALS_OPTIONS)),
   localAnesthetics: Schema.Boolean,
   localAnestheticsText: Schema.String,
   outpatient: Schema.Boolean,

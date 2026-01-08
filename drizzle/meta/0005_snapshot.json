@@ -88,9 +88,7 @@
       "indexes": {
         "filter_condition_filter_id_idx": {
           "name": "filter_condition_filter_id_idx",
-          "columns": [
-            "filter_id"
-          ],
+          "columns": ["filter_id"],
           "isUnique": false
         }
       },
@@ -99,12 +97,8 @@
           "name": "filter_condition_filter_id_filter_id_fk",
           "tableFrom": "filter_condition",
           "tableTo": "filter",
-          "columnsFrom": [
-            "filter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["filter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -280,30 +274,22 @@
       "indexes": {
         "item_caseNumber_unique": {
           "name": "item_caseNumber_unique",
-          "columns": [
-            "caseNumber"
-          ],
+          "columns": ["caseNumber"],
           "isUnique": true
         },
         "item_date_idx": {
           "name": "item_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         },
         "item_department_idx": {
           "name": "item_department_idx",
-          "columns": [
-            "department"
-          ],
+          "columns": ["department"],
           "isUnique": false
         },
         "item_airway_idx": {
           "name": "item_airway_idx",
-          "columns": [
-            "airwayManagement"
-          ],
+          "columns": ["airwayManagement"],
           "isUnique": false
         }
       },

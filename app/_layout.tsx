@@ -10,6 +10,7 @@ import migrations from '../drizzle/migrations';
 import { useColorScheme } from 'nativewind';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
@@ -115,16 +116,19 @@ export default function Layout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <IntlProvider locale="de" messages={deMessages}>
-            <Stack key={retryKey}>
-              <Stack.Screen name="index" options={headerOptions} />
-              <Stack.Screen name="procedure/create" options={modalOptions} />
-              <Stack.Screen name="procedure/[procedureId]/edit" options={modalOptions} />
-              <Stack.Screen name="procedure/[procedureId]/show" options={modalOptions} />
-              <Stack.Screen name="filter/create" options={modalOptions} />
-              <Stack.Screen name="filter/[filterId]/show" options={modalOptions} />
-              <Stack.Screen name="filter/[filterId]/edit" options={modalOptions} />
-              <Stack.Screen name="settings" options={modalOptions} />
-            </Stack>
+            <SpecialsPickerProvider>
+              <Stack key={retryKey}>
+                <Stack.Screen name="index" options={headerOptions} />
+                <Stack.Screen name="procedure/create" options={modalOptions} />
+                <Stack.Screen name="procedure/[procedureId]/edit" options={modalOptions} />
+                <Stack.Screen name="procedure/[procedureId]/show" options={modalOptions} />
+                <Stack.Screen name="procedure/specials-picker" options={headerOptions} />
+                <Stack.Screen name="filter/create" options={modalOptions} />
+                <Stack.Screen name="filter/[filterId]/show" options={modalOptions} />
+                <Stack.Screen name="filter/[filterId]/edit" options={modalOptions} />
+                <Stack.Screen name="settings" options={modalOptions} />
+              </Stack>
+            </SpecialsPickerProvider>
           </IntlProvider>
         </QueryClientProvider>
       </ErrorBoundary>

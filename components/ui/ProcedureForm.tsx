@@ -16,12 +16,14 @@ import { itemTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
+import { useRouter } from 'expo-router';
 
-import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
+import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from '~/lib/options';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Item } from '~/lib/schema';
 import { DismissableTextField } from './DismissableTextField';
 import { AgePicker } from './AgePicker';
+import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
 
 const validateFormInternally = (value: typeof Item.Type) => {
   if (!value.caseNumber) {
@@ -61,11 +63,12 @@ export default function ProcedureForm({
   children,
 }: ProcedureFormProps) {
   const intl = useIntl();
+  const router = useRouter();
   const { colorScheme } = useColorScheme();
+  const { setSelection, setOnSelectionComplete } = useSpecialsPicker();
 
   const caseNumberRef = useRef<TextFieldRef>(null);
   const departmentOtherRef = useRef<TextFieldRef>(null);
-  const specialFeaturesTextRef = useRef<TextFieldRef>(null);
   const localAnestheticsTextRef = useRef<TextFieldRef>(null);
   const procedureRef = useRef<TextFieldRef>(null);
 
@@ -79,7 +82,6 @@ export default function ProcedureForm({
     onSubmit: async ({ value }) => {
       await caseNumberRef.current?.blur();
       await departmentOtherRef.current?.blur();
-      await specialFeaturesTextRef.current?.blur();
       await localAnestheticsTextRef.current?.blur();
       await procedureRef.current?.blur();
 
@@ -92,7 +94,7 @@ export default function ProcedureForm({
         airwayManagement: value.airwayManagement,
         department: value.department,
         departmentOther: value.department === 'other' ? value.departmentOther : null,
-        specials: value.specialFeatures ? value.specialFeaturesText : null,
+        specials: value.specials.length > 0 ? [...value.specials] : null,
         localAnesthetics: value.localAnesthetics,
         localAnestheticsText: value.localAnesthetics ? value.localAnestheticsText : null,
         outpatient: value.outpatient,
@@ -109,7 +111,6 @@ export default function ProcedureForm({
   });
 
   const departmentValue = useStore(form.store, (state) => state.values.department);
-  const specialFeaturesValue = useStore(form.store, (state) => state.values.specialFeatures);
   const localAnestheticsValue = useStore(form.store, (state) => state.values.localAnesthetics);
 
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
@@ -125,10 +126,21 @@ export default function ProcedureForm({
     label: intl.formatMessage({ id: `enum.department.${option}` }),
   })).sort((a, b) => a.label.localeCompare(b.label));
 
+  const getSpecialsLabel = (value: (typeof SPECIALS_OPTIONS)[number]) =>
+    intl.formatMessage({ id: `enum.specials.${value}` });
+
+  const openSpecialsPicker = (
+    currentSelection: Array<(typeof SPECIALS_OPTIONS)[number]>,
+    onComplete: (selection: Array<(typeof SPECIALS_OPTIONS)[number]>) => void
+  ) => {
+    setSelection(currentSelection);
+    setOnSelectionComplete(onComplete);
+    router.push('/procedure/specials-picker');
+  };
+
   const dismiss = async () => {
     await caseNumberRef.current?.blur();
     await departmentOtherRef.current?.blur();
-    await specialFeaturesTextRef.current?.blur();
     await localAnestheticsTextRef.current?.blur();
     await procedureRef.current?.blur();
   };
@@ -264,36 +276,24 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.specials' })}>
+                <form.Field name="specials">
+                  {({ state, handleChange }) => {
+                    const selectedLabels = state.value.map(getSpecialsLabel).join(', ');
+
+                    return (
+                      <Button onPress={() => openSpecialsPicker([...state.value], handleChange)}>
+                        <Text>
+                          {state.value.length > 0
+                            ? selectedLabels
+                            : intl.formatMessage({ id: 'create-filter.select' })}
+                        </Text>
+                      </Button>
+                    );
+                  }}
+                </form.Field>
+              </Section>
               <Section title={intl.formatMessage({ id: 'procedure.form.section.settings' })}>
-                <form.Field name="specialFeatures">
-                  {({ state, handleChange }) => (
-                    <Switch
-                      label={intl.formatMessage({ id: 'procedure.form.special-features' })}
-                      value={state.value}
-                      onValueChange={handleChange}
-                    />
-                  )}
-                </form.Field>
-                <form.Field name="specialFeaturesText">
-                  {({ state, handleChange }) => (
-                    <>
-                      {specialFeaturesValue && (
-                        <DismissableTextField
-                          placeholder={intl.formatMessage({
-                            id: 'procedure.form.special-features.placeholder',
-                          })}
-                          defaultValue={state.value}
-                          onChangeText={handleChange}
-                          multiline
-                          numberOfLines={3}
-                          autocorrection={false}
-                          allowNewlines={true}
-                          ref={specialFeaturesTextRef}
-                        />
-                      )}
-                    </>
-                  )}
-                </form.Field>
                 <form.Field name="localAnesthetics">
                   {({ state, handleChange }) => (
                     <Switch

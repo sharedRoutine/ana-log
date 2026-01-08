@@ -1,12 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import {
-  ChevronLeftCircle,
-  Edit,
-  FileQuestion,
-  Siren,
-  Check,
-  X,
-} from 'lucide-react-native';
+import { ChevronLeftCircle, Edit, FileQuestion, Siren, Check, X } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
@@ -133,11 +126,7 @@ export default function ShowProcedure() {
           </View>
         )}
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}>
+        <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
           <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
             {intl.formatMessage({ id: 'procedure.form.section.basic-info' })}
           </Text>
@@ -157,17 +146,15 @@ export default function ShowProcedure() {
                   styles.departmentBadge,
                   { backgroundColor: getDepartmentColor(item.department) },
                 ]}>
-                <Text style={styles.departmentText}>{getTranslatedDepartment(item.department)}</Text>
+                <Text style={styles.departmentText}>
+                  {getTranslatedDepartment(item.department)}
+                </Text>
               </View>
             }
           />
         </View>
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}>
+        <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
           <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
             {intl.formatMessage({ id: 'procedure.form.patient-age' })}
           </Text>
@@ -181,11 +168,7 @@ export default function ShowProcedure() {
           />
         </View>
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}>
+        <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
           <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
             {intl.formatMessage({ id: 'procedure.form.section.details' })}
           </Text>
@@ -205,11 +188,7 @@ export default function ShowProcedure() {
           />
         </View>
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}>
+        <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
           <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
             {intl.formatMessage({ id: 'procedure.form.section.settings' })}
           </Text>
@@ -233,34 +212,28 @@ export default function ShowProcedure() {
             label={intl.formatMessage({ id: 'procedure.form.local-anesthetics' })}
             value={<BooleanIndicator value={item.localAnesthetics} />}
           />
-          {item.localAnestheticsText && (
-            <DetailRow label="" value={item.localAnestheticsText} />
-          )}
+          {item.localAnestheticsText && <DetailRow label="" value={item.localAnestheticsText} />}
         </View>
 
-        {item.specials && (
-          <View
-            style={[
-              styles.section,
-              { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-            ]}>
+        {item.specials && item.specials.length > 0 && (
+          <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
             <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
-              {intl.formatMessage({ id: 'procedure.form.special-features' })}
+              {intl.formatMessage({ id: 'procedure.form.section.specials' })}
             </Text>
-            <View style={styles.textBlock}>
-              <Text style={[styles.textBlockContent, { color: isLight ? '#1F2937' : '#FFFFFF' }]}>
-                {item.specials}
-              </Text>
+            <View style={styles.specialsBadgeContainer}>
+              {item.specials.map((special) => (
+                <View key={special} style={[styles.specialBadge, { backgroundColor: '#6366F1' }]}>
+                  <Text style={styles.specialBadgeText}>
+                    {intl.formatMessage({ id: `enum.specials.${special}` })}
+                  </Text>
+                </View>
+              ))}
             </View>
           </View>
         )}
 
         {item.procedure && (
-          <View
-            style={[
-              styles.section,
-              { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-            ]}>
+          <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
             <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
               {intl.formatMessage({ id: 'procedure.form.procedure' })}
             </Text>
@@ -370,5 +343,22 @@ const styles = StyleSheet.create({
   textBlockContent: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  specialsBadgeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  specialBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  specialBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

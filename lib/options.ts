@@ -27,3 +27,20 @@ export const AIRWAY_OPTIONS = [
   'cricothyrotomy',
   'doppel-lumen-tube',
 ] as const;
+
+export const SPECIALS_OPTIONS = [
+  'avk',
+  'zvk',
+  'shaldon',
+  'schleuse',
+  'picco',
+  'reanimation',
+  'foi',
+  'rsi',
+  'organspender',
+  'schockraum',
+  'bsk',
+  'swan-ganz',
+  'cardioversion',
+  'cellsaver',
+] as const;

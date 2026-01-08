@@ -1,5 +1,5 @@
 import { Schema } from 'effect';
-import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from './options';
+import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from './options';
 
 export const TextCondition = Schema.TaggedStruct('TEXT_CONDITION', {
   field: Schema.String,
@@ -95,9 +95,9 @@ export const FIELDS = [
     field: 'favorite',
     value: false,
   }),
-  TextCondition.make({
-    field: 'special-features',
-    operators: new Set(['eq', 'ct']),
+  EnumCondition.make({
+    field: 'specials',
+    options: SPECIALS_OPTIONS,
     value: '',
   }),
   BooleanCondition.make({

@@ -9,16 +9,15 @@ import m0004 from './0004_thick_tinkerer.sql';
 import m0005 from './0005_wakeful_lilith.sql';
 import m0006 from './0006_daily_roulette.sql';
 
-  export default {
-    journal,
-    migrations: {
-      m0000,
-m0001,
-m0002,
-m0003,
-m0004,
-m0005,
-m0006
-    }
-  }
-  
+export default {
+  journal,
+  migrations: {
+    m0000,
+    m0001,
+    m0002,
+    m0003,
+    m0004,
+    m0005,
+    m0006,
+  },
+};

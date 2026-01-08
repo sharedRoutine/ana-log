@@ -61,6 +61,11 @@ export const buildWhereClauseFromConditions = (
         }
       }
 
+      // Special specials handling (JSON array contains check)
+      if (condition.field === 'specials' && condition.type === 'ENUM_CONDITION') {
+        return like(field, `%"${value}"%`);
+      }
+
       if (condition.operator === null || condition.operator === undefined) {
         return eq(field, value);
       }
@@ -141,9 +146,7 @@ export function useFilterLogic() {
         intl.formatMessage({ id: 'create-filter.field.analgosedation' })
       ),
       Match.when('favorite', () => intl.formatMessage({ id: 'create-filter.field.favorite' })),
-      Match.when('special-features', () =>
-        intl.formatMessage({ id: 'create-filter.field.special-features' })
-      ),
+      Match.when('specials', () => intl.formatMessage({ id: 'create-filter.field.specials' })),
       Match.when('local-anesthetics', () =>
         intl.formatMessage({ id: 'create-filter.field.local-anesthetics' })
       ),
@@ -164,6 +167,9 @@ export function useFilterLogic() {
         }
         if (condition.field === 'airway-management') {
           return intl.formatMessage({ id: `enum.airway-management.${condition.valueEnum}` });
+        }
+        if (condition.field === 'specials') {
+          return intl.formatMessage({ id: `enum.specials.${condition.valueEnum}` });
         }
         return condition.valueEnum;
       }),
@@ -268,6 +274,12 @@ export function useFilterMatchCounts(
       if (condition.field === 'age' && condition.type === 'BOOLEAN_CONDITION') {
         const ageInYears = procedure.ageYears + procedure.ageMonths / 12.0;
         return conditionValue === true ? ageInYears < 5 : ageInYears >= 5;
+      }
+
+      // Special specials handling (check if array contains value)
+      if (condition.field === 'specials' && condition.type === 'ENUM_CONDITION') {
+        if (!Array.isArray(procedure.specials)) return false;
+        return procedure.specials.some((s) => s === conditionValue);
       }
 
       const procedureValue = Match.value(condition.field).pipe(
