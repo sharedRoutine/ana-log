@@ -69,6 +69,7 @@
   "filter.condition.single": "1 Bedingung",
   "filter.condition.plural": "{count} Bedingungen",
   "enum.airway-management.tube": "Tubus",
+  "enum.airway-management.tube-nasal": "Tubus (Nasal)",
   "enum.airway-management.lama": "Lama",
   "enum.airway-management.tracheostomy": "Trachealkanüle",
   "enum.airway-management.mask": "Maske",

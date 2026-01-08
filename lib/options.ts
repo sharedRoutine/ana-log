@@ -19,6 +19,7 @@ export const DEPARTMENT_OPTIONS = [
 
 export const AIRWAY_OPTIONS = [
   'tube',
+  'tube-nasal',
   'lama',
   'tracheostomy',
   'mask',
