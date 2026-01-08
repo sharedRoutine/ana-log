@@ -1,5 +1,3 @@
-// This file is required for Expo/React Native SQLite migrations - https://orm.drizzle.team/quick-sqlite/expo
-
 import journal from './meta/_journal.json';
 import m0000 from './0000_tiny_kingpin.sql';
 import m0001 from './0001_amazing_skin.sql';
@@ -8,16 +6,19 @@ import m0003 from './0003_rapid_thaddeus_ross.sql';
 import m0004 from './0004_thick_tinkerer.sql';
 import m0005 from './0005_wakeful_lilith.sql';
 import m0006 from './0006_daily_roulette.sql';
+import m0007 from './0007_migrate_specials_to_array.sql';
 
-export default {
-  journal,
-  migrations: {
-    m0000,
-    m0001,
-    m0002,
-    m0003,
-    m0004,
-    m0005,
-    m0006,
-  },
-};
+  export default {
+    journal,
+    migrations: {
+      m0000,
+m0001,
+m0002,
+m0003,
+m0004,
+m0005,
+m0006,
+m0007
+    }
+  }
+  
