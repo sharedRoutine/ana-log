@@ -26,7 +26,7 @@ export default function CreateFilter() {
         await db.transaction(async (tx) => {
           const [f] = await tx
             .insert(filterTable)
-            .values({ name: value.name, goal: value.goal, combinator: value.combinator })
+            .values({ name: value.name, goal: value.hasGoal ? value.goal : null, combinator: value.combinator })
             .returning({ id: filterTable.id });
 
           for (const condition of value.conditions) {

@@ -14,6 +14,7 @@ const getTableField = (fieldName: string) => {
     Match.when('procedure', () => itemTable.procedure),
     Match.when('outpatient', () => itemTable.outpatient),
     Match.when('emergency', () => itemTable.emergency),
+    Match.when('analgosedation', () => itemTable.analgosedation),
     Match.when('age-years', () => itemTable.ageYears),
     Match.when('age-months', () => itemTable.ageMonths),
     Match.when('age', () => itemTable.ageYears),
@@ -135,6 +136,9 @@ export function useFilterLogic() {
       Match.when('procedure', () => intl.formatMessage({ id: 'create-filter.field.procedure' })),
       Match.when('outpatient', () => intl.formatMessage({ id: 'create-filter.field.outpatient' })),
       Match.when('emergency', () => intl.formatMessage({ id: 'create-filter.field.emergency' })),
+      Match.when('analgosedation', () =>
+        intl.formatMessage({ id: 'create-filter.field.analgosedation' })
+      ),
       Match.when('special-features', () =>
         intl.formatMessage({ id: 'create-filter.field.special-features' })
       ),
@@ -272,6 +276,7 @@ export function useFilterMatchCounts(
         Match.when('procedure', () => procedure.procedure),
         Match.when('outpatient', () => procedure.outpatient),
         Match.when('emergency', () => procedure.emergency),
+        Match.when('analgosedation', () => procedure.analgosedation),
         Match.when('specials', () => procedure.specials),
         Match.when('local-anesthetics', () => procedure.localAnesthetics),
         Match.orElse(() => undefined)

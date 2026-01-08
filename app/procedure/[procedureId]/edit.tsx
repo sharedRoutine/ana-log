@@ -58,6 +58,7 @@ export default function EditProcedure() {
     localAnestheticsText: existingItem.localAnestheticsText || '',
     outpatient: existingItem.outpatient,
     emergency: existingItem.emergency,
+    analgosedation: existingItem.analgosedation,
     procedure: existingItem.procedure,
   });
 

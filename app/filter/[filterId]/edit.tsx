@@ -73,7 +73,7 @@ export default function EditFilter() {
         await db.transaction(async (tx) => {
           await tx
             .update(filterTable)
-            .set({ name: value.name, goal: value.goal, combinator: value.combinator })
+            .set({ name: value.name, goal: value.hasGoal ? value.goal : null, combinator: value.combinator })
             .where(eq(filterTable.id, filterId));
           await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
 

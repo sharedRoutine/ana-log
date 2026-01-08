@@ -1,0 +1,1 @@
+ALTER TABLE `item` ADD `analgosedation` integer DEFAULT false NOT NULL;

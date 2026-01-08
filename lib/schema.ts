@@ -16,5 +16,6 @@ export const Item = Schema.Struct({
   localAnestheticsText: Schema.String,
   outpatient: Schema.Boolean,
   emergency: Schema.Boolean,
+  analgosedation: Schema.Boolean,
   procedure: Schema.String,
 });

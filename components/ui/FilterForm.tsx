@@ -205,6 +205,8 @@ export default function FilterForm({
                     )}
                   </form.Field>
                 )}
+              </Section>
+              <Section title={intl.formatMessage({ id: 'create-filter.combinator' })}>
                 <form.Field name="combinator">
                   {({ state, handleChange }) => (
                     <Picker

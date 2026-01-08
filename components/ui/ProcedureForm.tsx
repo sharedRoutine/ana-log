@@ -97,6 +97,7 @@ export default function ProcedureForm({
         localAnestheticsText: value.localAnesthetics ? value.localAnestheticsText : null,
         outpatient: value.outpatient,
         emergency: value.emergency,
+        analgosedation: value.analgosedation,
         procedure: value.procedure,
       };
 
@@ -334,6 +335,15 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <Switch
                       label={intl.formatMessage({ id: 'procedure.form.emergency' })}
+                      value={state.value}
+                      onValueChange={handleChange}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="analgosedation">
+                  {({ state, handleChange }) => (
+                    <Switch
+                      label={intl.formatMessage({ id: 'procedure.form.analgosedation' })}
                       value={state.value}
                       onValueChange={handleChange}
                     />

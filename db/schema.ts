@@ -17,6 +17,7 @@ export const itemTable = sqliteTable(
     localAnestheticsText: text('local_anesthetics_text'),
     outpatient: integer('outpatient', { mode: 'boolean' }).notNull(),
     emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
+    analgosedation: integer('analgosedation', { mode: 'boolean' }).notNull().default(false),
     procedure: text().notNull(),
   },
   (table) => [

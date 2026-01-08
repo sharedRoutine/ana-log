@@ -29,6 +29,7 @@ export default function UpsertItem() {
     localAnestheticsText: '',
     outpatient: false,
     emergency: false,
+    analgosedation: false,
     procedure: '',
   });
 

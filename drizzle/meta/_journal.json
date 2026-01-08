@@ -36,6 +36,13 @@
       "when": 1767903752275,
       "tag": "0004_thick_tinkerer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1767904658052,
+      "tag": "0005_wakeful_lilith",
+      "breakpoints": true
     }
   ]
 }
