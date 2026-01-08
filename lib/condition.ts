@@ -91,6 +91,10 @@ export const FIELDS = [
     field: 'analgosedation',
     value: false,
   }),
+  BooleanCondition.make({
+    field: 'favorite',
+    value: false,
+  }),
   TextCondition.make({
     field: 'special-features',
     operators: new Set(['eq', 'ct']),

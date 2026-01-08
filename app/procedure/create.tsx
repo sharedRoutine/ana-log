@@ -30,6 +30,7 @@ export default function UpsertItem() {
     outpatient: false,
     emergency: false,
     analgosedation: false,
+    favorite: false,
     procedure: '',
   });
 

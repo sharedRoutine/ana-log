@@ -17,5 +17,6 @@ export const Item = Schema.Struct({
   outpatient: Schema.Boolean,
   emergency: Schema.Boolean,
   analgosedation: Schema.Boolean,
+  favorite: Schema.Boolean,
   procedure: Schema.String,
 });

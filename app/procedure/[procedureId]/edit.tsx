@@ -59,6 +59,7 @@ export default function EditProcedure() {
     outpatient: existingItem.outpatient,
     emergency: existingItem.emergency,
     analgosedation: existingItem.analgosedation,
+    favorite: existingItem.favorite,
     procedure: existingItem.procedure,
   });
 

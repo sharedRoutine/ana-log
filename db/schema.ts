@@ -18,6 +18,7 @@ export const itemTable = sqliteTable(
     outpatient: integer('outpatient', { mode: 'boolean' }).notNull(),
     emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
     analgosedation: integer('analgosedation', { mode: 'boolean' }).notNull().default(false),
+    favorite: integer('favorite', { mode: 'boolean' }).notNull().default(false),
     procedure: text().notNull(),
   },
   (table) => [

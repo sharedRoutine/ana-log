@@ -226,6 +226,10 @@ export default function ShowProcedure() {
             value={<BooleanIndicator value={item.analgosedation} />}
           />
           <DetailRow
+            label={intl.formatMessage({ id: 'procedure.form.favorite' })}
+            value={<BooleanIndicator value={item.favorite} />}
+          />
+          <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.local-anesthetics' })}
             value={<BooleanIndicator value={item.localAnesthetics} />}
           />

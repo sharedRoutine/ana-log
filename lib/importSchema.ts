@@ -54,6 +54,13 @@ const Procedure = Schema.Struct({
       constructor: () => false,
     })
   ),
+  favorite: Schema.Boolean.pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => false,
+      constructor: () => false,
+    })
+  ),
   procedure: Schema.String,
 });
 

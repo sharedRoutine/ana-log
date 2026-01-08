@@ -98,6 +98,7 @@ export default function ProcedureForm({
         outpatient: value.outpatient,
         emergency: value.emergency,
         analgosedation: value.analgosedation,
+        favorite: value.favorite,
         procedure: value.procedure,
       };
 
@@ -344,6 +345,15 @@ export default function ProcedureForm({
                   {({ state, handleChange }) => (
                     <Switch
                       label={intl.formatMessage({ id: 'procedure.form.analgosedation' })}
+                      value={state.value}
+                      onValueChange={handleChange}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="favorite">
+                  {({ state, handleChange }) => (
+                    <Switch
+                      label={intl.formatMessage({ id: 'procedure.form.favorite' })}
                       value={state.value}
                       onValueChange={handleChange}
                     />
