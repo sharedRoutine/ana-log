@@ -16,6 +16,7 @@ export const itemTable = sqliteTable(
     localAnesthetics: integer('localAnesthetics', { mode: 'boolean' }).notNull(),
     localAnestheticsText: text('local_anesthetics_text'),
     outpatient: integer('outpatient', { mode: 'boolean' }).notNull(),
+    emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
     procedure: text().notNull(),
   },
   (table) => [
@@ -29,7 +30,9 @@ export const filterTable = sqliteTable('filter', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   goal: integer('goal'),
-  combinator: text('combinator', { enum: ['AND', 'OR'] }).notNull().default('AND'),
+  combinator: text('combinator', { enum: ['AND', 'OR'] })
+    .notNull()
+    .default('AND'),
   createdAt: integer('created_at', { mode: 'number' })
     .notNull()
     .$defaultFn(() => Date.now()),

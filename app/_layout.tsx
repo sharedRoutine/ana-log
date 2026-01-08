@@ -57,7 +57,11 @@ function MigrationErrorScreen({
         <Text style={[styles.errorMessage, isLight && styles.errorMessageLight]}>
           Die Datenbank konnte nicht initialisiert werden. Bitte starte die App neu.
         </Text>
-        {error && <Text style={[styles.errorDetails, isLight && styles.errorDetailsLight]}>{error.message}</Text>}
+        {error && (
+          <Text style={[styles.errorDetails, isLight && styles.errorDetailsLight]}>
+            {error.message}
+          </Text>
+        )}
         <PressableScale style={styles.retryButton} onPress={onRetry}>
           <Text style={styles.retryButtonText}>Erneut versuchen</Text>
         </PressableScale>
@@ -71,7 +75,9 @@ function LoadingScreen({ colorScheme }: { colorScheme: 'light' | 'dark' | undefi
   return (
     <View style={[styles.loadingContainer, isLight && styles.loadingContainerLight]}>
       <ActivityIndicator size="large" color="#3B82F6" />
-      <Text style={[styles.loadingText, isLight && styles.loadingTextLight]}>Datenbank wird initialisiert...</Text>
+      <Text style={[styles.loadingText, isLight && styles.loadingTextLight]}>
+        Datenbank wird initialisiert...
+      </Text>
     </View>
   );
 }

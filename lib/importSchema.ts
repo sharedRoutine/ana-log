@@ -40,6 +40,7 @@ const Procedure = Schema.Struct({
   localAnesthetics: Schema.Boolean,
   localAnestheticsText: Schema.NullOr(Schema.String),
   outpatient: Schema.Boolean,
+  emergency: Schema.Boolean,
   procedure: Schema.String,
 });
 

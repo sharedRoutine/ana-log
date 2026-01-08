@@ -1,0 +1,1 @@
+ALTER TABLE `item` ADD `emergency` integer DEFAULT false NOT NULL;

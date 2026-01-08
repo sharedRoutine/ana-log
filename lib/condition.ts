@@ -83,6 +83,10 @@ export const FIELDS = [
     field: 'outpatient',
     value: false,
   }),
+  BooleanCondition.make({
+    field: 'emergency',
+    value: false,
+  }),
   TextCondition.make({
     field: 'special-features',
     operators: new Set(['eq', 'ct']),

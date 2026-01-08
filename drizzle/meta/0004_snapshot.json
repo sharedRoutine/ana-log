@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "76c8cebf-7447-4cf9-9a89-25d2797fafe9",
-  "prevId": "156111a0-22b7-4108-8394-c1c9965cfae9",
+  "id": "4ccb50a4-9fb8-4a48-b294-47e10d00168d",
+  "prevId": "76c8cebf-7447-4cf9-9a89-25d2797fafe9",
   "tables": {
     "filter_condition": {
       "name": "filter_condition",
@@ -246,6 +246,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "emergency": {
+          "name": "emergency",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "procedure": {
           "name": "procedure",

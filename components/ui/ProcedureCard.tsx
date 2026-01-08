@@ -3,6 +3,7 @@ import { itemTable } from '~/db/schema';
 import { useIntl } from 'react-intl';
 import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
+import { Siren } from 'lucide-react-native';
 
 interface ProcedureCardProps {
   item: typeof itemTable.$inferSelect;
@@ -42,14 +43,17 @@ export function ProcedureCard({
       accessibilityHint={intl.formatMessage({ id: 'procedure.accessibility.hint' })}>
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
-          <Text
-            className="text-2xl font-bold"
-            style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}>
-            {item.caseNumber}
-          </Text>
-          <Text
-            className="text-sm font-medium"
-            style={{ color: isLight ? '#6B7280' : '#9CA3AF' }}>
+          <View className="flex-row items-center gap-2">
+            <Text className="text-2xl font-bold" style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}>
+              {item.caseNumber}
+            </Text>
+            {item.emergency && (
+              <View style={{ marginBottom: 2 }}>
+                <Siren size={22} color="#EF4444" />
+              </View>
+            )}
+          </View>
+          <Text className="text-sm font-medium" style={{ color: isLight ? '#6B7280' : '#9CA3AF' }}>
             {intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' })}
           </Text>
         </View>
