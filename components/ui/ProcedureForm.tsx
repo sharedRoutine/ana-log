@@ -281,7 +281,10 @@ export default function ProcedureForm({
               <Section title={intl.formatMessage({ id: 'procedure.form.section.specials' })}>
                 <form.Field name="specials">
                   {({ state, handleChange }) => {
-                    const selectedLabels = state.value.map(getSpecialsLabel).join(', ');
+                    const selectedLabels = state.value
+                      .map((v) => getSpecialsLabel(v))
+                      .sort((a, b) => a.localeCompare(b))
+                      .join(', ');
 
                     return (
                       <Button onPress={() => openSpecialsPicker([...state.value], handleChange)}>

@@ -221,13 +221,19 @@ export default function ShowProcedure() {
               {intl.formatMessage({ id: 'procedure.form.section.specials' })}
             </Text>
             <View style={styles.specialsBadgeContainer}>
-              {specials.map((special) => (
-                <View key={special} style={[styles.specialBadge, { backgroundColor: '#6366F1' }]}>
-                  <Text style={styles.specialBadgeText}>
-                    {intl.formatMessage({ id: `enum.specials.${special}` })}
-                  </Text>
-                </View>
-              ))}
+              {specials
+                .map((special) => ({
+                  value: special,
+                  label: intl.formatMessage({ id: `enum.specials.${special}` }),
+                }))
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map((special) => (
+                  <View
+                    key={special.value}
+                    style={[styles.specialBadge, { backgroundColor: '#6366F1' }]}>
+                    <Text style={styles.specialBadgeText}>{special.label}</Text>
+                  </View>
+                ))}
             </View>
           </View>
         )}
