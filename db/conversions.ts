@@ -1,7 +1,7 @@
 import { Match } from 'effect';
 import { filterConditionTable } from './schema';
 import { BooleanCondition, EnumCondition, NumberCondition, TextCondition } from '~/lib/condition';
-import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS } from '~/lib/options';
+import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from '~/lib/options';
 
 export const convertConditions = (conditions: Array<typeof filterConditionTable.$inferSelect>) => {
   return conditions.map((condition) => convertCondition(condition));
@@ -39,6 +39,14 @@ const convertCondition = (condition: typeof filterConditionTable.$inferSelect) =
         field: enumCondition.field,
         value: enumCondition.valueEnum ?? '',
         options: DEPARTMENT_OPTIONS,
+        _tag: 'ENUM_CONDITION',
+      })
+    ),
+    Match.when({ type: 'ENUM_CONDITION', field: 'specials' }, (enumCondition) =>
+      EnumCondition.make({
+        field: enumCondition.field,
+        value: enumCondition.valueEnum ?? '',
+        options: SPECIALS_OPTIONS,
         _tag: 'ENUM_CONDITION',
       })
     ),
