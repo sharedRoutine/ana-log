@@ -45,7 +45,13 @@ const Procedure = Schema.Struct({
   ),
   localAnesthetics: Schema.Boolean,
   localAnestheticsText: Schema.NullOr(Schema.String),
-  outpatient: Schema.Boolean,
+  outpatient: Schema.Boolean.pipe(
+    Schema.optional,
+    Schema.withDefaults({
+      decoding: () => false,
+      constructor: () => false,
+    })
+  ),
   emergency: Schema.Boolean.pipe(
     Schema.optional,
     Schema.withDefaults({

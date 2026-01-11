@@ -43,4 +43,6 @@ export const SPECIALS_OPTIONS = [
   'swan-ganz',
   'cardioversion',
   'cellsaver',
+  'analgosedation',
+  'outpatient',
 ] as const;

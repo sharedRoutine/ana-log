@@ -13,9 +13,7 @@ export const Item = Schema.Struct({
   specials: Schema.Array(Schema.Literal(...SPECIALS_OPTIONS)),
   localAnesthetics: Schema.Boolean,
   localAnestheticsText: Schema.String,
-  outpatient: Schema.Boolean,
   emergency: Schema.Boolean,
-  analgosedation: Schema.Boolean,
   favorite: Schema.Boolean,
   procedure: Schema.String,
 });

@@ -109,6 +109,8 @@
   "enum.specials.swan-ganz": "Swan Ganz",
   "enum.specials.cardioversion": "Cardioversion",
   "enum.specials.cellsaver": "Cellsaver",
+  "enum.specials.analgosedation": "Analgosedierung",
+  "enum.specials.outpatient": "Ambulant",
   "procedure.form.section.basic-info": "Grundlegende Informationen",
   "procedure.form.section.details": "Details",
   "procedure.form.section.settings": "Einstellungen",

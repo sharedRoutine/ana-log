@@ -4,7 +4,7 @@ import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '~/db/db';
-import { itemTable } from '~/db/schema';
+import { itemTable, itemSpecialTable } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useColors } from '~/hooks/useColors';
@@ -59,7 +59,14 @@ export default function ShowProcedure() {
 
   const { data, isPending } = useQuery({
     queryKey: ['procedure', procedureId],
-    queryFn: () => db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId)),
+    queryFn: async () => {
+      const items = await db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId));
+      const specials = await db
+        .select()
+        .from(itemSpecialTable)
+        .where(eq(itemSpecialTable.caseNumber, procedureId));
+      return { item: items[0], specials: specials.map((s) => s.special) };
+    },
   });
 
   const { getDepartmentColor } = useColors();
@@ -76,7 +83,7 @@ export default function ShowProcedure() {
     return <LoadingScreen />;
   }
 
-  if (!data || data.length === 0) {
+  if (!data || !data.item) {
     return (
       <EmptyState
         icon={FileQuestion}
@@ -88,7 +95,8 @@ export default function ShowProcedure() {
     );
   }
 
-  const item = data[0];
+  const item = data.item;
+  const specials = data.specials;
 
   return (
     <SafeAreaView
@@ -193,16 +201,8 @@ export default function ShowProcedure() {
             {intl.formatMessage({ id: 'procedure.form.section.settings' })}
           </Text>
           <DetailRow
-            label={intl.formatMessage({ id: 'procedure.form.outpatient' })}
-            value={<BooleanIndicator value={item.outpatient} />}
-          />
-          <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.emergency' })}
             value={<BooleanIndicator value={item.emergency} />}
-          />
-          <DetailRow
-            label={intl.formatMessage({ id: 'procedure.form.analgosedation' })}
-            value={<BooleanIndicator value={item.analgosedation} />}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.favorite' })}
@@ -215,13 +215,13 @@ export default function ShowProcedure() {
           {item.localAnestheticsText && <DetailRow label="" value={item.localAnestheticsText} />}
         </View>
 
-        {item.specials && item.specials.length > 0 && (
+        {specials && specials.length > 0 && (
           <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
             <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
               {intl.formatMessage({ id: 'procedure.form.section.specials' })}
             </Text>
             <View style={styles.specialsBadgeContainer}>
-              {item.specials.map((special) => (
+              {specials.map((special) => (
                 <View key={special} style={[styles.specialBadge, { backgroundColor: '#6366F1' }]}>
                   <Text style={styles.specialBadgeText}>
                     {intl.formatMessage({ id: `enum.specials.${special}` })}

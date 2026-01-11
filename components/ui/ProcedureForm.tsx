@@ -12,7 +12,7 @@ import {
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useRef } from 'react';
-import { itemTable } from '~/db/schema';
+import { itemTable, itemSpecialTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
@@ -37,10 +37,15 @@ const validateFormInternally = (value: typeof Item.Type) => {
   }
 };
 
+type ProcedureFormValues = {
+  item: typeof itemTable.$inferInsert;
+  specials: Array<(typeof SPECIALS_OPTIONS)[number]>;
+};
+
 type ProcedureFormProps = {
   procedure: typeof Item.Type;
   validateForm?: (value: typeof Item.Type) => string | undefined;
-  onSubmit: (values: typeof itemTable.$inferSelect) => Promise<void>;
+  onSubmit: (values: ProcedureFormValues) => Promise<void>;
   isEditing?: boolean;
   onDelete?: () => Promise<void>;
   children?: ({
@@ -94,17 +99,14 @@ export default function ProcedureForm({
         airwayManagement: value.airwayManagement,
         department: value.department,
         departmentOther: value.department === 'other' ? value.departmentOther : null,
-        specials: value.specials.length > 0 ? [...value.specials] : null,
         localAnesthetics: value.localAnesthetics,
         localAnestheticsText: value.localAnesthetics ? value.localAnestheticsText : null,
-        outpatient: value.outpatient,
         emergency: value.emergency,
-        analgosedation: value.analgosedation,
         favorite: value.favorite,
         procedure: value.procedure,
       };
 
-      await onSubmit(itemValues);
+      await onSubmit({ item: itemValues, specials: [...value.specials] });
 
       form.reset();
     },
@@ -323,28 +325,10 @@ export default function ProcedureForm({
                     </>
                   )}
                 </form.Field>
-                <form.Field name="outpatient">
-                  {({ state, handleChange }) => (
-                    <Switch
-                      label={intl.formatMessage({ id: 'procedure.form.outpatient' })}
-                      value={state.value}
-                      onValueChange={handleChange}
-                    />
-                  )}
-                </form.Field>
                 <form.Field name="emergency">
                   {({ state, handleChange }) => (
                     <Switch
                       label={intl.formatMessage({ id: 'procedure.form.emergency' })}
-                      value={state.value}
-                      onValueChange={handleChange}
-                    />
-                  )}
-                </form.Field>
-                <form.Field name="analgosedation">
-                  {({ state, handleChange }) => (
-                    <Switch
-                      label={intl.formatMessage({ id: 'procedure.form.analgosedation' })}
                       value={state.value}
                       onValueChange={handleChange}
                     />

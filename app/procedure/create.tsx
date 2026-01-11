@@ -7,7 +7,7 @@ import ProcedureForm from '~/components/ui/ProcedureForm';
 import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
 import { db } from '~/db/db';
-import { itemTable } from '~/db/schema';
+import { itemTable, itemSpecialTable } from '~/db/schema';
 
 export default function UpsertItem() {
   const intl = useIntl();
@@ -26,9 +26,7 @@ export default function UpsertItem() {
     specials: [],
     localAnesthetics: false,
     localAnestheticsText: '',
-    outpatient: false,
     emergency: false,
-    analgosedation: false,
     favorite: false,
     procedure: '',
   });
@@ -36,8 +34,18 @@ export default function UpsertItem() {
   return (
     <ProcedureForm
       procedure={procedure}
-      onSubmit={async (values) => {
-        await db.insert(itemTable).values(values);
+      onSubmit={async ({ item, specials }) => {
+        await db.transaction(async (tx) => {
+          await tx.insert(itemTable).values(item);
+          if (specials.length > 0) {
+            await tx.insert(itemSpecialTable).values(
+              specials.map((special) => ({
+                caseNumber: item.caseNumber,
+                special,
+              }))
+            );
+          }
+        });
         router.back();
       }}>
       {({ canSubmit, dismiss, save }) => (

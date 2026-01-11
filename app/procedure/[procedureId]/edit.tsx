@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useIntl } from 'react-intl';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
-import { itemTable } from '~/db/schema';
+import { itemTable, itemSpecialTable } from '~/db/schema';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save, FileQuestion } from 'lucide-react-native';
@@ -23,14 +23,21 @@ export default function EditProcedure() {
 
   const { data, isPending } = useQuery({
     queryKey: ['procedure', procedureId],
-    queryFn: () => db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId)),
+    queryFn: async () => {
+      const items = await db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId));
+      const specials = await db
+        .select()
+        .from(itemSpecialTable)
+        .where(eq(itemSpecialTable.caseNumber, procedureId));
+      return { item: items[0], specials: specials.map((s) => s.special) };
+    },
   });
 
   if (isPending) {
     return <LoadingScreen />;
   }
 
-  if (!data || data.length === 0) {
+  if (!data || !data.item) {
     return (
       <EmptyState
         icon={FileQuestion}
@@ -42,7 +49,7 @@ export default function EditProcedure() {
     );
   }
 
-  const existingItem = data[0];
+  const existingItem = data.item;
   const procedure = Item.make({
     caseNumber: existingItem.caseNumber,
     patientAgeYears: existingItem.ageYears,
@@ -52,12 +59,10 @@ export default function EditProcedure() {
     airwayManagement: existingItem.airwayManagement,
     department: existingItem.department,
     departmentOther: existingItem.departmentOther || '',
-    specials: existingItem.specials || [],
+    specials: data.specials,
     localAnesthetics: existingItem.localAnesthetics,
     localAnestheticsText: existingItem.localAnestheticsText || '',
-    outpatient: existingItem.outpatient,
     emergency: existingItem.emergency,
-    analgosedation: existingItem.analgosedation,
     favorite: existingItem.favorite,
     procedure: existingItem.procedure,
   });
@@ -71,8 +76,19 @@ export default function EditProcedure() {
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
         router.dismissAll();
       }}
-      onSubmit={async (values) => {
-        await db.update(itemTable).set(values).where(eq(itemTable.caseNumber, procedureId));
+      onSubmit={async ({ item, specials }) => {
+        await db.transaction(async (tx) => {
+          await tx.update(itemTable).set(item).where(eq(itemTable.caseNumber, procedureId));
+          await tx.delete(itemSpecialTable).where(eq(itemSpecialTable.caseNumber, procedureId));
+          if (specials.length > 0) {
+            await tx.insert(itemSpecialTable).values(
+              specials.map((special) => ({
+                caseNumber: procedureId,
+                special,
+              }))
+            );
+          }
+        });
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
         router.back();
       }}>

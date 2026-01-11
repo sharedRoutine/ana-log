@@ -5,7 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { File, Paths } from 'expo-file-system';
 
 import { db } from '~/db/db';
-import { filterTable, filterConditionTable, itemTable } from '~/db/schema';
+import { filterTable, filterConditionTable, itemTable, itemSpecialTable } from '~/db/schema';
 import { ImportDataSchema } from '~/lib/importSchema';
 
 const conditionToExport = (c: typeof filterConditionTable.$inferSelect) =>
@@ -91,10 +91,12 @@ const filterToExport = (
   conditions: conditions.filter((c) => c.filterId === id).map((item) => conditionToExport(item)),
 });
 
-const procedureToExport = (procedure: typeof itemTable.$inferSelect) => ({
+const procedureToExport = (
+  procedure: typeof itemTable.$inferSelect,
+  specials: string[]
+) => ({
   ...procedure,
-  // Only export specials if it's an array, otherwise export null
-  specials: Array.isArray(procedure.specials) ? procedure.specials : null,
+  specials: specials.length > 0 ? specials : null,
 });
 
 export async function exportData(
@@ -103,12 +105,22 @@ export async function exportData(
   procedures: Array<typeof itemTable.$inferSelect>,
   intl: IntlShape
 ) {
+  const allSpecials = await db.select().from(itemSpecialTable);
+  const specialsByCase = new Map<string, string[]>();
+  for (const special of allSpecials) {
+    const existing = specialsByCase.get(special.caseNumber) || [];
+    existing.push(special.special);
+    specialsByCase.set(special.caseNumber, existing);
+  }
+
   const file = new File(Paths.cache, `ana-log-export-${Date.now()}.json`);
   file.create();
   file.write(
     JSON.stringify({
       filters: filters.map((f) => filterToExport(f, allFilterConditions)),
-      procedures: procedures.map((procedure) => procedureToExport(procedure)),
+      procedures: procedures.map((procedure) =>
+        procedureToExport(procedure, specialsByCase.get(procedure.caseNumber) || [])
+      ),
     }),
     { encoding: 'utf8' }
   );
@@ -156,12 +168,31 @@ export async function importData({
 
   await db.transaction(async (tx) => {
     if (procedures.length > 0) {
-      // Only import procedures with valid specials (array or null, not string)
-      const validProcedures = procedures.map((p) => ({
-        ...p,
-        specials: Array.isArray(p.specials) ? p.specials : null,
-      }));
-      await tx.insert(itemTable).values(validProcedures).onConflictDoNothing();
+      for (const p of procedures) {
+        const specials = Array.isArray(p.specials) ? [...p.specials] : [];
+        if (p.outpatient && !specials.includes('outpatient')) {
+          specials.push('outpatient');
+        }
+        if (p.analgosedation && !specials.includes('analgosedation')) {
+          specials.push('analgosedation');
+        }
+
+        const { outpatient, analgosedation, specials: _, ...itemData } = p;
+
+        await tx.insert(itemTable).values(itemData).onConflictDoNothing();
+
+        if (specials.length > 0) {
+          await tx
+            .insert(itemSpecialTable)
+            .values(
+              specials.map((special) => ({
+                caseNumber: p.caseNumber,
+                special,
+              }))
+            )
+            .onConflictDoNothing();
+        }
+      }
     }
 
     for (const { id, name, goal, combinator, conditions } of filters) {

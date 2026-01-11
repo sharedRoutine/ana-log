@@ -1,4 +1,4 @@
-import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from '~/lib/options';
 
 export const itemTable = sqliteTable(
@@ -12,12 +12,9 @@ export const itemTable = sqliteTable(
     airwayManagement: text().$type<(typeof AIRWAY_OPTIONS)[number]>().notNull(),
     department: text().$type<(typeof DEPARTMENT_OPTIONS)[number]>().notNull(),
     departmentOther: text('department_other'),
-    specials: text({ mode: 'json' }).$type<Array<(typeof SPECIALS_OPTIONS)[number]>>(),
     localAnesthetics: integer('localAnesthetics', { mode: 'boolean' }).notNull(),
     localAnestheticsText: text('local_anesthetics_text'),
-    outpatient: integer('outpatient', { mode: 'boolean' }).notNull(),
     emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
-    analgosedation: integer('analgosedation', { mode: 'boolean' }).notNull().default(false),
     favorite: integer('favorite', { mode: 'boolean' }).notNull().default(false),
     procedure: text().notNull(),
   },
@@ -25,6 +22,20 @@ export const itemTable = sqliteTable(
     index('item_date_idx').on(table.date),
     index('item_department_idx').on(table.department),
     index('item_airway_idx').on(table.airwayManagement),
+  ]
+);
+
+export const itemSpecialTable = sqliteTable(
+  'item_special',
+  {
+    caseNumber: text('case_number')
+      .notNull()
+      .references(() => itemTable.caseNumber, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    special: text().notNull().$type<(typeof SPECIALS_OPTIONS)[number]>(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.caseNumber, table.special] }),
+    index('idx_item_special_special').on(table.special),
   ]
 );
 

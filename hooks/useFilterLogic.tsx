@@ -1,9 +1,9 @@
-import { and, count, eq, gte, gt, like, lt, lte, or, sql, SQL } from 'drizzle-orm';
+import { and, count, eq, exists, gte, gt, like, lt, lte, or, sql, SQL } from 'drizzle-orm';
 import { Match } from 'effect';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '~/db/db';
-import { itemTable, filterConditionTable, filterTable } from '~/db/schema';
+import { itemTable, itemSpecialTable, filterConditionTable, filterTable } from '~/db/schema';
 
 const getTableField = (fieldName: string) => {
   return Match.value(fieldName).pipe(
@@ -12,15 +12,12 @@ const getTableField = (fieldName: string) => {
     Match.when('airway-management', () => itemTable.airwayManagement),
     Match.when('case-number', () => itemTable.caseNumber),
     Match.when('procedure', () => itemTable.procedure),
-    Match.when('outpatient', () => itemTable.outpatient),
     Match.when('emergency', () => itemTable.emergency),
-    Match.when('analgosedation', () => itemTable.analgosedation),
     Match.when('favorite', () => itemTable.favorite),
     Match.when('age-years', () => itemTable.ageYears),
     Match.when('age-months', () => itemTable.ageMonths),
     Match.when('age', () => itemTable.ageYears),
     Match.when('date', () => itemTable.date),
-    Match.when('specials', () => itemTable.specials),
     Match.when('local-anesthetics', () => itemTable.localAnesthetics),
     Match.orElse(() => undefined)
   );
@@ -34,11 +31,6 @@ export const buildWhereClauseFromConditions = (
 
   const whereConditions = conditions
     .map((condition) => {
-      const field = getTableField(condition.field);
-      if (!field) {
-        return undefined;
-      }
-
       const value = Match.value(condition.type).pipe(
         Match.when('TEXT_CONDITION', () => condition.valueText),
         Match.when('NUMBER_CONDITION', () => condition.valueNumber),
@@ -61,9 +53,24 @@ export const buildWhereClauseFromConditions = (
         }
       }
 
-      // Special specials handling (JSON array contains check)
+      // Special specials handling (junction table EXISTS check)
       if (condition.field === 'specials' && condition.type === 'ENUM_CONDITION') {
-        return like(field, `%"${value}"%`);
+        return exists(
+          db
+            .select()
+            .from(itemSpecialTable)
+            .where(
+              and(
+                eq(itemSpecialTable.caseNumber, itemTable.caseNumber),
+                eq(itemSpecialTable.special, value as string)
+              )
+            )
+        );
+      }
+
+      const field = getTableField(condition.field);
+      if (!field) {
+        return undefined;
       }
 
       if (condition.operator === null || condition.operator === undefined) {
@@ -140,11 +147,7 @@ export function useFilterLogic() {
         intl.formatMessage({ id: 'create-filter.field.case-number' })
       ),
       Match.when('procedure', () => intl.formatMessage({ id: 'create-filter.field.procedure' })),
-      Match.when('outpatient', () => intl.formatMessage({ id: 'create-filter.field.outpatient' })),
       Match.when('emergency', () => intl.formatMessage({ id: 'create-filter.field.emergency' })),
-      Match.when('analgosedation', () =>
-        intl.formatMessage({ id: 'create-filter.field.analgosedation' })
-      ),
       Match.when('favorite', () => intl.formatMessage({ id: 'create-filter.field.favorite' })),
       Match.when('specials', () => intl.formatMessage({ id: 'create-filter.field.specials' })),
       Match.when('local-anesthetics', () =>
@@ -232,13 +235,20 @@ export function useFilterMatchCounts(
   filters: (typeof filterTable.$inferSelect)[] | undefined,
   allFilterConditions: (typeof filterConditionTable.$inferSelect)[] | undefined
 ): Map<number, number> {
-  // Get all procedures for counting
   const { data: procedures } = useLiveQuery(db.select().from(itemTable));
+  const { data: itemSpecials } = useLiveQuery(db.select().from(itemSpecialTable));
 
   const countsMap = new Map<number, number>();
 
-  if (!filters || !allFilterConditions || !procedures) {
+  if (!filters || !allFilterConditions || !procedures || !itemSpecials) {
     return countsMap;
+  }
+
+  const specialsByCase = new Map<string, string[]>();
+  for (const special of itemSpecials) {
+    const existing = specialsByCase.get(special.caseNumber) || [];
+    existing.push(special.special);
+    specialsByCase.set(special.caseNumber, existing);
   }
 
   for (const filter of filters) {
@@ -258,9 +268,6 @@ export function useFilterMatchCounts(
       procedure: (typeof procedures)[number],
       condition: (typeof conditions)[number]
     ) => {
-      const field = getTableField(condition.field);
-      if (!field) return true;
-
       const conditionValue = Match.value(condition.type).pipe(
         Match.when('TEXT_CONDITION', () => condition.valueText),
         Match.when('NUMBER_CONDITION', () => condition.valueNumber),
@@ -276,11 +283,13 @@ export function useFilterMatchCounts(
         return conditionValue === true ? ageInYears < 5 : ageInYears >= 5;
       }
 
-      // Special specials handling (check if array contains value)
       if (condition.field === 'specials' && condition.type === 'ENUM_CONDITION') {
-        if (!Array.isArray(procedure.specials)) return false;
-        return procedure.specials.some((s) => s === conditionValue);
+        const procedureSpecials = specialsByCase.get(procedure.caseNumber) || [];
+        return procedureSpecials.includes(conditionValue as string);
       }
+
+      const field = getTableField(condition.field);
+      if (!field) return true;
 
       const procedureValue = Match.value(condition.field).pipe(
         Match.when('department', () => procedure.department),
@@ -288,11 +297,8 @@ export function useFilterMatchCounts(
         Match.when('airway-management', () => procedure.airwayManagement),
         Match.when('case-number', () => procedure.caseNumber),
         Match.when('procedure', () => procedure.procedure),
-        Match.when('outpatient', () => procedure.outpatient),
         Match.when('emergency', () => procedure.emergency),
-        Match.when('analgosedation', () => procedure.analgosedation),
         Match.when('favorite', () => procedure.favorite),
-        Match.when('specials', () => procedure.specials),
         Match.when('local-anesthetics', () => procedure.localAnesthetics),
         Match.orElse(() => undefined)
       );

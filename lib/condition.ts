@@ -80,15 +80,7 @@ export const FIELDS = [
     value: '',
   }),
   BooleanCondition.make({
-    field: 'outpatient',
-    value: false,
-  }),
-  BooleanCondition.make({
     field: 'emergency',
-    value: false,
-  }),
-  BooleanCondition.make({
-    field: 'analgosedation',
     value: false,
   }),
   BooleanCondition.make({
