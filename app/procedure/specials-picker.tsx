@@ -1,5 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { Form, Host, Section, Switch } from '@expo/ui/swift-ui';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { useIntl } from 'react-intl';

@@ -111,6 +111,7 @@
   "enum.specials.cellsaver": "Cellsaver",
   "enum.specials.analgosedation": "Analgosedierung",
   "enum.specials.outpatient": "Ambulant",
+  "enum.specials.sectio": "Sectio",
   "procedure.form.section.basic-info": "Grundlegende Informationen",
   "procedure.form.section.details": "Details",
   "procedure.form.section.settings": "Einstellungen",
