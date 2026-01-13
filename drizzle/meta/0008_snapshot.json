@@ -88,9 +88,7 @@
       "indexes": {
         "filter_condition_filter_id_idx": {
           "name": "filter_condition_filter_id_idx",
-          "columns": [
-            "filter_id"
-          ],
+          "columns": ["filter_id"],
           "isUnique": false
         }
       },
@@ -99,12 +97,8 @@
           "name": "filter_condition_filter_id_filter_id_fk",
           "tableFrom": "filter_condition",
           "tableTo": "filter",
-          "columnsFrom": [
-            "filter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["filter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -187,9 +181,7 @@
       "indexes": {
         "idx_item_special_special": {
           "name": "idx_item_special_special",
-          "columns": [
-            "special"
-          ],
+          "columns": ["special"],
           "isUnique": false
         }
       },
@@ -198,22 +190,15 @@
           "name": "item_special_case_number_item_caseNumber_fk",
           "tableFrom": "item_special",
           "tableTo": "item",
-          "columnsFrom": [
-            "case_number"
-          ],
-          "columnsTo": [
-            "caseNumber"
-          ],
+          "columnsFrom": ["case_number"],
+          "columnsTo": ["caseNumber"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
         "item_special_case_number_special_pk": {
-          "columns": [
-            "case_number",
-            "special"
-          ],
+          "columns": ["case_number", "special"],
           "name": "item_special_case_number_special_pk"
         }
       },
@@ -320,30 +305,22 @@
       "indexes": {
         "item_caseNumber_unique": {
           "name": "item_caseNumber_unique",
-          "columns": [
-            "caseNumber"
-          ],
+          "columns": ["caseNumber"],
           "isUnique": true
         },
         "item_date_idx": {
           "name": "item_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         },
         "item_department_idx": {
           "name": "item_department_idx",
-          "columns": [
-            "department"
-          ],
+          "columns": ["department"],
           "isUnique": false
         },
         "item_airway_idx": {
           "name": "item_airway_idx",
-          "columns": [
-            "airwayManagement"
-          ],
+          "columns": ["airwayManagement"],
           "isUnique": false
         }
       },

@@ -45,5 +45,5 @@ export const SPECIALS_OPTIONS = [
   'cellsaver',
   'analgosedation',
   'outpatient',
-  'sectio'
+  'sectio',
 ] as const;

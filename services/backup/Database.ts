@@ -14,22 +14,27 @@ export class DatabaseService extends Effect.Service<DatabaseService>()('Database
         (sqlite) => Effect.sync(() => sqlite.closeSync())
       ),
     importFromBackup: (backupPath: string) =>
-      Effect.sync(() => {
-        db.$client.execSync(`ATTACH DATABASE '${backupPath}' AS backup`);
-        db.$client.execSync(`
-          BEGIN TRANSACTION;
-          DELETE FROM item_special;
-          DELETE FROM filter_condition;
-          DELETE FROM item;
-          DELETE FROM filter;
-          INSERT INTO item SELECT * FROM backup.item;
-          INSERT INTO filter SELECT * FROM backup.filter;
-          INSERT INTO item_special SELECT * FROM backup.item_special;
-          INSERT INTO filter_condition SELECT * FROM backup.filter_condition;
-          COMMIT;
-        `);
-        db.$client.execSync('DETACH DATABASE backup');
-      }),
+      Effect.acquireUseRelease(
+        Effect.sync(() => db.$client.execSync(`ATTACH DATABASE '${backupPath}' AS backup`)).pipe(
+          Effect.asVoid
+        ),
+        () =>
+          Effect.sync(() =>
+            db.$client.execSync(`
+              BEGIN TRANSACTION;
+              DELETE FROM item_special;
+              DELETE FROM filter_condition;
+              DELETE FROM item;
+              DELETE FROM filter;
+              INSERT INTO item SELECT * FROM backup.item;
+              INSERT INTO filter SELECT * FROM backup.filter;
+              INSERT INTO item_special SELECT * FROM backup.item_special;
+              INSERT INTO filter_condition SELECT * FROM backup.filter_condition;
+              COMMIT;
+        `)
+          ).pipe(Effect.asVoid),
+        () => Effect.sync(() => db.$client.execSync('DETACH DATABASE backup'))
+      ),
   }),
   accessors: true,
 }) {}

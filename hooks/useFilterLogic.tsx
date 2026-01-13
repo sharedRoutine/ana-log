@@ -244,7 +244,7 @@ export function useFilterMatchCounts(
     return countsMap;
   }
 
-  const specialsByCase = new Map<string, string[]>();
+  const specialsByCase = new Map<string, Array<string>>();
   for (const special of itemSpecials) {
     const existing = specialsByCase.get(special.caseNumber) || [];
     existing.push(special.special);

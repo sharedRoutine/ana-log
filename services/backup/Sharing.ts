@@ -1,5 +1,5 @@
-import { Effect } from 'effect'
-import * as Sharing from 'expo-sharing'
+import { Effect } from 'effect';
+import * as Sharing from 'expo-sharing';
 
 export class SharingService extends Effect.Service<SharingService>()('Sharing', {
   sync: () => ({
