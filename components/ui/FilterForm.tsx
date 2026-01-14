@@ -200,6 +200,7 @@ export default function FilterForm({
                         defaultValue={state.value ?? 0}
                         step={1}
                         min={0}
+                        max={1000}
                         onValueChanged={(value) => handleChange(value)}
                       />
                     )}
