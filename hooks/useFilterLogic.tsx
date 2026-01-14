@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '~/db/db';
 import { itemTable, itemSpecialTable, filterConditionTable, filterTable } from '~/db/schema';
+import { SPECIALS_OPTIONS } from '~/lib/options';
 
 const getTableField = (fieldName: string) => {
   return Match.value(fieldName).pipe(
@@ -62,7 +63,7 @@ export const buildWhereClauseFromConditions = (
             .where(
               and(
                 eq(itemSpecialTable.caseNumber, itemTable.caseNumber),
-                eq(itemSpecialTable.special, value as string)
+                eq(itemSpecialTable.special, value as (typeof SPECIALS_OPTIONS)[number])
               )
             )
         );
