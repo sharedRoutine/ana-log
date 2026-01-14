@@ -1,1 +1,0 @@
-UPDATE item SET specials = NULL WHERE specials IS NOT NULL AND specials NOT LIKE '[%';

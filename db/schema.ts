@@ -12,6 +12,7 @@ export const itemTable = sqliteTable(
     airwayManagement: text().$type<(typeof AIRWAY_OPTIONS)[number]>().notNull(),
     department: text().$type<(typeof DEPARTMENT_OPTIONS)[number]>().notNull(),
     departmentOther: text('department_other'),
+    specials: text(),
     localAnesthetics: integer('localAnesthetics', { mode: 'boolean' }).notNull(),
     localAnestheticsText: text('local_anesthetics_text'),
     emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
