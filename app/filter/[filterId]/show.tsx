@@ -39,7 +39,10 @@ export default function ShowFilter() {
       db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId)),
   });
 
-  const whereClause = isConditionsPending ? sql`1 = 0` : buildWhereClause(conditions || []);
+  const whereClause =
+    isConditionsPending || isFilterPending
+      ? sql`1 = 0`
+      : buildWhereClause(conditions || [], filters?.[0]?.combinator ?? 'AND');
 
   const { data: procedures } = useLiveQuery(
     db.select().from(itemTable).where(whereClause).orderBy(desc(itemTable.date)),

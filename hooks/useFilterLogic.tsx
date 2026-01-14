@@ -97,8 +97,11 @@ export const buildWhereClauseFromConditions = (
 export function useFilterLogic() {
   const intl = useIntl();
 
-  const buildWhereClause = (conditions: Array<typeof filterConditionTable.$inferSelect>) => {
-    return buildWhereClauseFromConditions(conditions);
+  const buildWhereClause = (
+    conditions: Array<typeof filterConditionTable.$inferSelect>,
+    combinator: 'AND' | 'OR' = 'AND'
+  ) => {
+    return buildWhereClauseFromConditions(conditions, combinator);
   };
 
   const getMatchingProceduresCount = (
