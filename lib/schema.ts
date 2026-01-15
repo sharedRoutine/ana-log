@@ -11,6 +11,7 @@ export const Item = Schema.Struct({
   department: Schema.Literal(...DEPARTMENT_OPTIONS),
   departmentOther: Schema.String,
   specials: Schema.Array(Schema.Literal(...SPECIALS_OPTIONS)),
+  legacySpecials: Schema.String,
   localAnesthetics: Schema.Boolean,
   localAnestheticsText: Schema.String,
   emergency: Schema.Boolean,

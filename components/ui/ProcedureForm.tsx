@@ -12,7 +12,7 @@ import {
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useRef } from 'react';
-import { itemTable, itemSpecialTable } from '~/db/schema';
+import { itemTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
@@ -75,6 +75,7 @@ export default function ProcedureForm({
   const caseNumberRef = useRef<TextFieldRef>(null);
   const departmentOtherRef = useRef<TextFieldRef>(null);
   const localAnestheticsTextRef = useRef<TextFieldRef>(null);
+  const legacySpecials = useRef<TextFieldRef>(null);
   const procedureRef = useRef<TextFieldRef>(null);
 
   const form = useForm({
@@ -88,6 +89,7 @@ export default function ProcedureForm({
       await caseNumberRef.current?.blur();
       await departmentOtherRef.current?.blur();
       await localAnestheticsTextRef.current?.blur();
+      await legacySpecials.current?.blur();
       await procedureRef.current?.blur();
 
       const itemValues = {
@@ -114,6 +116,7 @@ export default function ProcedureForm({
 
   const departmentValue = useStore(form.store, (state) => state.values.department);
   const localAnestheticsValue = useStore(form.store, (state) => state.values.localAnesthetics);
+  const legacySpecialsValue = useStore(form.store, (state) => state.values.legacySpecials);
 
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
@@ -143,6 +146,7 @@ export default function ProcedureForm({
   const dismiss = async () => {
     await caseNumberRef.current?.blur();
     await departmentOtherRef.current?.blur();
+    await legacySpecials.current?.blur();
     await localAnestheticsTextRef.current?.blur();
     await procedureRef.current?.blur();
   };
@@ -297,6 +301,7 @@ export default function ProcedureForm({
                     );
                   }}
                 </form.Field>
+                <Text>{legacySpecialsValue}</Text>
               </Section>
               <Section title={intl.formatMessage({ id: 'procedure.form.section.settings' })}>
                 <form.Field name="localAnesthetics">

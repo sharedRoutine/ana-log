@@ -60,6 +60,7 @@ export default function EditProcedure() {
     department: existingItem.department,
     departmentOther: existingItem.departmentOther || '',
     specials: data.specials,
+    legacySpecials: existingItem.specials || '',
     localAnesthetics: existingItem.localAnesthetics,
     localAnestheticsText: existingItem.localAnestheticsText || '',
     emergency: existingItem.emergency,

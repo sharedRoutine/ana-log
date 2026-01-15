@@ -24,6 +24,7 @@ export default function UpsertItem() {
     department: 'PSY',
     departmentOther: '',
     specials: [],
+    legacySpecials: '',
     localAnesthetics: false,
     localAnestheticsText: '',
     emergency: false,
