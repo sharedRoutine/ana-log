@@ -301,7 +301,7 @@ export default function ProcedureForm({
                     );
                   }}
                 </form.Field>
-                <Text>{legacySpecialsValue}</Text>
+                {legacySpecialsValue && <Text>{legacySpecialsValue}</Text>}
               </Section>
               <Section title={intl.formatMessage({ id: 'procedure.form.section.settings' })}>
                 <form.Field name="localAnesthetics">
