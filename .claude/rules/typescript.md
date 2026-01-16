@@ -1,8 +1,3 @@
----
-description: TypeScript coding conventions
-globs: ['**/*.ts', '**/*.tsx']
----
-
 # TypeScript
 
 - Do not define explicit types when TypeScript can infer them
