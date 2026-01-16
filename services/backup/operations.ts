@@ -22,7 +22,6 @@ export const importFromUri = Effect.fnUntraced(function* (uri: string) {
     fs.copyFile(uri, tempPath),
     () =>
       Effect.gen(function* () {
-        yield* database.migrateFile(tempPath);
         yield* database.importFromBackup(tempPath);
       }),
     () => fs.deleteFile(tempPath).pipe(Effect.catchAll(() => Effect.void))
