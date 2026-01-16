@@ -19,12 +19,16 @@ export default function EditProcedure() {
   const queryClient = useQueryClient();
 
   const { colorScheme } = useColorScheme();
-  const { procedureId } = useLocalSearchParams<{ procedureId: string }>();
+  const { procedureId: procedureIdParam } = useLocalSearchParams<{ procedureId: string }>();
+  const procedureId = parseInt(procedureIdParam, 10);
 
   const { data, isPending } = useQuery({
     queryKey: ['procedure', procedureId],
     queryFn: async () => {
-      const items = await db.select().from(procedureTable).where(eq(procedureTable.caseNumber, procedureId));
+      const items = await db
+        .select()
+        .from(procedureTable)
+        .where(eq(procedureTable.id, procedureId));
       const item = items[0];
       if (!item) return { item: undefined, specials: [] };
       const specials = await db
@@ -75,14 +79,16 @@ export default function EditProcedure() {
       procedure={procedure}
       isEditing={true}
       onDelete={async () => {
-        await db.delete(procedureTable).where(eq(procedureTable.caseNumber, procedureId));
+        await db.delete(procedureTable).where(eq(procedureTable.id, procedureId));
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
         router.dismissAll();
       }}
       onSubmit={async ({ item, specials }) => {
         await db.transaction(async (tx) => {
-          await tx.update(procedureTable).set(item).where(eq(procedureTable.caseNumber, procedureId));
-          await tx.delete(procedureSpecialTable).where(eq(procedureSpecialTable.procedureId, existingItem.id));
+          await tx.update(procedureTable).set(item).where(eq(procedureTable.id, procedureId));
+          await tx
+            .delete(procedureSpecialTable)
+            .where(eq(procedureSpecialTable.procedureId, existingItem.id));
           if (specials.length > 0) {
             await tx.insert(procedureSpecialTable).values(
               specials.map((special) => ({

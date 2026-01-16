@@ -52,7 +52,8 @@ export default function ShowProcedure() {
   const intl = useIntl();
   const router = useRouter();
 
-  const { procedureId } = useLocalSearchParams<{ procedureId: string }>();
+  const { procedureId: procedureIdParam } = useLocalSearchParams<{ procedureId: string }>();
+  const procedureId = parseInt(procedureIdParam, 10);
 
   const { colorScheme } = useColorScheme();
   const isLight = colorScheme === 'light';
@@ -60,7 +61,10 @@ export default function ShowProcedure() {
   const { data, isPending } = useQuery({
     queryKey: ['procedure', procedureId],
     queryFn: async () => {
-      const items = await db.select().from(procedureTable).where(eq(procedureTable.caseNumber, procedureId));
+      const items = await db
+        .select()
+        .from(procedureTable)
+        .where(eq(procedureTable.id, procedureId));
       const item = items[0];
       if (!item) return { item: undefined, specials: [] };
       const specials = await db
@@ -106,7 +110,7 @@ export default function ShowProcedure() {
       style={{ flex: 1, backgroundColor: isLight ? '#F2F2F7' : '#000000' }}>
       <Stack.Screen
         options={{
-          title: procedureId,
+          title: item.caseNumber,
           presentation: 'modal',
           headerLeft: () => (
             <PressableScale

@@ -147,7 +147,7 @@ export default function ShowFilter() {
             renderItem={({ item }) => (
               <ProcedureCard
                 item={item}
-                onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}
+                onPress={() => router.push(`/procedure/${item.id}/show`)}
                 getDepartmentColor={getDepartmentColor}
                 getTranslatedDepartment={(department) =>
                   intl.formatMessage({ id: `enum.department.${department}` })
