@@ -4,7 +4,7 @@ import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '~/db/db';
-import { itemTable, itemSpecialTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useColors } from '~/hooks/useColors';
@@ -60,12 +60,14 @@ export default function ShowProcedure() {
   const { data, isPending } = useQuery({
     queryKey: ['procedure', procedureId],
     queryFn: async () => {
-      const items = await db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId));
+      const items = await db.select().from(procedureTable).where(eq(procedureTable.caseNumber, procedureId));
+      const item = items[0];
+      if (!item) return { item: undefined, specials: [] };
       const specials = await db
         .select()
-        .from(itemSpecialTable)
-        .where(eq(itemSpecialTable.caseNumber, procedureId));
-      return { item: items[0], specials: specials.map((s) => s.special) };
+        .from(procedureSpecialTable)
+        .where(eq(procedureSpecialTable.procedureId, item.id));
+      return { item, specials: specials.map((s) => s.special) };
     },
   });
 

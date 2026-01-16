@@ -57,6 +57,13 @@
       "when": 1768421747740,
       "tag": "0007_tricky_the_santerians",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1768577902902,
+      "tag": "0008_medical_case_migration",
+      "breakpoints": true
     }
   ]
 }

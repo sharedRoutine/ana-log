@@ -3,23 +3,23 @@ import { Match } from 'effect';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '~/db/db';
-import { itemTable, itemSpecialTable, filterConditionTable, filterTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable, filterConditionTable, filterTable } from '~/db/schema';
 import { SPECIALS_OPTIONS } from '~/lib/options';
 
 const getTableField = (fieldName: string) => {
   return Match.value(fieldName).pipe(
-    Match.when('department', () => itemTable.department),
-    Match.when('asa-score', () => itemTable.asaScore),
-    Match.when('airway-management', () => itemTable.airwayManagement),
-    Match.when('case-number', () => itemTable.caseNumber),
-    Match.when('procedure', () => itemTable.procedure),
-    Match.when('emergency', () => itemTable.emergency),
-    Match.when('favorite', () => itemTable.favorite),
-    Match.when('age-years', () => itemTable.ageYears),
-    Match.when('age-months', () => itemTable.ageMonths),
-    Match.when('age', () => itemTable.ageYears),
-    Match.when('date', () => itemTable.date),
-    Match.when('local-anesthetics', () => itemTable.localAnesthetics),
+    Match.when('department', () => procedureTable.department),
+    Match.when('asa-score', () => procedureTable.asaScore),
+    Match.when('airway-management', () => procedureTable.airwayManagement),
+    Match.when('case-number', () => procedureTable.caseNumber),
+    Match.when('procedure', () => procedureTable.procedure),
+    Match.when('emergency', () => procedureTable.emergency),
+    Match.when('favorite', () => procedureTable.favorite),
+    Match.when('age-years', () => procedureTable.ageYears),
+    Match.when('age-months', () => procedureTable.ageMonths),
+    Match.when('age', () => procedureTable.ageYears),
+    Match.when('date', () => procedureTable.date),
+    Match.when('local-anesthetics', () => procedureTable.localAnesthetics),
     Match.orElse(() => undefined)
   );
 };
@@ -46,7 +46,7 @@ export const buildWhereClauseFromConditions = (
 
       // Special age handling
       if (condition.field === 'age' && condition.type === 'BOOLEAN_CONDITION') {
-        const ageInYears = sql`(${itemTable.ageYears} + ${itemTable.ageMonths} / 12.0)`;
+        const ageInYears = sql`(${procedureTable.ageYears} + ${procedureTable.ageMonths} / 12.0)`;
         if (value === true) {
           return lt(ageInYears, 5);
         } else {
@@ -59,11 +59,11 @@ export const buildWhereClauseFromConditions = (
         return exists(
           db
             .select()
-            .from(itemSpecialTable)
+            .from(procedureSpecialTable)
             .where(
               and(
-                eq(itemSpecialTable.caseNumber, itemTable.caseNumber),
-                eq(itemSpecialTable.special, value as (typeof SPECIALS_OPTIONS)[number])
+                eq(procedureSpecialTable.procedureId, procedureTable.id),
+                eq(procedureSpecialTable.special, value as (typeof SPECIALS_OPTIONS)[number])
               )
             )
         );
@@ -122,7 +122,7 @@ export function useFilterLogic() {
     const whereClause = buildWhereClauseFromConditions(conditions);
     if (!whereClause) return 0;
 
-    const [result] = db.select({ count: count() }).from(itemTable).where(whereClause).all();
+    const [result] = db.select({ count: count() }).from(procedureTable).where(whereClause).all();
     return result?.count || 0;
   };
 
@@ -239,20 +239,20 @@ export function useFilterMatchCounts(
   filters: (typeof filterTable.$inferSelect)[] | undefined,
   allFilterConditions: (typeof filterConditionTable.$inferSelect)[] | undefined
 ): Map<number, number> {
-  const { data: procedures } = useLiveQuery(db.select().from(itemTable));
-  const { data: itemSpecials } = useLiveQuery(db.select().from(itemSpecialTable));
+  const { data: procedures } = useLiveQuery(db.select().from(procedureTable));
+  const { data: procedureSpecials } = useLiveQuery(db.select().from(procedureSpecialTable));
 
   const countsMap = new Map<number, number>();
 
-  if (!filters || !allFilterConditions || !procedures || !itemSpecials) {
+  if (!filters || !allFilterConditions || !procedures || !procedureSpecials) {
     return countsMap;
   }
 
-  const specialsByCase = new Map<string, Array<string>>();
-  for (const special of itemSpecials) {
-    const existing = specialsByCase.get(special.caseNumber) || [];
+  const specialsByProcedure = new Map<number, Array<string>>();
+  for (const special of procedureSpecials) {
+    const existing = specialsByProcedure.get(special.procedureId) || [];
     existing.push(special.special);
-    specialsByCase.set(special.caseNumber, existing);
+    specialsByProcedure.set(special.procedureId, existing);
   }
 
   for (const filter of filters) {
@@ -288,8 +288,8 @@ export function useFilterMatchCounts(
       }
 
       if (condition.field === 'specials' && condition.type === 'ENUM_CONDITION') {
-        const procedureSpecials = specialsByCase.get(procedure.caseNumber) || [];
-        return procedureSpecials.includes(conditionValue as string);
+        const specials = specialsByProcedure.get(procedure.id) || [];
+        return specials.includes(conditionValue as string);
       }
 
       const field = getTableField(condition.field);

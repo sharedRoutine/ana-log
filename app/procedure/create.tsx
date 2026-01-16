@@ -7,7 +7,7 @@ import ProcedureForm from '~/components/ui/ProcedureForm';
 import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
 import { db } from '~/db/db';
-import { itemTable, itemSpecialTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
 
 export default function UpsertItem() {
   const intl = useIntl();
@@ -37,11 +37,20 @@ export default function UpsertItem() {
       procedure={procedure}
       onSubmit={async ({ item, specials }) => {
         await db.transaction(async (tx) => {
-          await tx.insert(itemTable).values(item);
+          await tx
+            .insert(medicalCaseTable)
+            .values({
+              caseNumber: item.caseNumber,
+              ageYears: item.ageYears,
+              ageMonths: item.ageMonths,
+              favorite: item.favorite,
+            })
+            .onConflictDoNothing();
+          const [insertedProcedure] = await tx.insert(procedureTable).values(item).returning();
           if (specials.length > 0) {
-            await tx.insert(itemSpecialTable).values(
+            await tx.insert(procedureSpecialTable).values(
               specials.map((special) => ({
-                caseNumber: item.caseNumber,
+                procedureId: insertedProcedure.id,
                 special,
               }))
             );

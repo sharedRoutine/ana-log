@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useIntl } from 'react-intl';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
-import { itemTable, itemSpecialTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable } from '~/db/schema';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save, FileQuestion } from 'lucide-react-native';
@@ -24,12 +24,14 @@ export default function EditProcedure() {
   const { data, isPending } = useQuery({
     queryKey: ['procedure', procedureId],
     queryFn: async () => {
-      const items = await db.select().from(itemTable).where(eq(itemTable.caseNumber, procedureId));
+      const items = await db.select().from(procedureTable).where(eq(procedureTable.caseNumber, procedureId));
+      const item = items[0];
+      if (!item) return { item: undefined, specials: [] };
       const specials = await db
         .select()
-        .from(itemSpecialTable)
-        .where(eq(itemSpecialTable.caseNumber, procedureId));
-      return { item: items[0], specials: specials.map((s) => s.special) };
+        .from(procedureSpecialTable)
+        .where(eq(procedureSpecialTable.procedureId, item.id));
+      return { item, specials: specials.map((s) => s.special) };
     },
   });
 
@@ -73,18 +75,18 @@ export default function EditProcedure() {
       procedure={procedure}
       isEditing={true}
       onDelete={async () => {
-        await db.delete(itemTable).where(eq(itemTable.caseNumber, procedureId));
+        await db.delete(procedureTable).where(eq(procedureTable.caseNumber, procedureId));
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
         router.dismissAll();
       }}
       onSubmit={async ({ item, specials }) => {
         await db.transaction(async (tx) => {
-          await tx.update(itemTable).set(item).where(eq(itemTable.caseNumber, procedureId));
-          await tx.delete(itemSpecialTable).where(eq(itemSpecialTable.caseNumber, procedureId));
+          await tx.update(procedureTable).set(item).where(eq(procedureTable.caseNumber, procedureId));
+          await tx.delete(procedureSpecialTable).where(eq(procedureSpecialTable.procedureId, existingItem.id));
           if (specials.length > 0) {
-            await tx.insert(itemSpecialTable).values(
+            await tx.insert(procedureSpecialTable).values(
               specials.map((special) => ({
-                caseNumber: procedureId,
+                procedureId: existingItem.id,
                 special,
               }))
             );

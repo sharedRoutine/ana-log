@@ -1,9 +1,9 @@
 import { db } from '~/db/db';
-import { itemTable } from '~/db/schema';
+import { procedureTable } from '~/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
-export type Procedure = typeof itemTable.$inferSelect;
-export type NewProcedure = typeof itemTable.$inferInsert;
+export type Procedure = typeof procedureTable.$inferSelect;
+export type NewProcedure = typeof procedureTable.$inferInsert;
 
 export const procedureKeys = {
   all: ['procedures'] as const,
@@ -14,28 +14,28 @@ export const procedureKeys = {
 };
 
 export async function getAllProcedures() {
-  return db.select().from(itemTable).orderBy(desc(itemTable.date));
+  return db.select().from(procedureTable).orderBy(desc(procedureTable.date));
 }
 
 export async function getProcedureById(caseNumber: string) {
-  const results = await db.select().from(itemTable).where(eq(itemTable.caseNumber, caseNumber));
+  const results = await db.select().from(procedureTable).where(eq(procedureTable.caseNumber, caseNumber));
   return results[0] ?? null;
 }
 
 export async function createProcedure(procedure: NewProcedure) {
-  const results = await db.insert(itemTable).values(procedure).returning();
+  const results = await db.insert(procedureTable).values(procedure).returning();
   return results[0];
 }
 
 export async function updateProcedure(caseNumber: string, updates: Partial<NewProcedure>) {
   const results = await db
-    .update(itemTable)
+    .update(procedureTable)
     .set(updates)
-    .where(eq(itemTable.caseNumber, caseNumber))
+    .where(eq(procedureTable.caseNumber, caseNumber))
     .returning();
   return results[0];
 }
 
 export async function deleteProcedure(caseNumber: string) {
-  await db.delete(itemTable).where(eq(itemTable.caseNumber, caseNumber));
+  await db.delete(procedureTable).where(eq(procedureTable.caseNumber, caseNumber));
 }

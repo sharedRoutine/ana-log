@@ -12,7 +12,7 @@ import {
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useRef } from 'react';
-import { itemTable } from '~/db/schema';
+import { procedureTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
@@ -38,7 +38,7 @@ const validateFormInternally = (value: typeof Item.Type) => {
 };
 
 type ProcedureFormValues = {
-  item: typeof itemTable.$inferInsert;
+  item: typeof procedureTable.$inferInsert;
   specials: Array<(typeof SPECIALS_OPTIONS)[number]>;
 };
 

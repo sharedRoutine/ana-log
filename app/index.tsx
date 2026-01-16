@@ -5,7 +5,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { desc, count } from 'drizzle-orm';
 import { FlashList } from '@shopify/flash-list';
 import { db } from '~/db/db';
-import { filterTable, itemTable, filterConditionTable } from '~/db/schema';
+import { filterTable, procedureTable, filterConditionTable } from '~/db/schema';
 import { useColorScheme } from 'nativewind';
 import { FilterCard } from '~/components/ui/FilterCard';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
@@ -109,7 +109,7 @@ export default function Home() {
   const router = useRouter();
   const intl = useIntl();
   const { data: procedures } = useLiveQuery(
-    db.select().from(itemTable).orderBy(desc(itemTable.date))
+    db.select().from(procedureTable).orderBy(desc(procedureTable.date))
   );
   const { data: filters } = useLiveQuery(db.select().from(filterTable));
   const { data: filterConditions } = useLiveQuery(
@@ -139,7 +139,7 @@ export default function Home() {
     return intl.formatMessage({ id: `enum.department.${department}` });
   };
 
-  const renderItem = ({ item }: { item: typeof itemTable.$inferSelect }) => (
+  const renderItem = ({ item }: { item: typeof procedureTable.$inferSelect }) => (
     <ProcedureCard
       item={item}
       onPress={() => router.push(`/procedure/${item.caseNumber}/show`)}

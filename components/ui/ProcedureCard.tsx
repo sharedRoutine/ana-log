@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { itemTable } from '~/db/schema';
+import { procedureTable } from '~/db/schema';
 import { useIntl } from 'react-intl';
 import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { Siren } from 'lucide-react-native';
 
 interface ProcedureCardProps {
-  item: typeof itemTable.$inferSelect;
+  item: typeof procedureTable.$inferSelect;
   onPress?: () => void;
   getDepartmentColor: (department: string) => string;
   getTranslatedDepartment: (department: string) => string;

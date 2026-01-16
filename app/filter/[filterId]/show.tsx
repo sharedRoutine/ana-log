@@ -6,7 +6,7 @@ import { ChevronLeftCircle, Edit } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '~/db/db';
-import { filterConditionTable, filterTable, itemTable } from '~/db/schema';
+import { filterConditionTable, filterTable, procedureTable } from '~/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
@@ -45,7 +45,7 @@ export default function ShowFilter() {
       : buildWhereClause(conditions || [], filters?.[0]?.combinator ?? 'AND');
 
   const { data: procedures } = useLiveQuery(
-    db.select().from(itemTable).where(whereClause).orderBy(desc(itemTable.date)),
+    db.select().from(procedureTable).where(whereClause).orderBy(desc(procedureTable.date)),
     [whereClause]
   );
 
