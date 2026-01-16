@@ -94,6 +94,7 @@
   "enum.department.RAD": "RAD",
   "enum.department.NRAD": "NRAD",
   "enum.department.PSY": "PSY",
+  "enum.department.AU": "AU",
   "enum.department.other": "Andere",
   "enum.specials.avk": "AVK",
   "enum.specials.zvk": "ZVK",

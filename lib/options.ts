@@ -14,6 +14,7 @@ export const DEPARTMENT_OPTIONS = [
   'RAD',
   'NRAD',
   'PSY',
+  'AU',
   'other',
 ] as const;
 
