@@ -199,7 +199,7 @@ export default function Home() {
         renderItem={renderItem}
         ListHeaderComponent={renderListHeader}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
-        keyExtractor={(item) => item.caseNumber}
+        keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={() => <View className="h-4" />}
       />
     </SafeAreaView>
