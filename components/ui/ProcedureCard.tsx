@@ -9,17 +9,9 @@ interface ProcedureCardProps {
   item: typeof procedureTable.$inferSelect;
   onPress?: () => void;
   getDepartmentColor: (department: string) => string;
-  getTranslatedDepartment: (department: string) => string;
-  getTranslatedAirwayManagement: (airway: string) => string;
 }
 
-export function ProcedureCard({
-  item,
-  onPress,
-  getDepartmentColor,
-  getTranslatedDepartment,
-  getTranslatedAirwayManagement,
-}: ProcedureCardProps) {
+export function ProcedureCard({ item, onPress, getDepartmentColor }: ProcedureCardProps) {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
   const isLight = colorScheme === 'light';
@@ -29,7 +21,7 @@ export function ProcedureCard({
     {
       caseNumber: item.caseNumber,
       date: intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' }),
-      department: getTranslatedDepartment(item.department),
+      department: intl.formatMessage({ id: `enum.department.${item.department}` }),
       asa: item.asaScore,
     }
   );
@@ -64,13 +56,17 @@ export function ProcedureCard({
             paddingVertical: 4,
             borderRadius: 9999,
           }}>
-          <Text className="text-white">{getTranslatedDepartment(item.department)}</Text>
+          <Text className="text-white">
+            {intl.formatMessage({ id: `enum.department.${item.department}` })}
+          </Text>
         </View>
       </View>
 
       <View className="mt-4 flex-row flex-wrap gap-2">
         <View style={[styles.tag, { backgroundColor: '#10B981' }]}>
-          <Text className="text-white">{getTranslatedAirwayManagement(item.airwayManagement)}</Text>
+          <Text className="text-white">
+            {intl.formatMessage({ id: `enum.airway-management.${item.airwayManagement}` })}
+          </Text>
         </View>
         <View style={[styles.tag, isLight ? styles.asaTagLight : styles.asaTagDark]}>
           <Text style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}>

@@ -149,16 +149,10 @@ export default function ShowFilter() {
                 item={item}
                 onPress={() => router.push(`/procedure/${item.id}/show`)}
                 getDepartmentColor={getDepartmentColor}
-                getTranslatedDepartment={(department) =>
-                  intl.formatMessage({ id: `enum.department.${department}` })
-                }
-                getTranslatedAirwayManagement={(airwayManagement) =>
-                  intl.formatMessage({ id: `enum.airway-management.${airwayManagement}` })
-                }
               />
             )}
             getItemType={() => 'procedure'}
-            keyExtractor={(item) => item.caseNumber}
+            keyExtractor={(item) => item.id.toString()}
             ItemSeparatorComponent={() => <View className="h-4" />}
           />
         </View>

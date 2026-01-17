@@ -131,21 +131,11 @@ export default function Home() {
 
   const { exportDatabase, importDatabase } = useDataBackup();
 
-  const getTranslatedAirwayManagement = (airway: string) => {
-    return intl.formatMessage({ id: `enum.airway-management.${airway}` });
-  };
-
-  const getTranslatedDepartment = (department: string) => {
-    return intl.formatMessage({ id: `enum.department.${department}` });
-  };
-
   const renderItem = ({ item }: { item: typeof procedureTable.$inferSelect }) => (
     <ProcedureCard
       item={item}
       onPress={() => router.push(`/procedure/${item.id}/show`)}
       getDepartmentColor={getDepartmentColor}
-      getTranslatedDepartment={getTranslatedDepartment}
-      getTranslatedAirwayManagement={getTranslatedAirwayManagement}
     />
   );
 
