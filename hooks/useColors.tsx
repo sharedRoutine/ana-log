@@ -16,6 +16,7 @@ const DEPARTMENT_COLORS: Record<(typeof DEPARTMENT_OPTIONS)[number], string> = {
   RAD: '#84CC16',
   NRAD: '#F59E0B',
   PSY: '#EF4444',
+  AU: '#7C3AED',
   other: '#6B7280',
 };
 

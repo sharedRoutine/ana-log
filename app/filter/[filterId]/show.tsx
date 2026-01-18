@@ -12,7 +12,6 @@ import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { FlashList } from '@shopify/flash-list';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
-import { useColors } from '~/hooks/useColors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Gauge, Host } from '@expo/ui/swift-ui';
 
@@ -23,8 +22,6 @@ export default function ShowFilter() {
 
   const { filterId: filterIdParam } = useLocalSearchParams<{ filterId: string }>();
   const filterId = parseInt(filterIdParam, 10);
-
-  const { getDepartmentColor } = useColors();
 
   const { buildWhereClause, stringifyCondition } = useFilterLogic();
 
@@ -148,7 +145,6 @@ export default function ShowFilter() {
               <ProcedureCard
                 item={item}
                 onPress={() => router.push(`/procedure/${item.id}/show`)}
-                getDepartmentColor={getDepartmentColor}
               />
             )}
             getItemType={() => 'procedure'}

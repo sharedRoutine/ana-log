@@ -9,7 +9,7 @@ import { PressableScale } from 'pressto';
 import { db } from '~/db/db';
 import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
 
-export default function UpsertItem() {
+export default function CreateProcedure() {
   const intl = useIntl();
   const router = useRouter();
   const { colorScheme } = useColorScheme();

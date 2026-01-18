@@ -2,84 +2,36 @@ import { Stack, useRouter } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { desc, count } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { FlashList } from '@shopify/flash-list';
 import { db } from '~/db/db';
-import { filterTable, procedureTable, filterConditionTable } from '~/db/schema';
+import { procedureTable, medicalCaseTable } from '~/db/schema';
 import { useColorScheme } from 'nativewind';
-import { FilterCard } from '~/components/ui/FilterCard';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
-import { useColors } from '~/hooks/useColors';
-import { useFilterLogic, useFilterMatchCounts } from '~/hooks/useFilterLogic';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, Settings } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
-import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
-import { useDataBackup } from '~/hooks/useDataBackup';
+import FilterGrid from '~/components/home/FilterGrid';
+import DataBackup from '~/components/home/DataBackup';
 
 interface ListHeaderProps {
-  filters: Array<typeof filterTable.$inferSelect>;
-  filterConditions: Array<{ filterId: number; conditionCount: number }>;
-  allFilterConditions: Array<typeof filterConditionTable.$inferSelect>;
-  filterMatchCounts: Map<number, number>;
   proceduresCount: number;
 }
 
 const ListHeader = ({
-  filters,
-  filterConditions,
-  allFilterConditions,
-  filterMatchCounts,
   proceduresCount,
 }: ListHeaderProps) => {
   const router = useRouter();
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
-  const { getConditionText } = useFilterLogic();
 
   return (
     <View className="bg-white px-4 pt-4 dark:bg-black">
-      <View className="mb-6 flex-row items-center gap-4">
-        <Text className="text-[28px] font-semibold text-black dark:text-white">
-          {intl.formatMessage({ id: 'home.my-filters' })}
-        </Text>
-        <View
-          style={[
-            styles.countBadge,
-            colorScheme === 'light' ? styles.countBadgeLight : styles.countBadgeDark,
-          ]}>
-          <Text
-            style={{ fontWeight: '600', color: colorScheme === 'light' ? '#6B7280' : '#8E8E93' }}>
-            {filters.length}
-          </Text>
-        </View>
-      </View>
-
-      <View className="mb-8 flex-row flex-wrap gap-4">
-        <PressableScale
-          style={styles.createFilterCard}
-          onPress={() => router.push('/filter/create')}>
-          <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
-          <Text className="mt-2 text-center text-[13px] font-semibold text-white" numberOfLines={2}>
-            {filters.length === 0
-              ? intl.formatMessage({ id: 'home.create-first-filter' })
-              : intl.formatMessage({ id: 'home.create-another-filter' })}
-          </Text>
-        </PressableScale>
-        {filters?.map((filter) => (
-          <FilterCard
-            key={filter.id}
-            filter={filter}
-            conditionText={getConditionText(filter.id, filterConditions, allFilterConditions)}
-            matchingCount={filterMatchCounts.get(filter.id) ?? 0}
-            onPress={() => router.push(`/filter/${filter.id}/show`)}
-          />
-        ))}
-      </View>
+      <FilterGrid />
 
       <View className="mb-6 flex-row items-center gap-4">
         <Text className="text-[28px] font-semibold text-black dark:text-white">
-          {intl.formatMessage({ id: 'home.my-procedures' })}
+          {intl.formatMessage({ id: 'home.my-cases' })}
         </Text>
         <View
           style={[
@@ -95,10 +47,10 @@ const ListHeader = ({
 
       <PressableScale
         style={styles.createProcedureCard}
-        onPress={() => router.push('/procedure/create')}>
+        onPress={() => router.push('/case/create')}>
         <Plus size={20} color="#FFFFFF" strokeWidth={2.5} />
         <Text className="ml-2 text-[14px] font-semibold text-white">
-          {intl.formatMessage({ id: 'home.add-procedure' })}
+          {intl.formatMessage({ id: 'home.add-case' })}
         </Text>
       </PressableScale>
     </View>
@@ -109,42 +61,32 @@ export default function Home() {
   const router = useRouter();
   const intl = useIntl();
   const { data: procedures } = useLiveQuery(
-    db.select().from(procedureTable).orderBy(desc(procedureTable.date))
-  );
-  const { data: filters } = useLiveQuery(db.select().from(filterTable));
-  const { data: filterConditions } = useLiveQuery(
     db
       .select({
-        filterId: filterConditionTable.filterId,
-        conditionCount: count(),
+        procedure: procedureTable,
+        medicalCase: medicalCaseTable,
       })
-      .from(filterConditionTable)
-      .groupBy(filterConditionTable.filterId)
+      .from(procedureTable)
+      .innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber))
+      .orderBy(desc(procedureTable.date))
   );
 
-  const { data: allFilterConditions } = useLiveQuery(db.select().from(filterConditionTable));
-
-  const { colorScheme } = useColorScheme();
-  const filterMatchCounts = useFilterMatchCounts(filters, allFilterConditions);
-
-  const { getDepartmentColor } = useColors();
-
-  const { exportDatabase, importDatabase } = useDataBackup();
-
-  const renderItem = ({ item }: { item: typeof procedureTable.$inferSelect }) => (
+  const renderItem = ({
+    item,
+  }: {
+    item: {
+      procedure: typeof procedureTable.$inferSelect;
+      medicalCase: typeof medicalCaseTable.$inferSelect;
+    };
+  }) => (
     <ProcedureCard
-      item={item}
-      onPress={() => router.push(`/procedure/${item.id}/show`)}
-      getDepartmentColor={getDepartmentColor}
+      item={item.procedure}
+      onPress={() => router.push(`/procedure/${item.procedure.id}/show`)}
     />
   );
 
   const renderListHeader = () => (
     <ListHeader
-      filters={filters}
-      filterConditions={filterConditions || []}
-      allFilterConditions={allFilterConditions || []}
-      filterMatchCounts={filterMatchCounts}
       proceduresCount={procedures.length}
     />
   );
@@ -155,32 +97,7 @@ export default function Home() {
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
           headerLeft: () => (
-            <View className="px-2">
-              <Host matchContents>
-                <ContextMenu>
-                  <ContextMenu.Items>
-                    <Button
-                      variant="bordered"
-                      systemImage="square.and.arrow.up"
-                      onPress={async () => {
-                        await exportDatabase();
-                      }}>
-                      {intl.formatMessage({ id: 'home.export-data' })}
-                    </Button>
-                    <Button
-                      systemImage="square.and.arrow.down"
-                      onPress={async () => {
-                        await importDatabase();
-                      }}>
-                      {intl.formatMessage({ id: 'home.import-data' })}
-                    </Button>
-                  </ContextMenu.Items>
-                  <ContextMenu.Trigger>
-                    <Settings size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
-                  </ContextMenu.Trigger>
-                </ContextMenu>
-              </Host>
-            </View>
+            <DataBackup />
           ),
         }}
       />
@@ -189,7 +106,7 @@ export default function Home() {
         renderItem={renderItem}
         ListHeaderComponent={renderListHeader}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.procedure.id.toString()}
         ItemSeparatorComponent={() => <View className="h-4" />}
       />
     </SafeAreaView>
@@ -197,20 +114,6 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  createFilterCard: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 16,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 96,
-    width: '47%',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
   createProcedureCard: {
     backgroundColor: '#3B82F6',
     borderRadius: 12,

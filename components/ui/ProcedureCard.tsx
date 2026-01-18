@@ -4,16 +4,19 @@ import { useIntl } from 'react-intl';
 import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { Siren } from 'lucide-react-native';
+import { useColors } from '~/hooks/useColors';
 
 interface ProcedureCardProps {
   item: typeof procedureTable.$inferSelect;
   onPress?: () => void;
-  getDepartmentColor: (department: string) => string;
 }
 
-export function ProcedureCard({ item, onPress, getDepartmentColor }: ProcedureCardProps) {
+export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
+
+  const { getDepartmentColor } = useColors();
+
   const isLight = colorScheme === 'light';
 
   const accessibilityLabel = intl.formatMessage(
