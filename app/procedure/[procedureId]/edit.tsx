@@ -91,7 +91,10 @@ export default function EditProcedure() {
           if (medicalCase.caseNumber !== existingItem.caseNumber) {
             await tx.delete(medicalCaseTable).where(eq(medicalCaseTable.caseNumber, existingItem.caseNumber));
           }
-          await tx.insert(medicalCaseTable).values(medicalCase).onConflictDoNothing();
+          await tx.insert(medicalCaseTable).values(medicalCase).onConflictDoUpdate({
+            target: medicalCaseTable.caseNumber,
+            set: medicalCase
+          });
           await tx.update(procedureTable).set(procedure).where(eq(procedureTable.id, procedureId));
           await tx
             .delete(procedureSpecialTable)
