@@ -189,7 +189,7 @@ export default function ProcedureForm({
         <Host style={{ flex: 1 }}>
           <Form modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}>
             <>
-              <Section title={intl.formatMessage({ id: 'procedure.form.section.basic-info' })}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.case-info' })}>
                 <form.Field name="caseNumber">
                   {({ state, handleChange }) => (
                     <DismissableTextField
@@ -202,23 +202,17 @@ export default function ProcedureForm({
                     />
                   )}
                 </form.Field>
-              </Section>
-              <Section title={intl.formatMessage({ id: 'procedure.form.section.data' })}>
-                <form.Field name="operationDate">
+                <form.Field name="favorite">
                   {({ state, handleChange }) => (
-                    <DateTimePicker
-                      onDateSelected={(date) => {
-                        handleChange(DateTime.unsafeMake(date));
-                      }}
-                      key={state.value.epochMillis}
-                      color={colorScheme === 'dark' ? 'white' : 'black'}
-                      title={intl.formatMessage({ id: 'procedure.form.operation-date' })}
-                      displayedComponents="date"
-                      initialDate={DateTime.toDate(state.value).toISOString()}
-                      variant="compact"
+                    <Switch
+                      label={intl.formatMessage({ id: 'procedure.form.favorite' })}
+                      value={state.value}
+                      onValueChange={handleChange}
                     />
                   )}
                 </form.Field>
+              </Section>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.patient-info' })}>
                 <form.Field name="patientAgeYears">
                   {({ state: yearsState, handleChange: handleYearsChange }) => (
                     <form.Field name="patientAgeMonths">
@@ -236,7 +230,22 @@ export default function ProcedureForm({
                   )}
                 </form.Field>
               </Section>
-              <Section title={intl.formatMessage({ id: 'procedure.form.section.details' })}>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.operation-info' })}>
+                <form.Field name="operationDate">
+                  {({ state, handleChange }) => (
+                    <DateTimePicker
+                      onDateSelected={(date) => {
+                        handleChange(DateTime.unsafeMake(date));
+                      }}
+                      key={state.value.epochMillis}
+                      color={colorScheme === 'dark' ? 'white' : 'black'}
+                      title={intl.formatMessage({ id: 'procedure.form.operation-date' })}
+                      displayedComponents="date"
+                      initialDate={DateTime.toDate(state.value).toISOString()}
+                      variant="compact"
+                    />
+                  )}
+                </form.Field>
                 <form.Field name="asaScore">
                   {({ state, handleChange }) => (
                     <Picker
@@ -303,29 +312,6 @@ export default function ProcedureForm({
                     </>
                   )}
                 </form.Field>
-              </Section>
-              <Section title={intl.formatMessage({ id: 'procedure.form.section.specials' })}>
-                <form.Field name="specials">
-                  {({ state, handleChange }) => {
-                    const selectedLabels = state.value
-                      .map((v) => getSpecialsLabel(v))
-                      .sort((a, b) => a.localeCompare(b))
-                      .join(', ');
-
-                    return (
-                      <Button onPress={() => openSpecialsPicker([...state.value], handleChange)}>
-                        <Text>
-                          {state.value.length > 0
-                            ? selectedLabels
-                            : intl.formatMessage({ id: 'create-filter.select' })}
-                        </Text>
-                      </Button>
-                    );
-                  }}
-                </form.Field>
-                {legacySpecialsValue && <Text>{legacySpecialsValue}</Text>}
-              </Section>
-              <Section title={intl.formatMessage({ id: 'procedure.form.section.settings' })}>
                 <form.Field name="localAnesthetics">
                   {({ state, handleChange }) => (
                     <Switch
@@ -364,15 +350,27 @@ export default function ProcedureForm({
                     />
                   )}
                 </form.Field>
-                <form.Field name="favorite">
-                  {({ state, handleChange }) => (
-                    <Switch
-                      label={intl.formatMessage({ id: 'procedure.form.favorite' })}
-                      value={state.value}
-                      onValueChange={handleChange}
-                    />
-                  )}
+              </Section>
+              <Section title={intl.formatMessage({ id: 'procedure.form.section.specials' })}>
+                <form.Field name="specials">
+                  {({ state, handleChange }) => {
+                    const selectedLabels = state.value
+                      .map((v) => getSpecialsLabel(v))
+                      .sort((a, b) => a.localeCompare(b))
+                      .join(', ');
+
+                    return (
+                      <Button onPress={() => openSpecialsPicker([...state.value], handleChange)}>
+                        <Text>
+                          {state.value.length > 0
+                            ? selectedLabels
+                            : intl.formatMessage({ id: 'create-filter.select' })}
+                        </Text>
+                      </Button>
+                    );
+                  }}
                 </form.Field>
+                {legacySpecialsValue && <Text>{legacySpecialsValue}</Text>}
               </Section>
               <Section title={intl.formatMessage({ id: 'procedure.form.procedure' })}>
                 <form.Field name="procedure">
