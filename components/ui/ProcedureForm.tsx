@@ -20,12 +20,29 @@ import { useRouter } from 'expo-router';
 
 import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from '~/lib/options';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
-import { Item } from '~/lib/schema';
 import { DismissableTextField } from './DismissableTextField';
 import { AgePicker } from './AgePicker';
 import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
 
-const validateFormInternally = (value: typeof Item.Type) => {
+type Item = {
+  caseNumber: string;
+  patientAgeYears: number;
+  patientAgeMonths: number;
+  operationDate: DateTime.Utc;
+  asaScore: 1 | 2 | 3 | 4 | 5 | 6;
+  airwayManagement: (typeof AIRWAY_OPTIONS)[number];
+  department: (typeof DEPARTMENT_OPTIONS)[number];
+  departmentOther: string;
+  specials: Array<(typeof SPECIALS_OPTIONS)[number]>;
+  legacySpecials: string;
+  localAnesthetics: boolean;
+  localAnestheticsText: string;
+  emergency: boolean;
+  favorite: boolean;
+  procedure: string;
+}
+
+const validateFormInternally = (value: Item) => {
   if (!value.caseNumber) {
     return 'No case number';
   }
@@ -44,8 +61,8 @@ type ProcedureFormValues = {
 };
 
 type ProcedureFormProps = {
-  procedure: typeof Item.Type;
-  validateForm?: (value: typeof Item.Type) => string | undefined;
+  procedure: Item;
+  validateForm?: (value: Item) => string | undefined;
   onSubmit: (values: ProcedureFormValues) => Promise<void>;
   isEditing?: boolean;
   onDelete?: () => Promise<void>;

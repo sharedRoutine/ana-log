@@ -7,7 +7,6 @@ import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save, FileQuestion } from 'lucide-react-native';
 import ProcedureForm from '~/components/ui/ProcedureForm';
-import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LoadingScreen } from '~/components/layout/LoadingScreen';

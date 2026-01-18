@@ -4,17 +4,17 @@ import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
 import ProcedureForm from '~/components/ui/ProcedureForm';
-import { Item } from '~/lib/schema';
 import { PressableScale } from 'pressto';
 import { db } from '~/db/db';
 import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
+import { SPECIALS_OPTIONS } from '~/lib/options';
 
 export default function CreateProcedure() {
   const intl = useIntl();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const procedure = Item.make({
+  const procedure = {
     caseNumber: '',
     patientAgeYears: 0,
     patientAgeMonths: 0,
@@ -23,14 +23,14 @@ export default function CreateProcedure() {
     airwayManagement: 'tube',
     department: 'PSY',
     departmentOther: '',
-    specials: [],
+    specials: [] as Array<(typeof SPECIALS_OPTIONS)[number]>,
     legacySpecials: '',
     localAnesthetics: false,
     localAnestheticsText: '',
     emergency: false,
     favorite: false,
     procedure: '',
-  });
+  } as const;
 
   return (
     <ProcedureForm
