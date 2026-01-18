@@ -4,7 +4,7 @@ import { PressableScale } from 'pressto';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '~/db/db';
-import { procedureTable, procedureSpecialTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useColors } from '~/hooks/useColors';
@@ -62,16 +62,20 @@ export default function ShowProcedure() {
     queryKey: ['procedure', procedureId],
     queryFn: async () => {
       const items = await db
-        .select()
+        .select({
+          procedure: procedureTable,
+          medicalCase: medicalCaseTable,
+        })
         .from(procedureTable)
+        .innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber))
         .where(eq(procedureTable.id, procedureId));
       const item = items[0];
-      if (!item) return { item: undefined, specials: [] };
+      if (!item) return { procedure: undefined, medicalCase: undefined, specials: [] };
       const specials = await db
         .select()
         .from(procedureSpecialTable)
-        .where(eq(procedureSpecialTable.procedureId, item.id));
-      return { item, specials: specials.map((s) => s.special) };
+        .where(eq(procedureSpecialTable.procedureId, item.procedure.id));
+      return { procedure: item.procedure, medicalCase: item.medicalCase, specials: specials.map((s) => s.special) };
     },
   });
 
@@ -89,7 +93,7 @@ export default function ShowProcedure() {
     return <LoadingScreen />;
   }
 
-  if (!data || !data.item) {
+  if (!data || !data.procedure || !data.medicalCase) {
     return (
       <EmptyState
         icon={FileQuestion}
@@ -101,8 +105,7 @@ export default function ShowProcedure() {
     );
   }
 
-  const item = data.item;
-  const specials = data.specials;
+  const { procedure, medicalCase, specials } = data;
 
   return (
     <SafeAreaView
@@ -110,7 +113,7 @@ export default function ShowProcedure() {
       style={{ flex: 1, backgroundColor: isLight ? '#F2F2F7' : '#000000' }}>
       <Stack.Screen
         options={{
-          title: item.caseNumber,
+          title: procedure.caseNumber,
           presentation: 'modal',
           headerLeft: () => (
             <PressableScale
@@ -133,7 +136,7 @@ export default function ShowProcedure() {
         }}
       />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {item.emergency && (
+        {procedure.emergency && (
           <View style={[styles.emergencyBanner, { backgroundColor: '#FEE2E2' }]}>
             <Siren size={20} color="#DC2626" />
             <Text style={styles.emergencyText}>Notfall</Text>
@@ -146,11 +149,11 @@ export default function ShowProcedure() {
           </Text>
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.case-number' })}
-            value={item.caseNumber}
+            value={procedure.caseNumber}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.operation-date' })}
-            value={intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' })}
+            value={intl.formatDate(procedure.date, { year: 'numeric', month: 'long', day: 'numeric' })}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.department' })}
@@ -158,10 +161,10 @@ export default function ShowProcedure() {
               <View
                 style={[
                   styles.departmentBadge,
-                  { backgroundColor: getDepartmentColor(item.department) },
+                  { backgroundColor: getDepartmentColor(procedure.department) },
                 ]}>
                 <Text style={styles.departmentText}>
-                  {getTranslatedDepartment(item.department)}
+                  {getTranslatedDepartment(procedure.department)}
                 </Text>
               </View>
             }
@@ -174,11 +177,11 @@ export default function ShowProcedure() {
           </Text>
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.years' })}
-            value={`${item.ageYears}`}
+            value={`${procedure.ageYears}`}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.months' })}
-            value={`${item.ageMonths}`}
+            value={`${procedure.ageMonths}`}
           />
         </View>
 
@@ -188,14 +191,14 @@ export default function ShowProcedure() {
           </Text>
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.asa-score' })}
-            value={`ASA ${item.asaScore}`}
+            value={`ASA ${procedure.asaScore}`}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.airway-management' })}
             value={
               <View style={[styles.airwayBadge, { backgroundColor: '#10B981' }]}>
                 <Text style={styles.airwayText}>
-                  {getTranslatedAirwayManagement(item.airwayManagement)}
+                  {getTranslatedAirwayManagement(procedure.airwayManagement)}
                 </Text>
               </View>
             }
@@ -208,17 +211,17 @@ export default function ShowProcedure() {
           </Text>
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.emergency' })}
-            value={<BooleanIndicator value={item.emergency} />}
+            value={<BooleanIndicator value={procedure.emergency} />}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.favorite' })}
-            value={<BooleanIndicator value={item.favorite} />}
+            value={<BooleanIndicator value={medicalCase.favorite} />}
           />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.local-anesthetics' })}
-            value={<BooleanIndicator value={item.localAnesthetics} />}
+            value={<BooleanIndicator value={procedure.localAnesthetics} />}
           />
-          {item.localAnestheticsText && <DetailRow label="" value={item.localAnestheticsText} />}
+          {procedure.localAnestheticsText && <DetailRow label="" value={procedure.localAnestheticsText} />}
         </View>
 
         {specials && specials.length > 0 && (
@@ -244,14 +247,14 @@ export default function ShowProcedure() {
           </View>
         )}
 
-        {item.procedure && (
+        {procedure.description && (
           <View style={[styles.section, { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' }]}>
             <Text style={[styles.sectionTitle, { color: isLight ? '#6B7280' : '#8E8E93' }]}>
               {intl.formatMessage({ id: 'procedure.form.procedure' })}
             </Text>
             <View style={styles.textBlock}>
               <Text style={[styles.textBlockContent, { color: isLight ? '#1F2937' : '#FFFFFF' }]}>
-                {item.procedure}
+                {procedure.description}
               </Text>
             </View>
           </View>

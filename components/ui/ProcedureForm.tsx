@@ -12,7 +12,7 @@ import {
 } from '@expo/ui/swift-ui';
 import { useIntl } from 'react-intl';
 import { useRef } from 'react';
-import { procedureTable } from '~/db/schema';
+import { medicalCaseTable, procedureTable } from '~/db/schema';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
@@ -38,7 +38,8 @@ const validateFormInternally = (value: typeof Item.Type) => {
 };
 
 type ProcedureFormValues = {
-  item: typeof procedureTable.$inferInsert;
+  procedure: typeof procedureTable.$inferInsert;
+  medicalCase: typeof medicalCaseTable.$inferInsert;
   specials: Array<(typeof SPECIALS_OPTIONS)[number]>;
 };
 
@@ -104,11 +105,15 @@ export default function ProcedureForm({
         localAnesthetics: value.localAnesthetics,
         localAnestheticsText: value.localAnesthetics ? value.localAnestheticsText : null,
         emergency: value.emergency,
-        favorite: value.favorite,
-        procedure: value.procedure,
+        description: value.procedure,
       };
 
-      await onSubmit({ item: itemValues, specials: [...value.specials] });
+      const medicalCaseValues = {
+        caseNumber: value.caseNumber,
+        favorite: value.favorite,
+      };
+
+      await onSubmit({ procedure: itemValues, medicalCase: medicalCaseValues, specials: [...value.specials] });
 
       form.reset();
     },
@@ -156,10 +161,10 @@ export default function ProcedureForm({
     <>
       {children
         ? children({
-            canSubmit: canSubmit && !isSubmitting,
-            dismiss,
-            save,
-          })
+          canSubmit: canSubmit && !isSubmitting,
+          dismiss,
+          save,
+        })
         : null}
       <View
         className="flex-1"
@@ -254,8 +259,8 @@ export default function ProcedureForm({
                       selectedIndex={
                         state.value
                           ? SORTED_DEPARTMENT_OPTIONS.map((option) => option.value).indexOf(
-                              state.value
-                            )
+                            state.value
+                          )
                           : 0
                       }
                       onOptionSelected={({ nativeEvent: { index } }) => {

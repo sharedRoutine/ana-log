@@ -6,7 +6,7 @@ import { ChevronLeftCircle, Edit } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '~/db/db';
-import { filterConditionTable, filterTable, procedureTable } from '~/db/schema';
+import { filterConditionTable, filterTable, medicalCaseTable, procedureTable } from '~/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
@@ -42,7 +42,7 @@ export default function ShowFilter() {
       : buildWhereClause(conditions || [], filters?.[0]?.combinator ?? 'AND');
 
   const { data: procedures } = useLiveQuery(
-    db.select().from(procedureTable).where(whereClause).orderBy(desc(procedureTable.date)),
+    db.select().from(procedureTable).innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber)).where(whereClause).orderBy(desc(procedureTable.date)),
     [whereClause]
   );
 
@@ -141,14 +141,14 @@ export default function ShowFilter() {
         <View className="flex-1 px-4 pt-4">
           <FlashList
             data={procedures}
-            renderItem={({ item }) => (
+            renderItem={({ item: { procedure } }) => (
               <ProcedureCard
-                item={item}
-                onPress={() => router.push(`/procedure/${item.id}/show`)}
+                item={procedure}
+                onPress={() => router.push(`/procedure/${procedure.id}/show`)}
               />
             )}
             getItemType={() => 'procedure'}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.procedure.id.toString()}
             ItemSeparatorComponent={() => <View className="h-4" />}
           />
         </View>

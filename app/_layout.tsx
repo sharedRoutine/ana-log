@@ -126,7 +126,6 @@ export default function Layout() {
                 <Stack.Screen name="filter/create" options={modalOptions} />
                 <Stack.Screen name="filter/[filterId]/show" options={modalOptions} />
                 <Stack.Screen name="filter/[filterId]/edit" options={modalOptions} />
-                <Stack.Screen name="settings" options={modalOptions} />
               </Stack>
             </SpecialsPickerProvider>
           </IntlProvider>

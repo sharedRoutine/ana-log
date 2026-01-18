@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useIntl } from 'react-intl';
 import { eq } from 'drizzle-orm';
 import { db } from '~/db/db';
-import { procedureTable, procedureSpecialTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
 import { DateTime } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeftCircle, Save, FileQuestion } from 'lucide-react-native';
@@ -26,16 +26,20 @@ export default function EditProcedure() {
     queryKey: ['procedure', procedureId],
     queryFn: async () => {
       const items = await db
-        .select()
+        .select({
+          procedure: procedureTable,
+          medicalCase: medicalCaseTable,
+        })
         .from(procedureTable)
+        .innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber))
         .where(eq(procedureTable.id, procedureId));
       const item = items[0];
-      if (!item) return { item: undefined, specials: [] };
+      if (!item) return { procedure: undefined, medicalCase: undefined, specials: [] };
       const specials = await db
         .select()
         .from(procedureSpecialTable)
-        .where(eq(procedureSpecialTable.procedureId, item.id));
-      return { item, specials: specials.map((s) => s.special) };
+        .where(eq(procedureSpecialTable.procedureId, item.procedure.id));
+      return { procedure: item.procedure, medicalCase: item.medicalCase, specials: specials.map((s) => s.special) };
     },
   });
 
@@ -43,7 +47,7 @@ export default function EditProcedure() {
     return <LoadingScreen />;
   }
 
-  if (!data || !data.item) {
+  if (!data || !data.procedure || !data.medicalCase) {
     return (
       <EmptyState
         icon={FileQuestion}
@@ -55,8 +59,8 @@ export default function EditProcedure() {
     );
   }
 
-  const existingItem = data.item;
-  const procedure = Item.make({
+  const existingItem = data.procedure;
+  const procedure = {
     caseNumber: existingItem.caseNumber,
     patientAgeYears: existingItem.ageYears,
     patientAgeMonths: existingItem.ageMonths,
@@ -70,9 +74,9 @@ export default function EditProcedure() {
     localAnesthetics: existingItem.localAnesthetics,
     localAnestheticsText: existingItem.localAnestheticsText || '',
     emergency: existingItem.emergency,
-    favorite: existingItem.favorite,
-    procedure: existingItem.procedure,
-  });
+    favorite: data.medicalCase.favorite,
+    procedure: existingItem.description,
+  };
 
   return (
     <ProcedureForm
@@ -83,9 +87,13 @@ export default function EditProcedure() {
         await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
         router.dismissAll();
       }}
-      onSubmit={async ({ item, specials }) => {
+      onSubmit={async ({ procedure, medicalCase, specials }) => {
         await db.transaction(async (tx) => {
-          await tx.update(procedureTable).set(item).where(eq(procedureTable.id, procedureId));
+          if (medicalCase.caseNumber !== existingItem.caseNumber) {
+            await tx.delete(medicalCaseTable).where(eq(medicalCaseTable.caseNumber, existingItem.caseNumber));
+          }
+          await tx.insert(medicalCaseTable).values(medicalCase).onConflictDoNothing();
+          await tx.update(procedureTable).set(procedure).where(eq(procedureTable.id, procedureId));
           await tx
             .delete(procedureSpecialTable)
             .where(eq(procedureSpecialTable.procedureId, existingItem.id));

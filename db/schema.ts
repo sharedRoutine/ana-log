@@ -3,8 +3,6 @@ import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from '~/lib/opti
 
 export const medicalCaseTable = sqliteTable('medical_case', {
   caseNumber: text('case_number').primaryKey().unique().notNull(),
-  ageYears: integer('age_years').notNull(),
-  ageMonths: integer('age_months').notNull(),
   favorite: integer('favorite', { mode: 'boolean' }).notNull().default(false),
 });
 
@@ -26,8 +24,7 @@ export const procedureTable = sqliteTable(
     localAnesthetics: integer('local_anesthetics', { mode: 'boolean' }).notNull(),
     localAnestheticsText: text('local_anesthetics_text'),
     emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
-    favorite: integer('favorite', { mode: 'boolean' }).notNull().default(false),
-    procedure: text().notNull(),
+    description: text().notNull(),
   },
   (table) => [
     index('procedure_date_idx').on(table.date),

@@ -3,7 +3,7 @@ import { Match } from 'effect';
 import { useIntl } from 'react-intl';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '~/db/db';
-import { procedureTable, procedureSpecialTable, filterConditionTable, filterTable } from '~/db/schema';
+import { procedureTable, procedureSpecialTable, filterConditionTable, filterTable, medicalCaseTable } from '~/db/schema';
 import { SPECIALS_OPTIONS } from '~/lib/options';
 
 const getTableField = (fieldName: string) => {
@@ -12,9 +12,9 @@ const getTableField = (fieldName: string) => {
     Match.when('asa-score', () => procedureTable.asaScore),
     Match.when('airway-management', () => procedureTable.airwayManagement),
     Match.when('case-number', () => procedureTable.caseNumber),
-    Match.when('procedure', () => procedureTable.procedure),
+    Match.when('procedure', () => procedureTable.description),
     Match.when('emergency', () => procedureTable.emergency),
-    Match.when('favorite', () => procedureTable.favorite),
+    Match.when('favorite', () => medicalCaseTable.favorite),
     Match.when('age-years', () => procedureTable.ageYears),
     Match.when('age-months', () => procedureTable.ageMonths),
     Match.when('age', () => procedureTable.ageYears),
@@ -122,7 +122,7 @@ export function useFilterLogic() {
     const whereClause = buildWhereClauseFromConditions(conditions);
     if (!whereClause) return 0;
 
-    const [result] = db.select({ count: count() }).from(procedureTable).where(whereClause).all();
+    const [result] = db.select({ count: count() }).from(procedureTable).innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber)).where(whereClause).all();
     return result?.count || 0;
   };
 
@@ -185,14 +185,14 @@ export function useFilterLogic() {
 
     const operatorSymbol = condition.operator
       ? Match.value(condition.operator).pipe(
-          Match.when('eq', () => '='),
-          Match.when('ct', () => '∋'),
-          Match.when('gt', () => '>'),
-          Match.when('gte', () => '≥'),
-          Match.when('lt', () => '<'),
-          Match.when('lte', () => '≤'),
-          Match.exhaustive
-        )
+        Match.when('eq', () => '='),
+        Match.when('ct', () => '∋'),
+        Match.when('gt', () => '>'),
+        Match.when('gte', () => '≥'),
+        Match.when('lt', () => '<'),
+        Match.when('lte', () => '≤'),
+        Match.exhaustive
+      )
       : '=';
 
     return `${fieldName} ${operatorSymbol} ${value}`;
@@ -239,12 +239,15 @@ export function useFilterMatchCounts(
   filters: (typeof filterTable.$inferSelect)[] | undefined,
   allFilterConditions: (typeof filterConditionTable.$inferSelect)[] | undefined
 ): Map<number, number> {
-  const { data: procedures } = useLiveQuery(db.select().from(procedureTable));
+  const { data } = useLiveQuery(db.select({
+    procedure: procedureTable,
+    medicalCase: medicalCaseTable,
+  }).from(procedureTable).innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber)));
   const { data: procedureSpecials } = useLiveQuery(db.select().from(procedureSpecialTable));
 
   const countsMap = new Map<number, number>();
 
-  if (!filters || !allFilterConditions || !procedures || !procedureSpecials) {
+  if (!filters || !allFilterConditions || !data || !procedureSpecials) {
     return countsMap;
   }
 
@@ -269,7 +272,7 @@ export function useFilterMatchCounts(
     }
 
     const matchCondition = (
-      procedure: (typeof procedures)[number],
+      { procedure, medicalCase }: (typeof data)[number],
       condition: (typeof conditions)[number]
     ) => {
       const conditionValue = Match.value(condition.type).pipe(
@@ -300,9 +303,9 @@ export function useFilterMatchCounts(
         Match.when('asa-score', () => procedure.asaScore),
         Match.when('airway-management', () => procedure.airwayManagement),
         Match.when('case-number', () => procedure.caseNumber),
-        Match.when('procedure', () => procedure.procedure),
+        Match.when('procedure', () => procedure.description),
         Match.when('emergency', () => procedure.emergency),
-        Match.when('favorite', () => procedure.favorite),
+        Match.when('favorite', () => medicalCase.favorite),
         Match.when('local-anesthetics', () => procedure.localAnesthetics),
         Match.orElse(() => undefined)
       );
@@ -351,11 +354,11 @@ export function useFilterMatchCounts(
       );
     };
 
-    const matchingCount = procedures.filter((procedure) => {
+    const matchingCount = data.filter(({ procedure, medicalCase }) => {
       if (filter.combinator === 'OR') {
-        return conditions.some((condition) => matchCondition(procedure, condition));
+        return conditions.some((condition) => matchCondition({ procedure, medicalCase }, condition));
       }
-      return conditions.every((condition) => matchCondition(procedure, condition));
+      return conditions.every((condition) => matchCondition({ procedure, medicalCase }, condition));
     }).length;
 
     countsMap.set(filter.id, matchingCount);

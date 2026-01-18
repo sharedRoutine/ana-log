@@ -35,18 +35,10 @@ export default function CreateProcedure() {
   return (
     <ProcedureForm
       procedure={procedure}
-      onSubmit={async ({ item, specials }) => {
+      onSubmit={async ({ procedure, medicalCase, specials }) => {
         await db.transaction(async (tx) => {
-          await tx
-            .insert(medicalCaseTable)
-            .values({
-              caseNumber: item.caseNumber,
-              ageYears: item.ageYears,
-              ageMonths: item.ageMonths,
-              favorite: item.favorite,
-            })
-            .onConflictDoNothing();
-          const [insertedProcedure] = await tx.insert(procedureTable).values(item).returning();
+          await tx.insert(medicalCaseTable).values(medicalCase).onConflictDoNothing();
+          const [insertedProcedure] = await tx.insert(procedureTable).values(procedure).returning({ id: procedureTable.id });
           if (specials.length > 0) {
             await tx.insert(procedureSpecialTable).values(
               specials.map((special) => ({
