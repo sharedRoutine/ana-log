@@ -1,8 +1,8 @@
-import { db } from '~/db/db';
-import { filterTable, filterConditionTable } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { Match } from 'effect';
 import type { FilterCondition } from '~/lib/condition';
+import { db } from '~/db/db';
+import { filterTable, filterConditionTable } from '~/db/schema';
 
 export type Filter = typeof filterTable.$inferSelect;
 export type FilterConditionRecord = typeof filterConditionTable.$inferSelect;
@@ -14,7 +14,8 @@ export const filterKeys = {
   lists: () => [...filterKeys.all, 'list'] as const,
   details: () => [...filterKeys.all, 'detail'] as const,
   detail: (id: number) => [...filterKeys.details(), id] as const,
-  conditions: (filterId: number) => [...filterKeys.detail(filterId), 'conditions'] as const,
+  conditions: (filterId: number) =>
+    [...filterKeys.detail(filterId), 'conditions'] as const,
 };
 
 export async function getAllFilters() {
@@ -22,17 +23,23 @@ export async function getAllFilters() {
 }
 
 export async function getFilterById(id: number) {
-  const results = await db.select().from(filterTable).where(eq(filterTable.id, id));
+  const results = await db
+    .select()
+    .from(filterTable)
+    .where(eq(filterTable.id, id));
   return results[0] ?? null;
 }
 
 export async function getFilterConditions(filterId: number) {
-  return db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
+  return db
+    .select()
+    .from(filterConditionTable)
+    .where(eq(filterConditionTable.filterId, filterId));
 }
 
 export async function createFilter(
   filter: Omit<NewFilter, 'id' | 'createdAt' | 'updatedAt'>,
-  conditions: Array<typeof FilterCondition.Type>
+  conditions: Array<typeof FilterCondition.Type>,
 ) {
   return db.transaction(async (tx) => {
     const [createdFilter] = await tx
@@ -49,7 +56,7 @@ export async function createFilter(
 export async function updateFilter(
   filterId: number,
   filter: Partial<Omit<NewFilter, 'id' | 'createdAt'>>,
-  conditions: Array<typeof FilterCondition.Type>
+  conditions: Array<typeof FilterCondition.Type>,
 ) {
   return db.transaction(async (tx) => {
     await tx
@@ -57,7 +64,9 @@ export async function updateFilter(
       .set({ ...filter, updatedAt: Date.now() })
       .where(eq(filterTable.id, filterId));
 
-    await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
+    await tx
+      .delete(filterConditionTable)
+      .where(eq(filterConditionTable.filterId, filterId));
     await insertFilterConditions(tx, filterId, conditions);
   });
 }
@@ -71,7 +80,7 @@ export async function deleteFilter(filterId: number) {
 export async function insertFilterConditions(
   tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
   filterId: number,
-  conditions: Array<typeof FilterCondition.Type>
+  conditions: Array<typeof FilterCondition.Type>,
 ) {
   for (const condition of conditions) {
     await Match.value(condition).pipe(
@@ -85,7 +94,7 @@ export async function insertFilterConditions(
             operator: textCondition.operator,
             valueText: textCondition.value,
           })
-          .execute()
+          .execute(),
       ),
       Match.tag('NUMBER_CONDITION', (numberCondition) =>
         tx
@@ -97,7 +106,7 @@ export async function insertFilterConditions(
             operator: numberCondition.operator,
             valueNumber: numberCondition.value,
           })
-          .execute()
+          .execute(),
       ),
       Match.tag('BOOLEAN_CONDITION', (booleanCondition) =>
         tx
@@ -108,7 +117,7 @@ export async function insertFilterConditions(
             field: booleanCondition.field,
             valueBoolean: booleanCondition.value,
           })
-          .execute()
+          .execute(),
       ),
       Match.tag('ENUM_CONDITION', (enumCondition) =>
         tx
@@ -119,9 +128,9 @@ export async function insertFilterConditions(
             field: enumCondition.field,
             valueEnum: enumCondition.value,
           })
-          .execute()
+          .execute(),
       ),
-      Match.exhaustive
+      Match.exhaustive,
     );
   }
 }

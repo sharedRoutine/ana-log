@@ -1,6 +1,6 @@
+import { Effect, Either, Layer, Option } from 'effect';
 import { useIntl } from 'react-intl';
 import { Alert } from 'react-native';
-import { Effect, Either, Layer, Option } from 'effect';
 import {
   FileSystem,
   SharingService,
@@ -14,7 +14,7 @@ const LiveLayer = Layer.mergeAll(
   FileSystem.Default,
   SharingService.Default,
   DocumentPickerService.Default,
-  DatabaseService.Default
+  DatabaseService.Default,
 );
 
 export function useDataBackup() {
@@ -32,7 +32,7 @@ export function useDataBackup() {
       },
       Effect.provide(LiveLayer),
       Effect.scoped,
-      Effect.runPromise
+      Effect.runPromise,
     ),
     importDatabase: Effect.fnUntraced(
       function* () {
@@ -52,13 +52,13 @@ export function useDataBackup() {
           onRight: () => {
             Alert.alert(
               intl.formatMessage({ id: 'import.success.title' }),
-              intl.formatMessage({ id: 'import.success.message' })
+              intl.formatMessage({ id: 'import.success.message' }),
             );
           },
         });
       },
       Effect.provide(LiveLayer),
-      Effect.runPromise
+      Effect.runPromise,
     ),
   };
 }

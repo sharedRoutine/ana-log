@@ -1,26 +1,24 @@
-import { Stack, useRouter } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
-import { useIntl } from 'react-intl';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { desc, eq } from 'drizzle-orm';
 import { FlashList } from '@shopify/flash-list';
+import { desc, eq } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { Stack, useRouter } from 'expo-router';
+import { Plus } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
+import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import DataBackup from '~/components/home/DataBackup';
+import FilterGrid from '~/components/home/FilterGrid';
+import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { db } from '~/db/db';
 import { procedureTable, medicalCaseTable } from '~/db/schema';
-import { useColorScheme } from 'nativewind';
-import { ProcedureCard } from '~/components/ui/ProcedureCard';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
-import { PressableScale } from 'pressto';
-import FilterGrid from '~/components/home/FilterGrid';
-import DataBackup from '~/components/home/DataBackup';
 
 interface ListHeaderProps {
   proceduresCount: number;
 }
 
-const ListHeader = ({
-  proceduresCount,
-}: ListHeaderProps) => {
+const ListHeader = ({ proceduresCount }: ListHeaderProps) => {
   const router = useRouter();
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
@@ -36,10 +34,17 @@ const ListHeader = ({
         <View
           style={[
             styles.countBadge,
-            colorScheme === 'light' ? styles.countBadgeLight : styles.countBadgeDark,
-          ]}>
+            colorScheme === 'light'
+              ? styles.countBadgeLight
+              : styles.countBadgeDark,
+          ]}
+        >
           <Text
-            style={{ fontWeight: '600', color: colorScheme === 'light' ? '#6B7280' : '#8E8E93' }}>
+            style={{
+              fontWeight: '600',
+              color: colorScheme === 'light' ? '#6B7280' : '#8E8E93',
+            }}
+          >
             {proceduresCount}
           </Text>
         </View>
@@ -47,7 +52,8 @@ const ListHeader = ({
 
       <PressableScale
         style={styles.createProcedureCard}
-        onPress={() => router.push('/procedure/create')}>
+        onPress={() => router.push('/procedure/create')}
+      >
         <Plus size={20} color="#FFFFFF" strokeWidth={2.5} />
         <Text className="ml-2 text-[14px] font-semibold text-white">
           {intl.formatMessage({ id: 'home.add-procedure' })}
@@ -67,8 +73,11 @@ export default function Home() {
         medicalCase: medicalCaseTable,
       })
       .from(procedureTable)
-      .innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber))
-      .orderBy(desc(procedureTable.date))
+      .innerJoin(
+        medicalCaseTable,
+        eq(procedureTable.caseNumber, medicalCaseTable.caseNumber),
+      )
+      .orderBy(desc(procedureTable.date)),
   );
 
   const renderItem = ({
@@ -86,9 +95,7 @@ export default function Home() {
   );
 
   const renderListHeader = () => (
-    <ListHeader
-      proceduresCount={procedures.length}
-    />
+    <ListHeader proceduresCount={procedures.length} />
   );
 
   return (
@@ -96,9 +103,7 @@ export default function Home() {
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),
-          headerLeft: () => (
-            <DataBackup />
-          ),
+          headerLeft: () => <DataBackup />,
         }}
       />
       <FlashList

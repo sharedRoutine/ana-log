@@ -1,11 +1,11 @@
-import { Stack, useRouter } from 'expo-router';
-import { View } from 'react-native';
 import { Form, Host, Section, Switch } from '@expo/ui/swift-ui';
 import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
-import { useIntl } from 'react-intl';
-import { useColorScheme } from 'nativewind';
+import { Stack, useRouter } from 'expo-router';
 import { ChevronLeftCircle } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
+import { View } from 'react-native';
 import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
 import { SPECIALS_OPTIONS } from '~/lib/options';
 
@@ -22,7 +22,10 @@ export default function SpecialsPicker() {
     label: intl.formatMessage({ id: `enum.specials.${option}` }),
   })).sort((a, b) => a.label.localeCompare(b.label));
 
-  const toggleSelection = (value: (typeof SPECIALS_OPTIONS)[number], checked: boolean) => {
+  const toggleSelection = (
+    value: (typeof SPECIALS_OPTIONS)[number],
+    checked: boolean,
+  ) => {
     if (checked) {
       setSelection([...selection, value]);
     } else {
@@ -36,12 +39,18 @@ export default function SpecialsPicker() {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: isLight ? '#F2F2F7' : '#000000' }}>
+    <View
+      className="flex-1"
+      style={{ backgroundColor: isLight ? '#F2F2F7' : '#000000' }}
+    >
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'procedure.form.section.specials' }),
           headerLeft: () => (
-            <PressableScale style={{ paddingHorizontal: 8 }} onPress={handleBack}>
+            <PressableScale
+              style={{ paddingHorizontal: 8 }}
+              onPress={handleBack}
+            >
               <ChevronLeftCircle size={24} color={isLight ? '#000' : '#fff'} />
             </PressableScale>
           ),
@@ -58,7 +67,9 @@ export default function SpecialsPicker() {
                   key={item.value}
                   label={item.label}
                   value={isSelected}
-                  onValueChange={(checked) => toggleSelection(item.value, checked)}
+                  onValueChange={(checked) =>
+                    toggleSelection(item.value, checked)
+                  }
                 />
               );
             })}

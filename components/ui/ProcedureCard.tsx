@@ -1,9 +1,9 @@
+import { Siren } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
 import { View, Text, StyleSheet } from 'react-native';
 import { procedureTable } from '~/db/schema';
-import { useIntl } from 'react-intl';
-import { PressableScale } from 'pressto';
-import { useColorScheme } from 'nativewind';
-import { Siren } from 'lucide-react-native';
 import { useColors } from '~/hooks/useColors';
 
 interface ProcedureCardProps {
@@ -23,23 +23,38 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
     { id: 'procedure.accessibility.card' },
     {
       caseNumber: item.caseNumber,
-      date: intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' }),
-      department: intl.formatMessage({ id: `enum.department.${item.department}` }),
+      date: intl.formatDate(item.date, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      department: intl.formatMessage({
+        id: `enum.department.${item.department}`,
+      }),
       asa: item.asaScore,
-    }
+    },
   );
 
   return (
     <PressableScale
-      style={[styles.entryCard, isLight ? styles.entryCardLight : styles.entryCardDark]}
+      style={[
+        styles.entryCard,
+        isLight ? styles.entryCardLight : styles.entryCardDark,
+      ]}
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
-      accessibilityHint={intl.formatMessage({ id: 'procedure.accessibility.hint' })}>
+      accessibilityHint={intl.formatMessage({
+        id: 'procedure.accessibility.hint',
+      })}
+    >
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-2xl font-bold" style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}>
+            <Text
+              className="text-2xl font-bold"
+              style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
+            >
               {item.caseNumber}
             </Text>
             {item.emergency && (
@@ -48,8 +63,15 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
               </View>
             )}
           </View>
-          <Text className="text-sm font-medium" style={{ color: isLight ? '#6B7280' : '#9CA3AF' }}>
-            {intl.formatDate(item.date, { year: 'numeric', month: 'long', day: 'numeric' })}
+          <Text
+            className="text-sm font-medium"
+            style={{ color: isLight ? '#6B7280' : '#9CA3AF' }}
+          >
+            {intl.formatDate(item.date, {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </Text>
         </View>
         <View
@@ -58,7 +80,8 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
             paddingHorizontal: 12,
             paddingVertical: 4,
             borderRadius: 9999,
-          }}>
+          }}
+        >
           <Text className="text-white">
             {intl.formatMessage({ id: `enum.department.${item.department}` })}
           </Text>
@@ -68,17 +91,31 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
       <View className="mt-4 flex-row flex-wrap gap-2">
         <View style={[styles.tag, { backgroundColor: '#10B981' }]}>
           <Text className="text-white">
-            {intl.formatMessage({ id: `enum.airway-management.${item.airwayManagement}` })}
+            {intl.formatMessage({
+              id: `enum.airway-management.${item.airwayManagement}`,
+            })}
           </Text>
         </View>
-        <View style={[styles.tag, isLight ? styles.asaTagLight : styles.asaTagDark]}>
+        <View
+          style={[styles.tag, isLight ? styles.asaTagLight : styles.asaTagDark]}
+        >
           <Text style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}>
-            {intl.formatMessage({ id: 'home.asa-score' }, { score: item.asaScore })}
+            {intl.formatMessage(
+              { id: 'home.asa-score' },
+              {
+                score: item.asaScore,
+              },
+            )}
           </Text>
         </View>
         <View style={[styles.tag, { backgroundColor: '#3B82F6' }]}>
           <Text className="text-white">
-            {intl.formatMessage({ id: 'procedure.age-years' }, { years: item.ageYears })}
+            {intl.formatMessage(
+              { id: 'procedure.age-years' },
+              {
+                years: item.ageYears,
+              },
+            )}
           </Text>
         </View>
       </View>

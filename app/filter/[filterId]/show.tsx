@@ -1,39 +1,50 @@
-import { PlatformColor, Text, View } from 'react-native';
+import { Gauge, Host } from '@expo/ui/swift-ui';
+import { FlashList } from '@shopify/flash-list';
+import { useQuery } from '@tanstack/react-query';
+import { desc, eq, sql } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { PressableScale } from 'pressto';
-import { useIntl } from 'react-intl';
 import { ChevronLeftCircle, Edit } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { useQuery } from '@tanstack/react-query';
-import { db } from '~/db/db';
-import { filterConditionTable, filterTable, medicalCaseTable, procedureTable } from '~/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
-import { useFilterLogic } from '~/hooks/useFilterLogic';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { FlashList } from '@shopify/flash-list';
-import { ProcedureCard } from '~/components/ui/ProcedureCard';
+import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
+import { PlatformColor, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Gauge, Host } from '@expo/ui/swift-ui';
+import { ProcedureCard } from '~/components/ui/ProcedureCard';
+import { db } from '~/db/db';
+import {
+  filterConditionTable,
+  filterTable,
+  medicalCaseTable,
+  procedureTable,
+} from '~/db/schema';
+import { useFilterLogic } from '~/hooks/useFilterLogic';
 
 export default function ShowFilter() {
   const intl = useIntl();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const { filterId: filterIdParam } = useLocalSearchParams<{ filterId: string }>();
+  const { filterId: filterIdParam } = useLocalSearchParams<{
+    filterId: string;
+  }>();
   const filterId = parseInt(filterIdParam, 10);
 
   const { buildWhereClause, stringifyCondition } = useFilterLogic();
 
   const { data: filters, isPending: isFilterPending } = useQuery({
     queryKey: ['filter', filterId],
-    queryFn: () => db.select().from(filterTable).where(eq(filterTable.id, filterId)),
+    queryFn: () =>
+      db.select().from(filterTable).where(eq(filterTable.id, filterId)),
   });
 
   const { data: conditions, isPending: isConditionsPending } = useQuery({
     queryKey: ['filter', filterId, 'conditions'],
     queryFn: () =>
-      db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId)),
+      db
+        .select()
+        .from(filterConditionTable)
+        .where(eq(filterConditionTable.filterId, filterId)),
   });
 
   const whereClause =
@@ -42,8 +53,16 @@ export default function ShowFilter() {
       : buildWhereClause(conditions || [], filters?.[0]?.combinator ?? 'AND');
 
   const { data: procedures } = useLiveQuery(
-    db.select().from(procedureTable).innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber)).where(whereClause).orderBy(desc(procedureTable.date)),
-    [whereClause]
+    db
+      .select()
+      .from(procedureTable)
+      .innerJoin(
+        medicalCaseTable,
+        eq(procedureTable.caseNumber, medicalCaseTable.caseNumber),
+      )
+      .where(whereClause)
+      .orderBy(desc(procedureTable.date)),
+    [whereClause],
   );
 
   if (!whereClause) {
@@ -91,8 +110,12 @@ export default function ShowFilter() {
               style={{ paddingHorizontal: 8 }}
               onPress={async () => {
                 router.back();
-              }}>
-              <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+              }}
+            >
+              <ChevronLeftCircle
+                size={24}
+                color={colorScheme === 'light' ? '#000' : '#fff'}
+              />
             </PressableScale>
           ),
           headerRight: () => (
@@ -100,13 +123,20 @@ export default function ShowFilter() {
               style={{ paddingHorizontal: 8 }}
               onPress={async () => {
                 router.push(`/filter/${filterId}/edit`);
-              }}>
-              <Edit size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+              }}
+            >
+              <Edit
+                size={24}
+                color={colorScheme === 'light' ? '#000' : '#fff'}
+              />
             </PressableScale>
           ),
         }}
       />
-      <SafeAreaView edges={['bottom']} className="flex-1 bg-white dark:bg-black">
+      <SafeAreaView
+        edges={['bottom']}
+        className="flex-1 bg-white dark:bg-black"
+      >
         {filters[0].goal ? (
           <View className="px-4 pt-6">
             <View className="flex flex-row items-center justify-between">
@@ -135,7 +165,9 @@ export default function ShowFilter() {
         ) : null}
         <View className="flex-row flex-wrap px-4 py-4">
           <Text className="text-gray-600 dark:text-gray-300">
-            {conditions.map((condition) => stringifyCondition(condition)).join(', ')}
+            {conditions
+              .map((condition) => stringifyCondition(condition))
+              .join(', ')}
           </Text>
         </View>
         <View className="flex-1 px-4 pt-4">

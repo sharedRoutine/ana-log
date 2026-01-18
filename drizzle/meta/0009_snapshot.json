@@ -88,9 +88,7 @@
       "indexes": {
         "filter_condition_filter_id_idx": {
           "name": "filter_condition_filter_id_idx",
-          "columns": [
-            "filter_id"
-          ],
+          "columns": ["filter_id"],
           "isUnique": false
         }
       },
@@ -99,12 +97,8 @@
           "name": "filter_condition_filter_id_filter_id_fk",
           "tableFrom": "filter_condition",
           "tableTo": "filter",
-          "columnsFrom": [
-            "filter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["filter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -188,9 +182,7 @@
       "indexes": {
         "medical_case_case_number_unique": {
           "name": "medical_case_case_number_unique",
-          "columns": [
-            "case_number"
-          ],
+          "columns": ["case_number"],
           "isUnique": true
         }
       },
@@ -220,9 +212,7 @@
       "indexes": {
         "idx_procedure_special_special": {
           "name": "idx_procedure_special_special",
-          "columns": [
-            "special"
-          ],
+          "columns": ["special"],
           "isUnique": false
         }
       },
@@ -231,22 +221,15 @@
           "name": "procedure_special_procedure_id_procedure_id_fk",
           "tableFrom": "procedure_special",
           "tableTo": "procedure",
-          "columnsFrom": [
-            "procedure_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["procedure_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
         "procedure_special_procedure_id_special_pk": {
-          "columns": [
-            "procedure_id",
-            "special"
-          ],
+          "columns": ["procedure_id", "special"],
           "name": "procedure_special_procedure_id_special_pk"
         }
       },
@@ -367,30 +350,22 @@
       "indexes": {
         "procedure_date_idx": {
           "name": "procedure_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         },
         "procedure_department_idx": {
           "name": "procedure_department_idx",
-          "columns": [
-            "department"
-          ],
+          "columns": ["department"],
           "isUnique": false
         },
         "procedure_airway_idx": {
           "name": "procedure_airway_idx",
-          "columns": [
-            "airway_management"
-          ],
+          "columns": ["airway_management"],
           "isUnique": false
         },
         "procedure_case_number_idx": {
           "name": "procedure_case_number_idx",
-          "columns": [
-            "case_number"
-          ],
+          "columns": ["case_number"],
           "isUnique": false
         }
       },
@@ -399,12 +374,8 @@
           "name": "procedure_case_number_medical_case_case_number_fk",
           "tableFrom": "procedure",
           "tableTo": "medical_case",
-          "columnsFrom": [
-            "case_number"
-          ],
-          "columnsTo": [
-            "case_number"
-          ],
+          "columnsFrom": ["case_number"],
+          "columnsTo": ["case_number"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }

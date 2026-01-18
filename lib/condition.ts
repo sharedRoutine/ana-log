@@ -1,5 +1,9 @@
 import { Schema } from 'effect';
-import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from './options';
+import {
+  AIRWAY_OPTIONS,
+  DEPARTMENT_OPTIONS,
+  SPECIALS_OPTIONS,
+} from './options';
 
 export const TextCondition = Schema.TaggedStruct('TEXT_CONDITION', {
   field: Schema.String,
@@ -9,7 +13,7 @@ export const TextCondition = Schema.TaggedStruct('TEXT_CONDITION', {
     Schema.withDefaults({
       decoding: () => 'eq' as const,
       constructor: () => 'eq' as const,
-    })
+    }),
   ),
   value: Schema.String,
 });
@@ -22,7 +26,7 @@ export const NumberCondition = Schema.TaggedStruct('NUMBER_CONDITION', {
     Schema.withDefaults({
       decoding: () => 'eq' as const,
       constructor: () => 'eq' as const,
-    })
+    }),
   ),
   value: Schema.Number,
 });
@@ -42,7 +46,7 @@ export const FilterCondition = Schema.Union(
   TextCondition,
   NumberCondition,
   BooleanCondition,
-  EnumCondition
+  EnumCondition,
 );
 
 export const Filter = Schema.Struct({
@@ -53,7 +57,7 @@ export const Filter = Schema.Struct({
     Schema.withDefaults({
       decoding: () => 'AND' as const,
       constructor: () => 'AND' as const,
-    })
+    }),
   ),
   conditions: Schema.mutable(Schema.Array(FilterCondition)),
 });

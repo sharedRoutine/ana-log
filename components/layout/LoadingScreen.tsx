@@ -1,5 +1,5 @@
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useColorScheme } from 'nativewind';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 
 interface LoadingScreenProps {
   message?: string;
@@ -12,7 +12,11 @@ export function LoadingScreen({ message }: LoadingScreenProps) {
   return (
     <View style={[styles.container, isLight && styles.containerLight]}>
       <ActivityIndicator size="large" color="#3B82F6" />
-      {message && <Text style={[styles.message, isLight && styles.messageLight]}>{message}</Text>}
+      {message && (
+        <Text style={[styles.message, isLight && styles.messageLight]}>
+          {message}
+        </Text>
+      )}
     </View>
   );
 }

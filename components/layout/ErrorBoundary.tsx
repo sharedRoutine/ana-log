@@ -1,6 +1,6 @@
+import { PressableScale } from 'pressto';
 import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { PressableScale } from 'pressto';
 
 interface Props {
   children: ReactNode;

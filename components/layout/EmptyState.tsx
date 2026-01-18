@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { PressableScale } from 'pressto';
 import { LucideIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { View, Text, StyleSheet } from 'react-native';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -11,7 +11,13 @@ interface EmptyStateProps {
   onAction?: () => void;
 }
 
-export function EmptyState({ icon: Icon, title, message, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  message,
+  actionLabel,
+  onAction,
+}: EmptyStateProps) {
   const { colorScheme } = useColorScheme();
   const isLight = colorScheme === 'light';
 
@@ -23,7 +29,9 @@ export function EmptyState({ icon: Icon, title, message, actionLabel, onAction }
         </View>
       )}
       <Text style={[styles.title, isLight && styles.titleLight]}>{title}</Text>
-      <Text style={[styles.message, isLight && styles.messageLight]}>{message}</Text>
+      <Text style={[styles.message, isLight && styles.messageLight]}>
+        {message}
+      </Text>
       {actionLabel && onAction && (
         <PressableScale style={styles.actionButton} onPress={onAction}>
           <Text style={styles.actionButtonText}>{actionLabel}</Text>

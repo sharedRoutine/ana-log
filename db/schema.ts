@@ -1,5 +1,16 @@
-import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { AIRWAY_OPTIONS, DEPARTMENT_OPTIONS, SPECIALS_OPTIONS } from '~/lib/options';
+import {
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+} from 'drizzle-orm/sqlite-core';
+import {
+  AIRWAY_OPTIONS,
+  DEPARTMENT_OPTIONS,
+  SPECIALS_OPTIONS,
+} from '~/lib/options';
 
 export const medicalCaseTable = sqliteTable('medical_case', {
   caseNumber: text('case_number').primaryKey().unique().notNull(),
@@ -12,18 +23,27 @@ export const procedureTable = sqliteTable(
     id: integer('id').primaryKey({ autoIncrement: true }),
     caseNumber: text('case_number')
       .notNull()
-      .references(() => medicalCaseTable.caseNumber, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => medicalCaseTable.caseNumber, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     ageYears: integer('age_years').notNull(),
     ageMonths: integer('age_months').notNull(),
     date: integer().notNull(),
     asaScore: integer('asa_score').notNull(),
-    airwayManagement: text('airway_management').$type<(typeof AIRWAY_OPTIONS)[number]>().notNull(),
+    airwayManagement: text('airway_management')
+      .$type<(typeof AIRWAY_OPTIONS)[number]>()
+      .notNull(),
     department: text().$type<(typeof DEPARTMENT_OPTIONS)[number]>().notNull(),
     departmentOther: text('department_other'),
     specials: text(),
-    localAnesthetics: integer('local_anesthetics', { mode: 'boolean' }).notNull(),
+    localAnesthetics: integer('local_anesthetics', {
+      mode: 'boolean',
+    }).notNull(),
     localAnestheticsText: text('local_anesthetics_text'),
-    emergency: integer('emergency', { mode: 'boolean' }).notNull().default(false),
+    emergency: integer('emergency', { mode: 'boolean' })
+      .notNull()
+      .default(false),
     description: text().notNull(),
   },
   (table) => [
@@ -31,7 +51,7 @@ export const procedureTable = sqliteTable(
     index('procedure_department_idx').on(table.department),
     index('procedure_airway_idx').on(table.airwayManagement),
     index('procedure_case_number_idx').on(table.caseNumber),
-  ]
+  ],
 );
 
 export const procedureSpecialTable = sqliteTable(
@@ -39,13 +59,16 @@ export const procedureSpecialTable = sqliteTable(
   {
     procedureId: integer('procedure_id')
       .notNull()
-      .references(() => procedureTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => procedureTable.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     special: text().notNull().$type<(typeof SPECIALS_OPTIONS)[number]>(),
   },
   (table) => [
     primaryKey({ columns: [table.procedureId, table.special] }),
     index('idx_procedure_special_special').on(table.special),
-  ]
+  ],
 );
 
 export const filterTable = sqliteTable('filter', {
@@ -69,9 +92,17 @@ export const filterConditionTable = sqliteTable(
     id: integer('id').primaryKey({ autoIncrement: true }),
     filterId: integer('filter_id')
       .notNull()
-      .references(() => filterTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => filterTable.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     type: text('type', {
-      enum: ['TEXT_CONDITION', 'NUMBER_CONDITION', 'BOOLEAN_CONDITION', 'ENUM_CONDITION'],
+      enum: [
+        'TEXT_CONDITION',
+        'NUMBER_CONDITION',
+        'BOOLEAN_CONDITION',
+        'ENUM_CONDITION',
+      ],
     }).notNull(),
     field: text('field').notNull(),
     operator: text('operator', {
@@ -88,5 +119,5 @@ export const filterConditionTable = sqliteTable(
       .notNull()
       .$defaultFn(() => Date.now()),
   },
-  (table) => [index('filter_condition_filter_id_idx').on(table.filterId)]
+  (table) => [index('filter_condition_filter_id_idx').on(table.filterId)],
 );

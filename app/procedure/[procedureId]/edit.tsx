@@ -1,16 +1,20 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useIntl } from 'react-intl';
-import { eq } from 'drizzle-orm';
-import { db } from '~/db/db';
-import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
-import { DateTime } from 'effect';
-import { useColorScheme } from 'nativewind';
-import { ChevronLeftCircle, Save, FileQuestion } from 'lucide-react-native';
-import ProcedureForm from '~/components/ui/ProcedureForm';
-import { PressableScale } from 'pressto';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import { eq } from 'drizzle-orm';
+import { DateTime } from 'effect';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { ChevronLeftCircle, Save, FileQuestion } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
 import { EmptyState } from '~/components/layout/EmptyState';
+import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import ProcedureForm from '~/components/ui/ProcedureForm';
+import { db } from '~/db/db';
+import {
+  procedureTable,
+  procedureSpecialTable,
+  medicalCaseTable,
+} from '~/db/schema';
 
 export default function EditProcedure() {
   const intl = useIntl();
@@ -18,7 +22,9 @@ export default function EditProcedure() {
   const queryClient = useQueryClient();
 
   const { colorScheme } = useColorScheme();
-  const { procedureId: procedureIdParam } = useLocalSearchParams<{ procedureId: string }>();
+  const { procedureId: procedureIdParam } = useLocalSearchParams<{
+    procedureId: string;
+  }>();
   const procedureId = parseInt(procedureIdParam, 10);
 
   const { data, isPending } = useQuery({
@@ -30,15 +36,23 @@ export default function EditProcedure() {
           medicalCase: medicalCaseTable,
         })
         .from(procedureTable)
-        .innerJoin(medicalCaseTable, eq(procedureTable.caseNumber, medicalCaseTable.caseNumber))
+        .innerJoin(
+          medicalCaseTable,
+          eq(procedureTable.caseNumber, medicalCaseTable.caseNumber),
+        )
         .where(eq(procedureTable.id, procedureId));
       const item = items[0];
-      if (!item) return { procedure: undefined, medicalCase: undefined, specials: [] };
+      if (!item)
+        return { procedure: undefined, medicalCase: undefined, specials: [] };
       const specials = await db
         .select()
         .from(procedureSpecialTable)
         .where(eq(procedureSpecialTable.procedureId, item.procedure.id));
-      return { procedure: item.procedure, medicalCase: item.medicalCase, specials: specials.map((s) => s.special) };
+      return {
+        procedure: item.procedure,
+        medicalCase: item.medicalCase,
+        specials: specials.map((s) => s.special),
+      };
     },
   });
 
@@ -82,20 +96,32 @@ export default function EditProcedure() {
       procedure={procedure}
       isEditing={true}
       onDelete={async () => {
-        await db.delete(procedureTable).where(eq(procedureTable.id, procedureId));
-        await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
+        await db
+          .delete(procedureTable)
+          .where(eq(procedureTable.id, procedureId));
+        await queryClient.invalidateQueries({
+          queryKey: ['procedure', procedureId],
+        });
         router.dismissAll();
       }}
       onSubmit={async ({ procedure, medicalCase, specials }) => {
         await db.transaction(async (tx) => {
           if (medicalCase.caseNumber !== existingItem.caseNumber) {
-            await tx.delete(medicalCaseTable).where(eq(medicalCaseTable.caseNumber, existingItem.caseNumber));
+            await tx
+              .delete(medicalCaseTable)
+              .where(eq(medicalCaseTable.caseNumber, existingItem.caseNumber));
           }
-          await tx.insert(medicalCaseTable).values(medicalCase).onConflictDoUpdate({
-            target: medicalCaseTable.caseNumber,
-            set: medicalCase
-          });
-          await tx.update(procedureTable).set(procedure).where(eq(procedureTable.id, procedureId));
+          await tx
+            .insert(medicalCaseTable)
+            .values(medicalCase)
+            .onConflictDoUpdate({
+              target: medicalCaseTable.caseNumber,
+              set: medicalCase,
+            });
+          await tx
+            .update(procedureTable)
+            .set(procedure)
+            .where(eq(procedureTable.id, procedureId));
           await tx
             .delete(procedureSpecialTable)
             .where(eq(procedureSpecialTable.procedureId, existingItem.id));
@@ -104,13 +130,16 @@ export default function EditProcedure() {
               specials.map((special) => ({
                 procedureId: existingItem.id,
                 special,
-              }))
+              })),
             );
           }
         });
-        await queryClient.invalidateQueries({ queryKey: ['procedure', procedureId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['procedure', procedureId],
+        });
         router.back();
-      }}>
+      }}
+    >
       {({ canSubmit, dismiss, save }) => (
         <Stack.Screen
           options={{
@@ -122,8 +151,12 @@ export default function EditProcedure() {
                 onPress={() => {
                   dismiss();
                   router.back();
-                }}>
-                <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+                }}
+              >
+                <ChevronLeftCircle
+                  size={24}
+                  color={colorScheme === 'light' ? '#000' : '#fff'}
+                />
               </PressableScale>
             ),
             headerRight: () => (
@@ -132,7 +165,8 @@ export default function EditProcedure() {
                 onPress={() => {
                   if (!canSubmit) return;
                   save();
-                }}>
+                }}
+              >
                 <Save size={24} color="#3B82F6" />
               </PressableScale>
             ),

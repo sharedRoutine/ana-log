@@ -1,18 +1,18 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { PressableScale } from 'pressto';
-import { useIntl } from 'react-intl';
-import { ChevronLeftCircle, Save, FilterX } from 'lucide-react-native';
-import { useColorScheme } from 'nativewind';
-import FilterForm from '~/components/ui/FilterForm';
-import { db } from '~/db/db';
-import { Match } from 'effect';
-import { filterConditionTable, filterTable } from '~/db/schema';
-import { Filter } from '~/lib/condition';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
-import { convertConditions } from '~/db/conversions';
-import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import { Match } from 'effect';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { ChevronLeftCircle, Save, FilterX } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
 import { EmptyState } from '~/components/layout/EmptyState';
+import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import FilterForm from '~/components/ui/FilterForm';
+import { convertConditions } from '~/db/conversions';
+import { db } from '~/db/db';
+import { filterConditionTable, filterTable } from '~/db/schema';
+import { Filter } from '~/lib/condition';
 
 export default function EditFilter() {
   const intl = useIntl();
@@ -21,18 +21,24 @@ export default function EditFilter() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { filterId: filterIdParam } = useLocalSearchParams<{ filterId: string }>();
+  const { filterId: filterIdParam } = useLocalSearchParams<{
+    filterId: string;
+  }>();
   const filterId = parseInt(filterIdParam, 10);
 
   const { data, isPending } = useQuery({
     queryKey: ['filter', filterId],
-    queryFn: () => db.select().from(filterTable).where(eq(filterTable.id, filterId)),
+    queryFn: () =>
+      db.select().from(filterTable).where(eq(filterTable.id, filterId)),
   });
 
   const { data: conditions, isPending: isConditionsPending } = useQuery({
     queryKey: ['filter', filterId, 'conditions'],
     queryFn: () =>
-      db.select().from(filterConditionTable).where(eq(filterConditionTable.filterId, filterId)),
+      db
+        .select()
+        .from(filterConditionTable)
+        .where(eq(filterConditionTable.filterId, filterId)),
   });
 
   if (isPending || isConditionsPending) {
@@ -64,7 +70,9 @@ export default function EditFilter() {
       onDelete={async () => {
         await db.transaction(async (tx) => {
           await tx.delete(filterTable).where(eq(filterTable.id, filterId));
-          await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
+          await tx
+            .delete(filterConditionTable)
+            .where(eq(filterConditionTable.filterId, filterId));
         });
         await queryClient.invalidateQueries({ queryKey: ['filter', filterId] });
         router.dismissAll();
@@ -79,7 +87,9 @@ export default function EditFilter() {
               combinator: value.combinator,
             })
             .where(eq(filterTable.id, filterId));
-          await tx.delete(filterConditionTable).where(eq(filterConditionTable.filterId, filterId));
+          await tx
+            .delete(filterConditionTable)
+            .where(eq(filterConditionTable.filterId, filterId));
 
           for (const condition of value.conditions) {
             await Match.value(condition).pipe(
@@ -93,7 +103,7 @@ export default function EditFilter() {
                     operator: textCondition.operator,
                     valueText: textCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
               Match.tag('NUMBER_CONDITION', (numberCondition) =>
                 tx
@@ -105,7 +115,7 @@ export default function EditFilter() {
                     operator: numberCondition.operator,
                     valueNumber: numberCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
               Match.tag('BOOLEAN_CONDITION', (booleanCondition) =>
                 tx
@@ -116,7 +126,7 @@ export default function EditFilter() {
                     field: booleanCondition.field,
                     valueBoolean: booleanCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
               Match.tag('ENUM_CONDITION', (enumCondition) =>
                 tx
@@ -127,15 +137,16 @@ export default function EditFilter() {
                     field: enumCondition.field,
                     valueEnum: enumCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
-              Match.exhaustive
+              Match.exhaustive,
             );
           }
         });
         await queryClient.invalidateQueries({ queryKey: ['filter', filterId] });
         router.back();
-      }}>
+      }}
+    >
       {({ dismiss, canSubmit, save }) => (
         <Stack.Screen
           options={{
@@ -147,8 +158,12 @@ export default function EditFilter() {
                 onPress={() => {
                   dismiss();
                   router.back();
-                }}>
-                <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+                }}
+              >
+                <ChevronLeftCircle
+                  size={24}
+                  color={colorScheme === 'light' ? '#000' : '#fff'}
+                />
               </PressableScale>
             ),
             headerRight: () => (
@@ -157,7 +172,8 @@ export default function EditFilter() {
                 onPress={() => {
                   if (!canSubmit) return;
                   save();
-                }}>
+                }}
+              >
                 <Save size={24} color="#3B82F6" />
               </PressableScale>
             ),

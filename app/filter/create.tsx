@@ -1,13 +1,13 @@
-import { Stack, useRouter } from 'expo-router';
-import { useIntl } from 'react-intl';
 import { Match } from 'effect';
-import { Filter, FilterCondition } from '~/lib/condition';
-import { db } from '~/db/db';
-import { filterConditionTable, filterTable } from '~/db/schema';
+import { Stack, useRouter } from 'expo-router';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
 import FilterForm from '~/components/ui/FilterForm';
+import { db } from '~/db/db';
+import { filterConditionTable, filterTable } from '~/db/schema';
+import { Filter, FilterCondition } from '~/lib/condition';
 
 export default function CreateFilter() {
   const intl = useIntl();
@@ -45,7 +45,7 @@ export default function CreateFilter() {
                     operator: textCondition.operator,
                     valueText: textCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
               Match.tag('NUMBER_CONDITION', (numberCondition) =>
                 tx
@@ -57,7 +57,7 @@ export default function CreateFilter() {
                     operator: numberCondition.operator,
                     valueNumber: numberCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
               Match.tag('BOOLEAN_CONDITION', (booleanCondition) =>
                 tx
@@ -68,7 +68,7 @@ export default function CreateFilter() {
                     field: booleanCondition.field,
                     valueBoolean: booleanCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
               Match.tag('ENUM_CONDITION', (enumCondition) =>
                 tx
@@ -79,14 +79,15 @@ export default function CreateFilter() {
                     field: enumCondition.field,
                     valueEnum: enumCondition.value,
                   })
-                  .execute()
+                  .execute(),
               ),
-              Match.exhaustive
+              Match.exhaustive,
             );
           }
           router.back();
         });
-      }}>
+      }}
+    >
       {({ canSubmit, dismiss, save }) => (
         <Stack.Screen
           options={{
@@ -98,8 +99,12 @@ export default function CreateFilter() {
                 onPress={() => {
                   dismiss();
                   router.back();
-                }}>
-                <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+                }}
+              >
+                <ChevronLeftCircle
+                  size={24}
+                  color={colorScheme === 'light' ? '#000' : '#fff'}
+                />
               </PressableScale>
             ),
             headerRight: () => (
@@ -108,7 +113,8 @@ export default function CreateFilter() {
                 onPress={() => {
                   if (!canSubmit) return;
                   save();
-                }}>
+                }}
+              >
                 <Save size={24} color="#3B82F6" />
               </PressableScale>
             ),

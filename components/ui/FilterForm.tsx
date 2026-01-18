@@ -11,15 +11,20 @@ import {
   TextFieldRef,
   Stepper,
 } from '@expo/ui/swift-ui';
-import { useIntl } from 'react-intl';
+import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
-import { FIELDS, Filter, BooleanCondition, FilterCondition } from '~/lib/condition';
-import { Fragment } from 'react/jsx-runtime';
-import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
-import { useRef } from 'react';
-import { View } from 'react-native';
 import { useColorScheme } from 'nativewind';
+import { useRef } from 'react';
+import { useIntl } from 'react-intl';
+import { View } from 'react-native';
+import { Fragment } from 'react/jsx-runtime';
+import {
+  FIELDS,
+  Filter,
+  BooleanCondition,
+  FilterCondition,
+} from '~/lib/condition';
 import { DismissableTextField } from './DismissableTextField';
 
 // TODO: Better errors
@@ -41,7 +46,10 @@ const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
         if (!textCondition.field) {
           return 'Missing field';
         }
-        if (typeof textCondition.value !== 'string' || !textCondition.value.trim()) {
+        if (
+          typeof textCondition.value !== 'string' ||
+          !textCondition.value.trim()
+        ) {
           return 'Empty value in condition';
         }
       }),
@@ -49,7 +57,10 @@ const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
         if (!numberCondition.field) {
           return 'Missing field';
         }
-        if (typeof numberCondition.value !== 'number' || isNaN(numberCondition.value)) {
+        if (
+          typeof numberCondition.value !== 'number' ||
+          isNaN(numberCondition.value)
+        ) {
           return 'Invalid number in condition';
         }
       }),
@@ -66,7 +77,7 @@ const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
           return 'Invalid enum value in condition';
         }
       }),
-      Match.exhaustive
+      Match.exhaustive,
     );
     if (returnVal) {
       return returnVal;
@@ -78,7 +89,9 @@ type FilterFormProps = {
   filter: typeof Filter.Type;
   hasGoal: boolean;
   isEditing?: boolean;
-  onSubmit?: (value: typeof Filter.Type & { hasGoal: boolean }) => Promise<void>;
+  onSubmit?: (
+    value: typeof Filter.Type & { hasGoal: boolean },
+  ) => Promise<void>;
   onDelete?: () => Promise<void>;
   children?: ({
     canSubmit,
@@ -155,11 +168,20 @@ export default function FilterForm({
         : null}
       <View
         className="flex-1"
-        style={{ backgroundColor: colorScheme === 'light' ? '#F2F2F7' : '#000000' }}>
+        style={{
+          backgroundColor: colorScheme === 'light' ? '#F2F2F7' : '#000000',
+        }}
+      >
         <Host style={{ flex: 1 }}>
-          <Form modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}>
+          <Form
+            modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}
+          >
             <>
-              <Section title={intl.formatMessage({ id: 'create-filter.filter-details' })}>
+              <Section
+                title={intl.formatMessage({
+                  id: 'create-filter.filter-details',
+                })}
+              >
                 <form.Field name="name">
                   {({ state, handleChange }) => (
                     <DismissableTextField
@@ -195,7 +217,7 @@ export default function FilterForm({
                       <Stepper
                         label={intl.formatMessage(
                           { id: 'create-filter.goal-value' },
-                          { value: state.value ?? 0 }
+                          { value: state.value ?? 0 },
                         )}
                         defaultValue={state.value ?? 0}
                         step={1}
@@ -207,14 +229,22 @@ export default function FilterForm({
                   </form.Field>
                 )}
               </Section>
-              <Section title={intl.formatMessage({ id: 'create-filter.combinator' })}>
+              <Section
+                title={intl.formatMessage({ id: 'create-filter.combinator' })}
+              >
                 <form.Field name="combinator">
                   {({ state, handleChange }) => (
                     <Picker
-                      label={intl.formatMessage({ id: 'create-filter.combinator' })}
+                      label={intl.formatMessage({
+                        id: 'create-filter.combinator',
+                      })}
                       options={[
-                        intl.formatMessage({ id: 'create-filter.combinator.AND' }),
-                        intl.formatMessage({ id: 'create-filter.combinator.OR' }),
+                        intl.formatMessage({
+                          id: 'create-filter.combinator.AND',
+                        }),
+                        intl.formatMessage({
+                          id: 'create-filter.combinator.OR',
+                        }),
                       ]}
                       variant="segmented"
                       selectedIndex={state.value === 'OR' ? 1 : 0}
@@ -229,38 +259,59 @@ export default function FilterForm({
                 {(field) => (
                   <>
                     {field.state.value.map((_, i) => {
-                      const value = field.form.getFieldValue(`conditions[${i}]`);
+                      const value = field.form.getFieldValue(
+                        `conditions[${i}]`,
+                      );
 
                       return (
                         <Section
                           key={`condition-${i}`}
                           title={intl.formatMessage(
                             { id: 'create-filter.condition' },
-                            { index: i + 1 }
-                          )}>
+                            { index: i + 1 },
+                          )}
+                        >
                           <Fragment key={i}>
-                            <form.Field key={`field-${i}`} name={`conditions[${i}]`}>
+                            <form.Field
+                              key={`field-${i}`}
+                              name={`conditions[${i}]`}
+                            >
                               {(conditionField) => (
                                 <>
                                   {/* Field Selection Renderer */}
                                   <form.Field name={`conditions[${i}].field`}>
                                     {(subField) => {
-                                      const currentFieldIndex = FieldsWithName.findIndex(
-                                        (f) => f.value === subField.state.value
-                                      );
+                                      const currentFieldIndex =
+                                        FieldsWithName.findIndex(
+                                          (f) =>
+                                            f.value === subField.state.value,
+                                        );
                                       return (
                                         <Picker
-                                          label={intl.formatMessage({ id: 'create-filter.field' })}
+                                          label={intl.formatMessage({
+                                            id: 'create-filter.field',
+                                          })}
                                           selectedIndex={
-                                            currentFieldIndex >= 0 ? currentFieldIndex : 0
+                                            currentFieldIndex >= 0
+                                              ? currentFieldIndex
+                                              : 0
                                           }
-                                          options={FieldsWithName.map((o) => o.label)}
+                                          options={FieldsWithName.map(
+                                            (o) => o.label,
+                                          )}
                                           variant="menu"
-                                          onOptionSelected={({ nativeEvent: { index } }) => {
-                                            const field = FieldsWithName[index].value;
-                                            const condition = FIELDS.find((f) => f.field === field);
+                                          onOptionSelected={({
+                                            nativeEvent: { index },
+                                          }) => {
+                                            const field =
+                                              FieldsWithName[index].value;
+                                            const condition = FIELDS.find(
+                                              (f) => f.field === field,
+                                            );
                                             if (condition) {
-                                              conditionField.handleChange(condition);
+                                              conditionField.handleChange(
+                                                condition,
+                                              );
                                             }
                                             subField.handleChange(field);
                                           }}
@@ -272,87 +323,132 @@ export default function FilterForm({
                                   {/* Operator Renderer */}
                                   {value.field &&
                                     Match.value(value).pipe(
-                                      Match.tag('TEXT_CONDITION', (textField) => (
-                                        <form.Field name={`conditions[${i}].operator`}>
-                                          {(operatorField) => {
-                                            const ops = Array.from(textField.operators);
-                                            const currentOpIndex = ops.findIndex(
-                                              (op) => op === operatorField.state.value
-                                            );
-                                            return (
-                                              <Picker
-                                                label={intl.formatMessage({
-                                                  id: 'create-filter.operator',
-                                                })}
-                                                options={ops.map((op) =>
-                                                  intl.formatMessage({
-                                                    id: `create-filter.operator.${op}`,
-                                                  })
-                                                )}
-                                                selectedIndex={
-                                                  currentOpIndex >= 0 ? currentOpIndex : 0
-                                                }
-                                                onOptionSelected={({ nativeEvent: { index } }) => {
-                                                  const selectedOp = ops[index];
-                                                  operatorField.handleChange(selectedOp);
-                                                }}
-                                              />
-                                            );
-                                          }}
-                                        </form.Field>
-                                      )),
-                                      Match.tag('NUMBER_CONDITION', (numberField) => (
-                                        <form.Field name={`conditions[${i}].operator`}>
-                                          {(operatorField) => {
-                                            const ops = Array.from(numberField.operators);
-                                            const currentOpIndex = ops.findIndex(
-                                              (op) => op === operatorField.state.value
-                                            );
-                                            return (
-                                              <Picker
-                                                label={intl.formatMessage({
-                                                  id: 'create-filter.operator',
-                                                })}
-                                                options={ops.map((op) =>
-                                                  intl.formatMessage({
-                                                    id: `create-filter.operator.${op}`,
-                                                  })
-                                                )}
-                                                selectedIndex={
-                                                  currentOpIndex >= 0 ? currentOpIndex : 0
-                                                }
-                                                onOptionSelected={({ nativeEvent: { index } }) => {
-                                                  const selectedOp = ops[index];
-                                                  operatorField.handleChange(selectedOp);
-                                                }}
-                                              />
-                                            );
-                                          }}
-                                        </form.Field>
-                                      )),
-                                      Match.tag('BOOLEAN_CONDITION', () => null),
+                                      Match.tag(
+                                        'TEXT_CONDITION',
+                                        (textField) => (
+                                          <form.Field
+                                            name={`conditions[${i}].operator`}
+                                          >
+                                            {(operatorField) => {
+                                              const ops = Array.from(
+                                                textField.operators,
+                                              );
+                                              const currentOpIndex =
+                                                ops.findIndex(
+                                                  (op) =>
+                                                    op ===
+                                                    operatorField.state.value,
+                                                );
+                                              return (
+                                                <Picker
+                                                  label={intl.formatMessage({
+                                                    id: 'create-filter.operator',
+                                                  })}
+                                                  options={ops.map((op) =>
+                                                    intl.formatMessage({
+                                                      id: `create-filter.operator.${op}`,
+                                                    }),
+                                                  )}
+                                                  selectedIndex={
+                                                    currentOpIndex >= 0
+                                                      ? currentOpIndex
+                                                      : 0
+                                                  }
+                                                  onOptionSelected={({
+                                                    nativeEvent: { index },
+                                                  }) => {
+                                                    const selectedOp =
+                                                      ops[index];
+                                                    operatorField.handleChange(
+                                                      selectedOp,
+                                                    );
+                                                  }}
+                                                />
+                                              );
+                                            }}
+                                          </form.Field>
+                                        ),
+                                      ),
+                                      Match.tag(
+                                        'NUMBER_CONDITION',
+                                        (numberField) => (
+                                          <form.Field
+                                            name={`conditions[${i}].operator`}
+                                          >
+                                            {(operatorField) => {
+                                              const ops = Array.from(
+                                                numberField.operators,
+                                              );
+                                              const currentOpIndex =
+                                                ops.findIndex(
+                                                  (op) =>
+                                                    op ===
+                                                    operatorField.state.value,
+                                                );
+                                              return (
+                                                <Picker
+                                                  label={intl.formatMessage({
+                                                    id: 'create-filter.operator',
+                                                  })}
+                                                  options={ops.map((op) =>
+                                                    intl.formatMessage({
+                                                      id: `create-filter.operator.${op}`,
+                                                    }),
+                                                  )}
+                                                  selectedIndex={
+                                                    currentOpIndex >= 0
+                                                      ? currentOpIndex
+                                                      : 0
+                                                  }
+                                                  onOptionSelected={({
+                                                    nativeEvent: { index },
+                                                  }) => {
+                                                    const selectedOp =
+                                                      ops[index];
+                                                    operatorField.handleChange(
+                                                      selectedOp,
+                                                    );
+                                                  }}
+                                                />
+                                              );
+                                            }}
+                                          </form.Field>
+                                        ),
+                                      ),
+                                      Match.tag(
+                                        'BOOLEAN_CONDITION',
+                                        () => null,
+                                      ),
                                       Match.tag('ENUM_CONDITION', () => null),
-                                      Match.exhaustive
+                                      Match.exhaustive,
                                     )}
 
                                   {/* Value Renderer */}
                                   {value.field &&
                                     Match.value(value).pipe(
                                       Match.tag('TEXT_CONDITION', () => (
-                                        <form.Field name={`conditions[${i}].value`}>
+                                        <form.Field
+                                          name={`conditions[${i}].value`}
+                                        >
                                           {(valueField) => (
                                             <>
                                               <Text>
-                                                {intl.formatMessage({ id: 'create-filter.value' })}
+                                                {intl.formatMessage({
+                                                  id: 'create-filter.value',
+                                                })}
                                               </Text>
                                               <DismissableTextField
                                                 onChangeText={(newText) =>
-                                                  valueField.handleChange(newText)
+                                                  valueField.handleChange(
+                                                    newText,
+                                                  )
                                                 }
                                                 defaultValue={valueField.state.value.toString()}
-                                                placeholder={intl.formatMessage({
-                                                  id: 'create-filter.value.placeholder',
-                                                })}
+                                                placeholder={intl.formatMessage(
+                                                  {
+                                                    id: 'create-filter.value.placeholder',
+                                                  },
+                                                )}
                                                 keyboardType="numeric"
                                                 ref={textConditionRef}
                                               />
@@ -360,92 +456,143 @@ export default function FilterForm({
                                           )}
                                         </form.Field>
                                       )),
-                                      Match.tag('NUMBER_CONDITION', (numberField) => (
-                                        <form.Field name={`conditions[${i}].value`}>
-                                          {(valueField) => (
-                                            <>
-                                              {numberField.field === 'asa-score' && (
-                                                <Picker
-                                                  label={intl.formatMessage({
-                                                    id: 'create-filter.value',
-                                                  })}
-                                                  variant="menu"
-                                                  options={['1', '2', '3', '4', '5', '6']}
-                                                  selectedIndex={
-                                                    typeof valueField.state.value === 'number'
-                                                      ? valueField.state.value - 1
-                                                      : 0
-                                                  }
-                                                  onOptionSelected={({
-                                                    nativeEvent: { index },
-                                                  }) => {
-                                                    valueField.handleChange(index + 1);
-                                                  }}
-                                                />
-                                              )}
-                                            </>
-                                          )}
-                                        </form.Field>
-                                      )),
+                                      Match.tag(
+                                        'NUMBER_CONDITION',
+                                        (numberField) => (
+                                          <form.Field
+                                            name={`conditions[${i}].value`}
+                                          >
+                                            {(valueField) => (
+                                              <>
+                                                {numberField.field ===
+                                                  'asa-score' && (
+                                                  <Picker
+                                                    label={intl.formatMessage({
+                                                      id: 'create-filter.value',
+                                                    })}
+                                                    variant="menu"
+                                                    options={[
+                                                      '1',
+                                                      '2',
+                                                      '3',
+                                                      '4',
+                                                      '5',
+                                                      '6',
+                                                    ]}
+                                                    selectedIndex={
+                                                      typeof valueField.state
+                                                        .value === 'number'
+                                                        ? valueField.state
+                                                            .value - 1
+                                                        : 0
+                                                    }
+                                                    onOptionSelected={({
+                                                      nativeEvent: { index },
+                                                    }) => {
+                                                      valueField.handleChange(
+                                                        index + 1,
+                                                      );
+                                                    }}
+                                                  />
+                                                )}
+                                              </>
+                                            )}
+                                          </form.Field>
+                                        ),
+                                      ),
                                       Match.tag('BOOLEAN_CONDITION', () => (
-                                        <form.Field name={`conditions[${i}].value`}>
+                                        <form.Field
+                                          name={`conditions[${i}].value`}
+                                        >
                                           {(valueField) => (
                                             <Picker
                                               label={intl.formatMessage({
                                                 id: 'create-filter.value',
                                               })}
                                               options={[
-                                                intl.formatMessage({ id: 'create-filter.yes' }),
-                                                intl.formatMessage({ id: 'create-filter.no' }),
+                                                intl.formatMessage({
+                                                  id: 'create-filter.yes',
+                                                }),
+                                                intl.formatMessage({
+                                                  id: 'create-filter.no',
+                                                }),
                                               ]}
                                               variant="segmented"
                                               selectedIndex={
-                                                valueField.state.value === true ? 0 : 1
+                                                valueField.state.value === true
+                                                  ? 0
+                                                  : 1
                                               }
-                                              onOptionSelected={({ nativeEvent: { index } }) => {
-                                                valueField.handleChange(index === 0);
+                                              onOptionSelected={({
+                                                nativeEvent: { index },
+                                              }) => {
+                                                valueField.handleChange(
+                                                  index === 0,
+                                                );
                                               }}
                                             />
                                           )}
                                         </form.Field>
                                       )),
-                                      Match.tag('ENUM_CONDITION', (enumField) => {
-                                        const sortedOptions = enumField.options
-                                          .map((option) => ({
-                                            label: intl.formatMessage({
-                                              id: `enum.${enumField.field}.${option}`,
-                                            }),
-                                            value: option,
-                                          }))
-                                          .sort((a, b) => a.label.localeCompare(b.label));
-                                        return (
-                                          <form.Field name={`conditions[${i}].value`}>
-                                            {(valueField) => {
-                                              const currentValueIndex = sortedOptions.findIndex(
-                                                (o) => o.value === valueField.state.value
+                                      Match.tag(
+                                        'ENUM_CONDITION',
+                                        (enumField) => {
+                                          const sortedOptions =
+                                            enumField.options
+                                              .map((option) => ({
+                                                label: intl.formatMessage({
+                                                  id: `enum.${enumField.field}.${option}`,
+                                                }),
+                                                value: option,
+                                              }))
+                                              .sort((a, b) =>
+                                                a.label.localeCompare(b.label),
                                               );
-                                              return (
-                                                <Picker
-                                                  label={intl.formatMessage({
-                                                    id: 'create-filter.value',
-                                                  })}
-                                                  selectedIndex={
-                                                    currentValueIndex >= 0 ? currentValueIndex : 0
-                                                  }
-                                                  variant="menu"
-                                                  onOptionSelected={(newValue) => {
-                                                    const selectedOption =
-                                                      sortedOptions[newValue.nativeEvent.index];
-                                                    valueField.handleChange(selectedOption.value);
-                                                  }}
-                                                  options={sortedOptions.map((o) => o.label)}
-                                                />
-                                              );
-                                            }}
-                                          </form.Field>
-                                        );
-                                      }),
-                                      Match.exhaustive
+                                          return (
+                                            <form.Field
+                                              name={`conditions[${i}].value`}
+                                            >
+                                              {(valueField) => {
+                                                const currentValueIndex =
+                                                  sortedOptions.findIndex(
+                                                    (o) =>
+                                                      o.value ===
+                                                      valueField.state.value,
+                                                  );
+                                                return (
+                                                  <Picker
+                                                    label={intl.formatMessage({
+                                                      id: 'create-filter.value',
+                                                    })}
+                                                    selectedIndex={
+                                                      currentValueIndex >= 0
+                                                        ? currentValueIndex
+                                                        : 0
+                                                    }
+                                                    variant="menu"
+                                                    onOptionSelected={(
+                                                      newValue,
+                                                    ) => {
+                                                      const selectedOption =
+                                                        sortedOptions[
+                                                          newValue.nativeEvent
+                                                            .index
+                                                        ];
+                                                      valueField.handleChange(
+                                                        selectedOption.value,
+                                                      );
+                                                    }}
+                                                    options={sortedOptions.map(
+                                                      (o) => o.label,
+                                                    )}
+                                                  />
+                                                );
+                                              }}
+                                            </form.Field>
+                                          );
+                                        },
+                                      ),
+                                      Match.exhaustive,
                                     )}
                                 </>
                               )}
@@ -456,8 +603,13 @@ export default function FilterForm({
                                 <Button
                                   onPress={() => field.removeValue(i)}
                                   role="destructive"
-                                  variant="bordered">
-                                  <Text>{intl.formatMessage({ id: 'create-filter.remove' })}</Text>
+                                  variant="bordered"
+                                >
+                                  <Text>
+                                    {intl.formatMessage({
+                                      id: 'create-filter.remove',
+                                    })}
+                                  </Text>
                                 </Button>
                                 <Spacer />
                               </HStack>
@@ -475,8 +627,13 @@ export default function FilterForm({
                             value: false,
                           }) as typeof FilterCondition.Type;
                           field.pushValue(defaultCondition);
-                        }}>
-                        <Text>{intl.formatMessage({ id: 'create-filter.add-condition' })}</Text>
+                        }}
+                      >
+                        <Text>
+                          {intl.formatMessage({
+                            id: 'create-filter.add-condition',
+                          })}
+                        </Text>
                       </Button>
                     </Section>
                   </>
@@ -486,7 +643,9 @@ export default function FilterForm({
             {isEditing && (
               <Section>
                 <Button role="destructive" onPress={onDelete}>
-                  <Text>{intl.formatMessage({ id: 'edit-filter.delete' })}</Text>
+                  <Text>
+                    {intl.formatMessage({ id: 'edit-filter.delete' })}
+                  </Text>
                 </Button>
               </Section>
             )}

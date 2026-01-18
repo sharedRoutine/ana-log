@@ -1,21 +1,20 @@
 import '../global.css';
-
-import { Stack } from 'expo-router';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { IntlProvider } from 'react-intl';
-import deMessages from '../locales/de.json';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import { Duration } from 'effect';
+import { Stack } from 'expo-router';
+import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { useState } from 'react';
+import { IntlProvider } from 'react-intl';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
+import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
 import { db } from '~/db/db';
 import migrations from '../drizzle/migrations';
-import { useColorScheme } from 'nativewind';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
-import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
-import { PressableScale } from 'pressto';
-import { Duration } from 'effect';
+import deMessages from '../locales/de.json';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,15 +26,17 @@ const queryClient = new QueryClient({
 });
 
 const getHeaderOptions = (
-  colorScheme: 'light' | 'dark' | undefined
+  colorScheme: 'light' | 'dark' | undefined,
 ): NativeStackNavigationOptions => ({
   headerShown: true,
   headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-  headerStyle: { backgroundColor: colorScheme === 'light' ? undefined : 'black' },
+  headerStyle: {
+    backgroundColor: colorScheme === 'light' ? undefined : 'black',
+  },
 });
 
 const getModalOptions = (
-  colorScheme: 'light' | 'dark' | undefined
+  colorScheme: 'light' | 'dark' | undefined,
 ): NativeStackNavigationOptions => ({
   ...getHeaderOptions(colorScheme),
   presentation: 'modal',
@@ -52,14 +53,23 @@ function MigrationErrorScreen({
 }) {
   const isLight = colorScheme === 'light';
   return (
-    <View style={[styles.errorContainer, isLight && styles.errorContainerLight]}>
+    <View
+      style={[styles.errorContainer, isLight && styles.errorContainerLight]}
+    >
       <View style={styles.errorContent}>
-        <Text style={[styles.errorTitle, isLight && styles.errorTitleLight]}>Datenbank-Fehler</Text>
-        <Text style={[styles.errorMessage, isLight && styles.errorMessageLight]}>
-          Die Datenbank konnte nicht initialisiert werden. Bitte starte die App neu.
+        <Text style={[styles.errorTitle, isLight && styles.errorTitleLight]}>
+          Datenbank-Fehler
+        </Text>
+        <Text
+          style={[styles.errorMessage, isLight && styles.errorMessageLight]}
+        >
+          Die Datenbank konnte nicht initialisiert werden. Bitte starte die App
+          neu.
         </Text>
         {error && (
-          <Text style={[styles.errorDetails, isLight && styles.errorDetailsLight]}>
+          <Text
+            style={[styles.errorDetails, isLight && styles.errorDetailsLight]}
+          >
             {error.message}
           </Text>
         )}
@@ -71,10 +81,16 @@ function MigrationErrorScreen({
   );
 }
 
-function LoadingScreen({ colorScheme }: { colorScheme: 'light' | 'dark' | undefined }) {
+function LoadingScreen({
+  colorScheme,
+}: {
+  colorScheme: 'light' | 'dark' | undefined;
+}) {
   const isLight = colorScheme === 'light';
   return (
-    <View style={[styles.loadingContainer, isLight && styles.loadingContainerLight]}>
+    <View
+      style={[styles.loadingContainer, isLight && styles.loadingContainerLight]}
+    >
       <ActivityIndicator size="large" color="#3B82F6" />
       <Text style={[styles.loadingText, isLight && styles.loadingTextLight]}>
         Datenbank wird initialisiert...
@@ -106,7 +122,11 @@ export default function Layout() {
   if (!success && error) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <MigrationErrorScreen error={error} onRetry={handleRetry} colorScheme={colorScheme} />
+        <MigrationErrorScreen
+          error={error}
+          onRetry={handleRetry}
+          colorScheme={colorScheme}
+        />
       </GestureHandlerRootView>
     );
   }
@@ -120,12 +140,27 @@ export default function Layout() {
               <Stack key={retryKey}>
                 <Stack.Screen name="index" options={headerOptions} />
                 <Stack.Screen name="procedure/create" options={modalOptions} />
-                <Stack.Screen name="procedure/[procedureId]/edit" options={modalOptions} />
-                <Stack.Screen name="procedure/[procedureId]/show" options={modalOptions} />
-                <Stack.Screen name="procedure/specials-picker" options={headerOptions} />
+                <Stack.Screen
+                  name="procedure/[procedureId]/edit"
+                  options={modalOptions}
+                />
+                <Stack.Screen
+                  name="procedure/[procedureId]/show"
+                  options={modalOptions}
+                />
+                <Stack.Screen
+                  name="procedure/specials-picker"
+                  options={headerOptions}
+                />
                 <Stack.Screen name="filter/create" options={modalOptions} />
-                <Stack.Screen name="filter/[filterId]/show" options={modalOptions} />
-                <Stack.Screen name="filter/[filterId]/edit" options={modalOptions} />
+                <Stack.Screen
+                  name="filter/[filterId]/show"
+                  options={modalOptions}
+                />
+                <Stack.Screen
+                  name="filter/[filterId]/edit"
+                  options={modalOptions}
+                />
               </Stack>
             </SpecialsPickerProvider>
           </IntlProvider>

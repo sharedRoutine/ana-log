@@ -1,7 +1,7 @@
-import { PressableScale } from 'pressto';
-import { View, Text, StyleSheet } from 'react-native';
-import { useIntl } from 'react-intl';
 import { useColorScheme } from 'nativewind';
+import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
+import { View, Text, StyleSheet } from 'react-native';
 
 interface FilterCardProps {
   filter: {
@@ -13,7 +13,12 @@ interface FilterCardProps {
   onPress?: () => void;
 }
 
-export function FilterCard({ filter, conditionText, matchingCount, onPress }: FilterCardProps) {
+export function FilterCard({
+  filter,
+  conditionText,
+  matchingCount,
+  onPress,
+}: FilterCardProps) {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
   const isLight = colorScheme === 'light';
@@ -24,26 +29,37 @@ export function FilterCard({ filter, conditionText, matchingCount, onPress }: Fi
       key={filter.id}
       accessibilityLabel={intl.formatMessage(
         { id: 'filter.accessibility.card' },
-        { name: filter.name, count: matchingCount }
+        { name: filter.name, count: matchingCount },
       )}
       accessibilityRole="button"
-      accessibilityHint={intl.formatMessage({ id: 'filter.accessibility.hint' })}
-      style={[styles.card, isLight ? styles.cardLight : styles.cardDark]}>
+      accessibilityHint={intl.formatMessage({
+        id: 'filter.accessibility.hint',
+      })}
+      style={[styles.card, isLight ? styles.cardLight : styles.cardDark]}
+    >
       <View className="flex-row items-center justify-between">
         <Text
-          className="text-sm font-medium w-2/3"
+          className="w-2/3 text-sm font-medium"
           style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
-          numberOfLines={2}>
+          numberOfLines={2}
+        >
           {filter.name}
         </Text>
-        <Text className="text-lg font-bold text-right w-1/3" style={{ color: isLight ? '#1F2937' : '#FFFFFF' }} numberOfLines={1}>
+        <Text
+          className="w-1/3 text-right text-lg font-bold"
+          style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
+          numberOfLines={1}
+        >
           {matchingCount}
         </Text>
       </View>
 
       <View className="flex-row flex-wrap gap-1">
         <View style={[styles.tag, isLight ? styles.tagLight : styles.tagDark]}>
-          <Text className="text-xs" style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}>
+          <Text
+            className="text-xs"
+            style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}
+          >
             {conditionText}
           </Text>
         </View>

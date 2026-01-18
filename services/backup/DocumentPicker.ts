@@ -16,5 +16,5 @@ export class DocumentPickerService extends Effect.Service<DocumentPickerService>
       }),
     }),
     accessors: true,
-  }
+  },
 ) {}

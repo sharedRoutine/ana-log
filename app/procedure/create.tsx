@@ -1,12 +1,16 @@
-import { Stack, useRouter } from 'expo-router';
-import { useIntl } from 'react-intl';
 import { DateTime } from 'effect';
-import { useColorScheme } from 'nativewind';
+import { Stack, useRouter } from 'expo-router';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
-import ProcedureForm from '~/components/ui/ProcedureForm';
+import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
+import { useIntl } from 'react-intl';
+import ProcedureForm from '~/components/ui/ProcedureForm';
 import { db } from '~/db/db';
-import { procedureTable, procedureSpecialTable, medicalCaseTable } from '~/db/schema';
+import {
+  procedureTable,
+  procedureSpecialTable,
+  medicalCaseTable,
+} from '~/db/schema';
 import { SPECIALS_OPTIONS } from '~/lib/options';
 
 export default function CreateProcedure() {
@@ -37,19 +41,26 @@ export default function CreateProcedure() {
       procedure={procedure}
       onSubmit={async ({ procedure, medicalCase, specials }) => {
         await db.transaction(async (tx) => {
-          await tx.insert(medicalCaseTable).values(medicalCase).onConflictDoNothing();
-          const [insertedProcedure] = await tx.insert(procedureTable).values(procedure).returning({ id: procedureTable.id });
+          await tx
+            .insert(medicalCaseTable)
+            .values(medicalCase)
+            .onConflictDoNothing();
+          const [insertedProcedure] = await tx
+            .insert(procedureTable)
+            .values(procedure)
+            .returning({ id: procedureTable.id });
           if (specials.length > 0) {
             await tx.insert(procedureSpecialTable).values(
               specials.map((special) => ({
                 procedureId: insertedProcedure.id,
                 special,
-              }))
+              })),
             );
           }
         });
         router.back();
-      }}>
+      }}
+    >
       {({ canSubmit, dismiss, save }) => (
         <Stack.Screen
           options={{
@@ -61,8 +72,12 @@ export default function CreateProcedure() {
                 onPress={() => {
                   dismiss();
                   router.back();
-                }}>
-                <ChevronLeftCircle size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
+                }}
+              >
+                <ChevronLeftCircle
+                  size={24}
+                  color={colorScheme === 'light' ? '#000' : '#fff'}
+                />
               </PressableScale>
             ),
             headerRight: () => (
@@ -71,7 +86,8 @@ export default function CreateProcedure() {
                 onPress={() => {
                   if (!canSubmit) return;
                   save();
-                }}>
+                }}
+              >
                 <Save size={24} color="#3B82F6" />
               </PressableScale>
             ),
