@@ -31,7 +31,7 @@ const ListHeader = ({
 
       <View className="mb-6 flex-row items-center gap-4">
         <Text className="text-[28px] font-semibold text-black dark:text-white">
-          {intl.formatMessage({ id: 'home.my-cases' })}
+          {intl.formatMessage({ id: 'home.my-procedures' })}
         </Text>
         <View
           style={[
@@ -47,10 +47,10 @@ const ListHeader = ({
 
       <PressableScale
         style={styles.createProcedureCard}
-        onPress={() => router.push('/case/create')}>
+        onPress={() => router.push('/procedure/create')}>
         <Plus size={20} color="#FFFFFF" strokeWidth={2.5} />
         <Text className="ml-2 text-[14px] font-semibold text-white">
-          {intl.formatMessage({ id: 'home.add-case' })}
+          {intl.formatMessage({ id: 'home.add-procedure' })}
         </Text>
       </PressableScale>
     </View>
