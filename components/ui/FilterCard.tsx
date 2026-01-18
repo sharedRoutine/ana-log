@@ -31,12 +31,12 @@ export function FilterCard({ filter, conditionText, matchingCount, onPress }: Fi
       style={[styles.card, isLight ? styles.cardLight : styles.cardDark]}>
       <View className="flex-row items-center justify-between">
         <Text
-          className="text-sm font-medium"
+          className="text-sm font-medium w-2/3"
           style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
-          numberOfLines={1}>
+          numberOfLines={2}>
           {filter.name}
         </Text>
-        <Text className="text-lg font-bold" style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}>
+        <Text className="text-lg font-bold text-right w-1/3" style={{ color: isLight ? '#1F2937' : '#FFFFFF' }} numberOfLines={1}>
           {matchingCount}
         </Text>
       </View>
