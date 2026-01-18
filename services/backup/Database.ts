@@ -8,6 +8,7 @@ import migrations from '~/drizzle/migrations';
 import {
   filterConditionTable,
   filterTable,
+  medicalCaseTable,
   procedureSpecialTable,
   procedureTable,
 } from '~/db/schema';
@@ -25,6 +26,7 @@ export class DatabaseService extends Effect.Service<DatabaseService>()('Database
         }),
         (backupDb) =>
           Effect.promise(async () => {
+            const medicalCases = await backupDb.select().from(medicalCaseTable);
             const procedures = await backupDb.select().from(procedureTable);
             const filters = await backupDb.select().from(filterTable);
             const procedureSpecials = await backupDb.select().from(procedureSpecialTable);
@@ -45,6 +47,9 @@ export class DatabaseService extends Effect.Service<DatabaseService>()('Database
               }
               if (filterConditions.length > 0) {
                 await tx.insert(filterConditionTable).values(filterConditions);
+              }
+              if (medicalCases.length > 0) {
+                await tx.insert(medicalCaseTable).values(medicalCases);
               }
             });
           }),
