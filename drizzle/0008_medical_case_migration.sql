@@ -9,7 +9,7 @@ CREATE TABLE `medical_case` (
 CREATE UNIQUE INDEX `medical_case_case_number_unique` ON `medical_case` (`case_number`);
 --> statement-breakpoint
 -- Populate medical_case from existing items
-INSERT OR IGNORE INTO `medical_case` (`case_number`, `age_years`, `age_months`, `favorite`)
+INSERT INTO `medical_case` (`case_number`, `age_years`, `age_months`, `favorite`)
 SELECT `caseNumber`, `ageYears`, `ageMonths`, `favorite` FROM `item`;
 --> statement-breakpoint
 -- Create new procedure table
