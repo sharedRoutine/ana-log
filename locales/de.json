@@ -149,6 +149,7 @@
   "import.error.failed": "Beim Importieren ist ein Fehler aufgetreten.",
   "import.success.title": "Import erfolgreich",
   "import.success.message": "Eingriffe und Filter importiert.",
+  "import.failed.title": "Import fehlgeschlagen",
   "import.success.restored": "Datenbank wurde erfolgreich wiederhergestellt.",
   "export.error.title": "Export fehlgeschlagen",
   "export.error.failed": "Beim Exportieren ist ein Fehler aufgetreten.",

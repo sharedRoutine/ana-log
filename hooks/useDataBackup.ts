@@ -1,6 +1,6 @@
 import { useIntl } from 'react-intl';
 import { Alert } from 'react-native';
-import { Effect, Layer, Option } from 'effect';
+import { Effect, Either, Layer, Option } from 'effect';
 import {
   FileSystem,
   SharingService,
@@ -41,11 +41,21 @@ export function useDataBackup() {
         if (Option.isNone(uri)) {
           return;
         }
-        yield* importFromUri(uri.value);
-        Alert.alert(
-          intl.formatMessage({ id: 'import.success.title' }),
-          intl.formatMessage({ id: 'import.success.message' })
-        );
+        const result = yield* importFromUri(uri.value).pipe(Effect.either);
+        Either.match(result, {
+          onLeft: (error) => {
+            Alert.alert(
+              intl.formatMessage({ id: 'import.failed.title' }),
+              error.message,
+            );
+          },
+          onRight: () => {
+            Alert.alert(
+              intl.formatMessage({ id: 'import.success.title' }),
+              intl.formatMessage({ id: 'import.success.message' })
+            );
+          },
+        });
       },
       Effect.provide(LiveLayer),
       Effect.runPromise
