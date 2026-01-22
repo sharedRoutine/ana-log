@@ -23,6 +23,7 @@ import {
   medicalCaseTable,
 } from '~/db/schema';
 import { useColors } from '~/hooks/useColors';
+import { cn } from '~/lib/cn';
 
 function DetailRow({
   label,
@@ -31,26 +32,17 @@ function DetailRow({
   label: string;
   value: React.ReactNode;
 }) {
-  const { colorScheme } = useColorScheme();
-  const isLight = colorScheme === 'light';
-
   return (
     <View
-      style={[
-        styles.row,
-        { borderBottomColor: isLight ? '#E5E7EB' : '#2C2C2E' },
-      ]}
+      className="flex-row items-center justify-between border-b border-border-secondary px-4 py-3"
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
     >
-      <Text style={[styles.label, { color: isLight ? '#6B7280' : '#9CA3AF' }]}>
+      <Text className="flex-1 text-base text-foreground-secondary">
         {label}
       </Text>
-      <View style={styles.valueContainer}>
+      <View className="shrink-0 items-end">
         {typeof value === 'string' ? (
-          <Text
-            style={[styles.value, { color: isLight ? '#1F2937' : '#FFFFFF' }]}
-          >
-            {value}
-          </Text>
+          <Text className="text-base font-medium text-foreground">{value}</Text>
         ) : (
           value
         )}
@@ -61,24 +53,16 @@ function DetailRow({
 
 function BooleanIndicator({ value }: { value: boolean }) {
   const { colorScheme } = useColorScheme();
-  const isLight = colorScheme === 'light';
 
   return value ? (
-    <View style={[styles.booleanBadge, { backgroundColor: '#10B981' }]}>
+    <View className="flex-row items-center gap-1 rounded-lg bg-success px-2.5 py-1">
       <Check size={14} color="#FFFFFF" />
-      <Text style={styles.booleanText}>Ja</Text>
+      <Text className="text-sm font-medium text-white">Ja</Text>
     </View>
   ) : (
-    <View
-      style={[
-        styles.booleanBadge,
-        { backgroundColor: isLight ? '#E5E7EB' : '#4A5568' },
-      ]}
-    >
-      <X size={14} color={isLight ? '#6B7280' : '#9CA3AF'} />
-      <Text
-        style={[styles.booleanText, { color: isLight ? '#6B7280' : '#9CA3AF' }]}
-      >
+    <View className="flex-row items-center gap-1 rounded-lg bg-border-secondary px-2.5 py-1">
+      <X size={14} color={colorScheme === 'light' ? '#6B7280' : '#9CA3AF'} />
+      <Text className="text-sm font-medium text-foreground-secondary">
         Nein
       </Text>
     </View>
@@ -126,7 +110,7 @@ export default function ShowProcedure() {
     },
   });
 
-  const { getDepartmentColor } = useColors();
+  const { getDepartmentClass } = useColors();
 
   const getTranslatedAirwayManagement = (airway: string) => {
     return intl.formatMessage({ id: `enum.airway-management.${airway}` });
@@ -155,17 +139,14 @@ export default function ShowProcedure() {
   const { procedure, medicalCase, specials } = data;
 
   return (
-    <SafeAreaView
-      edges={['bottom']}
-      style={{ flex: 1, backgroundColor: isLight ? '#F2F2F7' : '#000000' }}
-    >
+    <SafeAreaView edges={['bottom']} className="flex-1 bg-background-tertiary">
       <Stack.Screen
         options={{
           title: procedure.caseNumber,
           presentation: 'modal',
           headerLeft: () => (
             <PressableScale
-              style={{ paddingHorizontal: 8 }}
+              className="px-2"
               onPress={() => {
                 router.back();
               }}
@@ -175,7 +156,7 @@ export default function ShowProcedure() {
           ),
           headerRight: () => (
             <PressableScale
-              style={{ paddingHorizontal: 8 }}
+              className="px-2"
               onPress={() => {
                 router.push(`/procedure/${procedureId}/edit`);
               }}
@@ -185,75 +166,33 @@ export default function ShowProcedure() {
           ),
         }}
       />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView className="flex-1" contentContainerClassName="gap-4 p-4">
         {procedure.emergency && (
-          <View
-            style={[styles.emergencyBanner, { backgroundColor: '#FEE2E2' }]}
-          >
+          <View className="flex-row items-center justify-center gap-2 rounded-xl bg-error-light px-4 py-3">
             <Siren size={20} color="#DC2626" />
-            <Text style={styles.emergencyText}>Notfall</Text>
+            <Text className="text-base font-semibold text-error-dark">
+              Notfall
+            </Text>
           </View>
         )}
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: isLight ? '#6B7280' : '#8E8E93' },
-            ]}
-          >
-            {intl.formatMessage({ id: 'procedure.form.section.basic-info' })}
+        <View className="overflow-hidden rounded-xl bg-card">
+          <Text className="px-4 pb-2 pt-3 text-[13px] font-medium uppercase text-foreground-secondary">
+            {intl.formatMessage({ id: 'procedure.form.section.case-info' })}
           </Text>
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.case-number' })}
             value={procedure.caseNumber}
           />
           <DetailRow
-            label={intl.formatMessage({ id: 'procedure.form.operation-date' })}
-            value={intl.formatDate(procedure.date, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          />
-          <DetailRow
-            label={intl.formatMessage({ id: 'procedure.form.department' })}
-            value={
-              <View
-                style={[
-                  styles.departmentBadge,
-                  { backgroundColor: getDepartmentColor(procedure.department) },
-                ]}
-              >
-                <Text style={styles.departmentText}>
-                  {getTranslatedDepartment(procedure.department)}
-                </Text>
-              </View>
-            }
+            label={intl.formatMessage({ id: 'procedure.form.favorite' })}
+            value={<BooleanIndicator value={medicalCase.favorite} />}
           />
         </View>
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: isLight ? '#6B7280' : '#8E8E93' },
-            ]}
-          >
-            {intl.formatMessage({ id: 'procedure.form.patient-age' })}
+        <View className="overflow-hidden rounded-xl bg-card">
+          <Text className="px-4 pb-2 pt-3 text-[13px] font-medium uppercase text-foreground-secondary">
+            {intl.formatMessage({ id: 'procedure.form.section.patient-info' })}
           </Text>
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.years' })}
@@ -265,20 +204,20 @@ export default function ShowProcedure() {
           />
         </View>
 
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: isLight ? '#6B7280' : '#8E8E93' },
-            ]}
-          >
-            {intl.formatMessage({ id: 'procedure.form.section.details' })}
+        <View className="overflow-hidden rounded-xl bg-card">
+          <Text className="px-4 pb-2 pt-3 text-[13px] font-medium uppercase text-foreground-secondary">
+            {intl.formatMessage({
+              id: 'procedure.form.section.operation-info',
+            })}
           </Text>
+          <DetailRow
+            label={intl.formatMessage({ id: 'procedure.form.operation-date' })}
+            value={intl.formatDate(procedure.date, {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          />
           <DetailRow
             label={intl.formatMessage({ id: 'procedure.form.asa-score' })}
             value={`ASA ${procedure.asaScore}`}
@@ -288,38 +227,27 @@ export default function ShowProcedure() {
               id: 'procedure.form.airway-management',
             })}
             value={
-              <View
-                style={[styles.airwayBadge, { backgroundColor: '#10B981' }]}
-              >
-                <Text style={styles.airwayText}>
+              <View className="rounded-lg bg-success px-3 py-1">
+                <Text className="text-sm font-medium text-white">
                   {getTranslatedAirwayManagement(procedure.airwayManagement)}
                 </Text>
               </View>
             }
           />
-        </View>
-
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-          ]}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: isLight ? '#6B7280' : '#8E8E93' },
-            ]}
-          >
-            {intl.formatMessage({ id: 'procedure.form.section.settings' })}
-          </Text>
           <DetailRow
-            label={intl.formatMessage({ id: 'procedure.form.emergency' })}
-            value={<BooleanIndicator value={procedure.emergency} />}
-          />
-          <DetailRow
-            label={intl.formatMessage({ id: 'procedure.form.favorite' })}
-            value={<BooleanIndicator value={medicalCase.favorite} />}
+            label={intl.formatMessage({ id: 'procedure.form.department' })}
+            value={
+              <View
+                className={cn(
+                  'rounded-full px-3 py-1',
+                  getDepartmentClass(procedure.department),
+                )}
+              >
+                <Text className="text-sm font-medium text-white">
+                  {getTranslatedDepartment(procedure.department)}
+                </Text>
+              </View>
+            }
           />
           <DetailRow
             label={intl.formatMessage({
@@ -330,24 +258,18 @@ export default function ShowProcedure() {
           {procedure.localAnestheticsText && (
             <DetailRow label="" value={procedure.localAnestheticsText} />
           )}
+          <DetailRow
+            label={intl.formatMessage({ id: 'procedure.form.emergency' })}
+            value={<BooleanIndicator value={procedure.emergency} />}
+          />
         </View>
 
         {specials && specials.length > 0 && (
-          <View
-            style={[
-              styles.section,
-              { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-            ]}
-          >
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: isLight ? '#6B7280' : '#8E8E93' },
-              ]}
-            >
+          <View className="overflow-hidden rounded-xl bg-card">
+            <Text className="px-4 pb-2 pt-3 text-[13px] font-medium uppercase text-foreground-secondary">
               {intl.formatMessage({ id: 'procedure.form.section.specials' })}
             </Text>
-            <View style={styles.specialsBadgeContainer}>
+            <View className="flex-row flex-wrap gap-2 px-4 pb-4">
               {specials
                 .map((special) => ({
                   value: special,
@@ -357,12 +279,11 @@ export default function ShowProcedure() {
                 .map((special) => (
                   <View
                     key={special.value}
-                    style={[
-                      styles.specialBadge,
-                      { backgroundColor: '#6366F1' },
-                    ]}
+                    className="rounded-lg bg-[#6366F1] px-3 py-1.5"
                   >
-                    <Text style={styles.specialBadgeText}>{special.label}</Text>
+                    <Text className="text-sm font-medium text-white">
+                      {special.label}
+                    </Text>
                   </View>
                 ))}
             </View>
@@ -370,27 +291,12 @@ export default function ShowProcedure() {
         )}
 
         {procedure.description && (
-          <View
-            style={[
-              styles.section,
-              { backgroundColor: isLight ? '#FFFFFF' : '#1C1C1E' },
-            ]}
-          >
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: isLight ? '#6B7280' : '#8E8E93' },
-              ]}
-            >
+          <View className="overflow-hidden rounded-xl bg-card">
+            <Text className="px-4 pb-2 pt-3 text-[13px] font-medium uppercase text-foreground-secondary">
               {intl.formatMessage({ id: 'procedure.form.procedure' })}
             </Text>
-            <View style={styles.textBlock}>
-              <Text
-                style={[
-                  styles.textBlockContent,
-                  { color: isLight ? '#1F2937' : '#FFFFFF' },
-                ]}
-              >
+            <View className="px-4 pb-4">
+              <Text className="text-base leading-6 text-foreground">
                 {procedure.description}
               </Text>
             </View>
@@ -400,117 +306,3 @@ export default function ShowProcedure() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 16,
-  },
-  emergencyBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-  },
-  emergencyText: {
-    color: '#DC2626',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  section: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '500',
-    textTransform: 'uppercase',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  label: {
-    fontSize: 16,
-    flex: 1,
-  },
-  valueContainer: {
-    flexShrink: 0,
-    alignItems: 'flex-end',
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  departmentBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 9999,
-  },
-  departmentText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  airwayBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  airwayText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  booleanBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  booleanText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  textBlock: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  textBlockContent: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  specialsBadgeContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  specialBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  specialBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

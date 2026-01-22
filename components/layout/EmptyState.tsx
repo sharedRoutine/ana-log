@@ -1,7 +1,7 @@
 import { LucideIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -19,72 +19,33 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   const { colorScheme } = useColorScheme();
-  const isLight = colorScheme === 'light';
 
   return (
-    <View style={[styles.container, isLight && styles.containerLight]}>
+    <View className="flex-1 items-center justify-center bg-background-secondary p-8">
       {Icon && (
-        <View style={styles.iconContainer}>
-          <Icon size={48} color={isLight ? '#6B7280' : '#8E8E93'} />
+        <View className="mb-4 opacity-60">
+          <Icon
+            size={48}
+            color={colorScheme === 'light' ? '#6B7280' : '#8E8E93'}
+          />
         </View>
       )}
-      <Text style={[styles.title, isLight && styles.titleLight]}>{title}</Text>
-      <Text style={[styles.message, isLight && styles.messageLight]}>
+      <Text className="mb-2 text-center text-xl font-semibold text-foreground">
+        {title}
+      </Text>
+      <Text className="mb-6 text-center text-base leading-[22px] text-foreground-secondary">
         {message}
       </Text>
       {actionLabel && onAction && (
-        <PressableScale style={styles.actionButton} onPress={onAction}>
-          <Text style={styles.actionButtonText}>{actionLabel}</Text>
+        <PressableScale
+          className="rounded-xl bg-accent px-6 py-3"
+          onPress={onAction}
+        >
+          <Text className="text-base font-semibold text-white">
+            {actionLabel}
+          </Text>
         </PressableScale>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-    backgroundColor: '#000',
-  },
-  containerLight: {
-    backgroundColor: '#F8FAFC',
-  },
-  iconContainer: {
-    marginBottom: 16,
-    opacity: 0.6,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  titleLight: {
-    color: '#1F2937',
-  },
-  message: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  messageLight: {
-    color: '#6B7280',
-  },
-  actionButton: {
-    backgroundColor: '#3B82F6',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

@@ -1,7 +1,7 @@
-import { useColorScheme } from 'nativewind';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 
 interface FilterCardProps {
   filter: {
@@ -20,8 +20,7 @@ export function FilterCard({
   onPress,
 }: FilterCardProps) {
   const intl = useIntl();
-  const { colorScheme } = useColorScheme();
-  const isLight = colorScheme === 'light';
+  const hasGlassEffect = isLiquidGlassAvailable();
 
   return (
     <PressableScale
@@ -35,71 +34,36 @@ export function FilterCard({
       accessibilityHint={intl.formatMessage({
         id: 'filter.accessibility.hint',
       })}
-      style={[styles.card, isLight ? styles.cardLight : styles.cardDark]}
+      className="h-24 w-[47%]"
     >
-      <View className="flex-row items-center justify-between">
-        <Text
-          className="w-2/3 text-sm font-medium"
-          style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
-          numberOfLines={2}
-        >
-          {filter.name}
-        </Text>
-        <Text
-          className="w-1/3 text-right text-lg font-bold"
-          style={{ color: isLight ? '#1F2937' : '#FFFFFF' }}
-          numberOfLines={1}
-        >
-          {matchingCount}
-        </Text>
-      </View>
-
-      <View className="flex-row flex-wrap gap-1">
-        <View style={[styles.tag, isLight ? styles.tagLight : styles.tagDark]}>
+      <GlassView
+        glassEffectStyle="regular"
+        className="h-full w-full justify-between rounded-2xl border border-card-border p-3"
+        style={!hasGlassEffect && { backgroundColor: 'rgba(255,255,255,0.85)' }}
+      >
+        <View className="flex-row items-center justify-between">
           <Text
-            className="text-xs"
-            style={{ color: isLight ? '#4B5563' : '#FFFFFF' }}
+            className="w-2/3 text-sm font-medium text-foreground"
+            numberOfLines={2}
           >
-            {conditionText}
+            {filter.name}
+          </Text>
+          <Text
+            className="w-1/3 text-right text-lg font-bold text-foreground"
+            numberOfLines={1}
+          >
+            {matchingCount}
           </Text>
         </View>
-      </View>
+
+        <View className="flex-row flex-wrap gap-1">
+          <View className="rounded-full bg-border px-2 py-1">
+            <Text className="text-xs text-foreground-secondary">
+              {conditionText}
+            </Text>
+          </View>
+        </View>
+      </GlassView>
     </PressableScale>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    height: 96,
-    width: '47%',
-    justifyContent: 'space-between',
-    borderRadius: 16,
-    padding: 12,
-    position: 'relative',
-    borderWidth: 1,
-  },
-  cardLight: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#E2E8F0',
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#2C2C2E',
-  },
-  tag: {
-    borderRadius: 9999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  tagLight: {
-    backgroundColor: '#E2E8F0',
-  },
-  tagDark: {
-    backgroundColor: '#4A5568',
-  },
-});

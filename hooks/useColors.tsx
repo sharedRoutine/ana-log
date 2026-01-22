@@ -1,34 +1,35 @@
 import { DEPARTMENT_OPTIONS } from '~/lib/options';
 
-const DEPARTMENT_COLORS: Record<(typeof DEPARTMENT_OPTIONS)[number], string> = {
-  TC: '#EF4444',
-  NC: '#3B82F6',
-  AC: '#10B981',
-  GC: '#8B5CF6',
-  HNO: '#F59E0B',
-  HG: '#DC2626',
-  DE: '#6B7280',
-  PC: '#EC4899',
-  UC: '#14B8A6',
-  URO: '#F97316',
-  GYN: '#8B5CF6',
-  MKG: '#06B6D4',
-  RAD: '#84CC16',
-  NRAD: '#F59E0B',
-  PSY: '#EF4444',
-  AU: '#7C3AED',
-  other: '#6B7280',
-};
-
-const DEFAULT_COLOR = '#6B7280';
-
-export function useColors() {
-  const getDepartmentColor = (department: string): string => {
-    if (department in DEPARTMENT_COLORS) {
-      return DEPARTMENT_COLORS[department as keyof typeof DEPARTMENT_COLORS];
-    }
-    return DEFAULT_COLOR;
+const DEPARTMENT_CLASSES: Record<(typeof DEPARTMENT_OPTIONS)[number], string> =
+  {
+    TC: 'bg-red-500',
+    NC: 'bg-blue-500',
+    AC: 'bg-emerald-500',
+    GC: 'bg-violet-500',
+    HNO: 'bg-amber-500',
+    HG: 'bg-red-600',
+    DE: 'bg-gray-500',
+    PC: 'bg-pink-500',
+    UC: 'bg-teal-500',
+    URO: 'bg-orange-500',
+    GYN: 'bg-violet-500',
+    MKG: 'bg-cyan-500',
+    RAD: 'bg-lime-500',
+    NRAD: 'bg-amber-500',
+    PSY: 'bg-red-500',
+    AU: 'bg-violet-600',
+    other: 'bg-gray-500',
   };
 
-  return { getDepartmentColor };
+const DEFAULT_CLASS = 'bg-gray-500';
+
+export function useColors() {
+  const getDepartmentClass = (department: string): string => {
+    if (department in DEPARTMENT_CLASSES) {
+      return DEPARTMENT_CLASSES[department as keyof typeof DEPARTMENT_CLASSES];
+    }
+    return DEFAULT_CLASS;
+  };
+
+  return { getDepartmentClass };
 }

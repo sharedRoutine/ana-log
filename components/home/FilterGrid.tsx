@@ -1,11 +1,18 @@
 import { count } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { ChevronDown, Plus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
+import { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { db } from '~/db/db';
 import { filterConditionTable, filterTable } from '~/db/schema';
 import { useFilterLogic, useFilterMatchCounts } from '~/hooks/useFilterLogic';
@@ -14,6 +21,20 @@ import { FilterCard } from '../ui/FilterCard';
 export default function FilterGrid() {
   const router = useRouter();
   const intl = useIntl();
+  const { colorScheme } = useColorScheme();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const rotation = useSharedValue(0);
+
+  const foregroundColor = colorScheme === 'dark' ? '#f8fafc' : '#1c1917';
+
+  const chevronStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+    rotation.value = withTiming(isCollapsed ? 0 : -180, { duration: 200 });
+  };
 
   const { data: filters } = useLiveQuery(db.select().from(filterTable));
   const { data: filterConditions } = useLiveQuery(
@@ -32,94 +53,67 @@ export default function FilterGrid() {
 
   const filterMatchCounts = useFilterMatchCounts(filters, allFilterConditions);
 
-  const { colorScheme } = useColorScheme();
   const { getConditionText } = useFilterLogic();
 
   return (
     <>
-      <View className="mb-6 flex-row items-center gap-4">
-        <Text className="text-[28px] font-semibold text-black dark:text-white">
+      <PressableScale
+        onPress={toggleCollapsed}
+        className="mb-6 flex-row items-center gap-4"
+      >
+        <Text className="text-[28px] font-semibold text-foreground">
           {intl.formatMessage({ id: 'home.my-filters' })}
         </Text>
-        <View
-          style={[
-            styles.countBadge,
-            colorScheme === 'light'
-              ? styles.countBadgeLight
-              : styles.countBadgeDark,
-          ]}
-        >
-          <Text
-            style={{
-              fontWeight: '600',
-              color: colorScheme === 'light' ? '#6B7280' : '#8E8E93',
-            }}
-          >
+        <View className="flex-1">
+          <Animated.View style={chevronStyle} className="w-6">
+            <ChevronDown size={24} color={foregroundColor} />
+          </Animated.View>
+        </View>
+        <View className="rounded-xl border border-border bg-background-tertiary px-3 py-1">
+          <Text className="font-semibold text-foreground-secondary">
             {filters.length}
           </Text>
         </View>
-      </View>
+      </PressableScale>
 
-      <View className="mb-8 flex-row flex-wrap gap-4">
-        <PressableScale
-          style={styles.createFilterCard}
-          onPress={() => router.push('/filter/create')}
-        >
-          <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
-          <Text
-            className="mt-2 text-center text-[13px] font-semibold text-white"
-            numberOfLines={2}
+      {!isCollapsed && (
+        <View className="mb-8 flex-row flex-wrap gap-4">
+          <PressableScale
+            className="h-24 w-[47%]"
+            onPress={() => router.push('/filter/create')}
           >
-            {filters.length === 0
-              ? intl.formatMessage({ id: 'home.create-first-filter' })
-              : intl.formatMessage({ id: 'home.create-another-filter' })}
-          </Text>
-        </PressableScale>
-        {filters?.map((filter) => (
-          <FilterCard
-            key={filter.id}
-            filter={filter}
-            conditionText={getConditionText(
-              filter.id,
-              filterConditions,
-              allFilterConditions,
-            )}
-            matchingCount={filterMatchCounts.get(filter.id) ?? 0}
-            onPress={() => router.push(`/filter/${filter.id}/show`)}
-          />
-        ))}
-      </View>
+            <GlassView
+              glassEffectStyle="regular"
+              tintColor="#3B82F6"
+              className="h-full w-full items-center justify-center rounded-2xl p-3"
+              style={!isLiquidGlassAvailable() && { backgroundColor: '#3B82F6' }}
+            >
+              <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
+              <Text
+                className="mt-2 text-center text-[13px] font-semibold text-white"
+                numberOfLines={2}
+              >
+                {filters.length === 0
+                  ? intl.formatMessage({ id: 'home.create-first-filter' })
+                  : intl.formatMessage({ id: 'home.create-another-filter' })}
+              </Text>
+            </GlassView>
+          </PressableScale>
+          {filters?.map((filter) => (
+            <FilterCard
+              key={filter.id}
+              filter={filter}
+              conditionText={getConditionText(
+                filter.id,
+                filterConditions,
+                allFilterConditions,
+              )}
+              matchingCount={filterMatchCounts.get(filter.id) ?? 0}
+              onPress={() => router.push(`/filter/${filter.id}/show`)}
+            />
+          ))}
+        </View>
+      )}
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  createFilterCard: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 16,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 96,
-    width: '47%',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  countBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  countBadgeLight: {
-    backgroundColor: '#F1F5F9',
-    borderColor: '#E2E8F0',
-  },
-  countBadgeDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#2C2C2E',
-  },
-});
