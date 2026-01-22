@@ -20,8 +20,37 @@ import {
 } from '~/db/schema';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 
-export default function ShowFilter() {
+const Goal = ({ current, goal }: { current: number, goal: number }) => {
   const intl = useIntl();
+  return (
+    <View className="px-4 pt-4">
+      <View className="flex flex-row items-center justify-between">
+        <Text className="text-3xl font-bold text-black dark:text-white">
+          {intl.formatMessage({ id: 'filter.goal' })}
+        </Text>
+        <Host matchContents>
+          <Gauge
+            max={{ value: goal, label: `${goal}` }}
+            min={{ value: 0, label: '0' }}
+            current={{
+              value: current,
+              label: `${current}`,
+            }}
+            color={[
+              PlatformColor('systemRed'),
+              PlatformColor('systemOrange'),
+              PlatformColor('systemYellow'),
+              PlatformColor('systemGreen'),
+            ]}
+            type="circular"
+          />
+        </Host>
+      </View>
+    </View>
+  )
+}
+
+export default function ShowFilter() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
@@ -137,39 +166,6 @@ export default function ShowFilter() {
         edges={['bottom']}
         className="flex-1 bg-white dark:bg-black"
       >
-        {filters[0].goal ? (
-          <View className="px-4 pt-6">
-            <View className="flex flex-row items-center justify-between">
-              <Text className="text-3xl font-bold text-black dark:text-white">
-                {intl.formatMessage({ id: 'filter.goal' })}
-              </Text>
-              <Host matchContents>
-                <Gauge
-                  max={{ value: filters[0].goal, label: `${filters[0].goal}` }}
-                  min={{ value: 0, label: '0' }}
-                  current={{
-                    value: procedures.length,
-                    label: `${procedures.length}`,
-                  }}
-                  color={[
-                    PlatformColor('systemRed'),
-                    PlatformColor('systemOrange'),
-                    PlatformColor('systemYellow'),
-                    PlatformColor('systemGreen'),
-                  ]}
-                  type="circular"
-                />
-              </Host>
-            </View>
-          </View>
-        ) : null}
-        <View className="flex-row flex-wrap px-4 py-4">
-          <Text className="text-gray-600 dark:text-gray-300">
-            {conditions
-              .map((condition) => stringifyCondition(condition))
-              .join(', ')}
-          </Text>
-        </View>
         <View className="flex-1 px-4 pt-4">
           <FlashList
             data={procedures}
@@ -178,6 +174,20 @@ export default function ShowFilter() {
                 item={procedure}
                 onPress={() => router.push(`/procedure/${procedure.id}/show`)}
               />
+            )}
+            ListHeaderComponent={() => (
+              <View className='mb-6'>
+                {filters[0].goal ? (
+                  <Goal current={procedures.length} goal={filters[0].goal} />
+                ) : null}
+                <View className="flex-row flex-wrap px-4 py-4">
+                  <Text className="text-gray-600 dark:text-gray-300 text-sm">
+                    {conditions
+                      .map((condition) => stringifyCondition(condition))
+                      .join(', ')}
+                  </Text>
+                </View>
+              </View>
             )}
             getItemType={() => 'procedure'}
             keyExtractor={(item) => item.procedure.id.toString()}
