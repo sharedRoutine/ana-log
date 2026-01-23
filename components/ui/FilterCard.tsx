@@ -1,5 +1,5 @@
 import { GlassView } from 'expo-glass-effect';
-import { HeartPulse } from 'lucide-react-native';
+import { HeartPulse, Check } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
 import { View, Text } from 'react-native';
@@ -8,6 +8,7 @@ interface FilterCardProps {
   filter: {
     id: number;
     name: string;
+    goal: number | null;
   };
   matchingCount: number;
   onPress?: () => void;
@@ -39,10 +40,17 @@ export function FilterCard({
         className="h-full w-full justify-between rounded-2xl p-3 bg-background-secondary-light dark:bg-background-secondary-dark"
       >
         <View className="flex-row items-center justify-between">
-          <HeartPulse
-            size={24}
-            color="#34D399"
-          />
+          {filter.goal && filter.goal <= matchingCount ? (
+            <Check
+              size={24}
+              color="#34D399"
+            />
+          ) : (
+            <HeartPulse
+              size={24}
+              color="#34D399"
+            />
+          )}
           <Text
             className="text-right text-3xl font-bold text-text-primary-light dark:text-text-primary-dark"
             numberOfLines={1}
