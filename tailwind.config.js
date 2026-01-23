@@ -19,9 +19,9 @@ module.exports = {
           },
         },
         accent: {
-          DEFAULT: colors.red[500],
-          light: colors.red[500],
-          dark: colors.red[500],
+          DEFAULT: colors.emerald[400],
+          light: colors.emerald[400],
+          dark: colors.emerald[400],
         },
         background: {
           primary: {

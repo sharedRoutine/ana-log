@@ -170,7 +170,7 @@ export default function FilterForm({
       <View className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
         <Host style={{ flex: 1 }}>
           <Form
-            modifiers={[scrollContentBackground('hidden'), tint('#ef4444')]}
+            modifiers={[scrollContentBackground('hidden'), tint('#34D399')]}
           >
             <>
               <Section
@@ -205,7 +205,7 @@ export default function FilterForm({
                         }
                       }}
                       variant="switch"
-                      color="#ef4444"
+                      color="#34D399"
                     />
                   )}
                 </form.Field>

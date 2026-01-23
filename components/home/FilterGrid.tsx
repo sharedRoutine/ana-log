@@ -68,9 +68,9 @@ export default function FilterGrid() {
           >
             <GlassView
               glassEffectStyle="regular"
-              tintColor="#EF4444"
+              tintColor="#34D399"
               className="h-full w-full items-center justify-center rounded-2xl p-3"
-              style={!isLiquidGlassAvailable() && { backgroundColor: '#EF4444' }}
+              style={!isLiquidGlassAvailable() && { backgroundColor: '#34D399' }}
             >
               <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
               <Text

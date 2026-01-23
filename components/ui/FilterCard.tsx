@@ -41,7 +41,7 @@ export function FilterCard({
         <View className="flex-row items-center justify-between">
           <HeartPulse
             size={24}
-            color="#EF4444"
+            color="#34D399"
           />
           <Text
             className="text-right text-3xl font-bold text-text-primary-light dark:text-text-primary-dark"

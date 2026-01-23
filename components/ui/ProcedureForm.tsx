@@ -212,7 +212,7 @@ export default function ProcedureForm({
       >
         <Host style={{ flex: 1 }}>
           <Form
-            modifiers={[scrollContentBackground('hidden'), tint('#ef4444')]}
+            modifiers={[scrollContentBackground('hidden'), tint('#34D399')]}
           >
             <>
               <Section
@@ -243,7 +243,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color='#ef4444'
+                      color='#34D399'
                     />
                   )}
                 </form.Field>
@@ -383,7 +383,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color='#ef4444'
+                      color='#34D399'
                     />
                   )}
                 </form.Field>
@@ -415,7 +415,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color='#ef4444'
+                      color='#34D399'
                     />
                   )}
                 </form.Field>

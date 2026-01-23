@@ -49,7 +49,7 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
             </Text>
             {item.emergency && (
               <View className="mb-0.5">
-                <Siren size={22} color="#EF4444" />
+                <Siren size={22} color="#34D399" />
               </View>
             )}
           </View>
