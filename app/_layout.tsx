@@ -142,6 +142,7 @@ export default function Layout() {
                   name="procedure/specials-picker"
                   options={headerOptions}
                 />
+                <Stack.Screen name="filters" options={modalOptions} />
                 <Stack.Screen name="filter/create" options={modalOptions} />
                 <Stack.Screen
                   name="filter/[filterId]/show"

@@ -1,5 +1,5 @@
 import { DateTime } from 'effect';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeftCircle, Save } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
@@ -17,12 +17,15 @@ export default function CreateProcedure() {
   const intl = useIntl();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
+  const { date: dateParam } = useLocalSearchParams<{ date: string }>();
+
+  const operationDate = dateParam ? DateTime.unsafeMake(new Date(dateParam)) : DateTime.unsafeMake(new Date());
 
   const procedure = {
     caseNumber: '',
     patientAgeYears: 0,
     patientAgeMonths: 0,
-    operationDate: DateTime.unsafeMake(new Date()),
+    operationDate,
     asaScore: 1,
     airwayManagement: 'tube',
     department: 'PSY',
