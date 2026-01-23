@@ -17,7 +17,7 @@ import { Match } from 'effect';
 import { useColorScheme } from 'nativewind';
 import { useRef } from 'react';
 import { useIntl } from 'react-intl';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { Fragment } from 'react/jsx-runtime';
 import {
   FIELDS,
@@ -157,6 +157,24 @@ export default function FilterForm({
     await textConditionRef.current?.blur();
   };
   const save = () => form.handleSubmit();
+
+  const handleDelete = () => {
+    Alert.alert(
+      intl.formatMessage({ id: 'edit-filter.delete.confirm.title' }),
+      intl.formatMessage({ id: 'edit-filter.delete.confirm.message' }),
+      [
+        {
+          text: intl.formatMessage({ id: 'edit-filter.delete.confirm.cancel' }),
+          style: 'cancel',
+        },
+        {
+          text: intl.formatMessage({ id: 'edit-filter.delete.confirm.delete' }),
+          style: 'destructive',
+          onPress: () => onDelete?.(),
+        },
+      ],
+    );
+  };
 
   return (
     <>
@@ -642,7 +660,7 @@ export default function FilterForm({
             </>
             {isEditing && (
               <Section modifiers={[listRowBackground(rowBackground)]}>
-                <Button role="destructive" onPress={onDelete}>
+                <Button role="destructive" onPress={handleDelete}>
                   <Text>
                     {intl.formatMessage({ id: 'edit-filter.delete' })}
                   </Text>

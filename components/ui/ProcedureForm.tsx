@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useRef } from 'react';
 import { useIntl } from 'react-intl';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
 import { medicalCaseTable, procedureTable } from '~/db/schema';
 import {
@@ -195,6 +195,24 @@ export default function ProcedureForm({
     await procedureRef.current?.blur();
   };
   const save = () => form.handleSubmit();
+
+  const handleDelete = () => {
+    Alert.alert(
+      intl.formatMessage({ id: 'edit-item.delete.confirm.title' }),
+      intl.formatMessage({ id: 'edit-item.delete.confirm.message' }),
+      [
+        {
+          text: intl.formatMessage({ id: 'edit-item.delete.confirm.cancel' }),
+          style: 'cancel',
+        },
+        {
+          text: intl.formatMessage({ id: 'edit-item.delete.confirm.delete' }),
+          style: 'destructive',
+          onPress: () => onDelete?.(),
+        },
+      ],
+    );
+  };
 
   const rowBackground = colorScheme === 'dark' ? '#1E293B' : '#f3f4f6';
 
@@ -474,8 +492,8 @@ export default function ProcedureForm({
               </Section>
             </>
             {isEditing && (
-              <Section>
-                <Button role="destructive" onPress={onDelete}>
+              <Section modifiers={[listRowBackground(rowBackground)]}>
+                <Button role="destructive" onPress={handleDelete}>
                   <Text>{intl.formatMessage({ id: 'edit-item.delete' })}</Text>
                 </Button>
               </Section>
