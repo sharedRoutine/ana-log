@@ -33,7 +33,7 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
 
   return (
     <PressableScale
-      className="rounded-[20px] border border-card-border bg-card p-5 shadow-card"
+      className="rounded-[20px] bg-background-secondary-light dark:bg-background-secondary-dark p-5"
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
@@ -44,7 +44,7 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
       <View className="mb-4 flex-row items-center justify-between">
         <View className="gap-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-2xl font-bold text-foreground">
+            <Text className="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">
               {item.caseNumber}
             </Text>
             {item.emergency && (
@@ -53,7 +53,7 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
               </View>
             )}
           </View>
-          <Text className="text-sm font-medium text-foreground-secondary">
+          <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
             {intl.formatDate(item.date, {
               year: 'numeric',
               month: 'long',
@@ -62,10 +62,7 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
           </Text>
         </View>
         <View
-          className={cn(
-            'rounded-full px-3 py-1',
-            getDepartmentClass(item.department),
-          )}
+          className={'rounded-full px-3 py-1 bg-background-secondary-dark'}
         >
           <Text className="text-white">
             {intl.formatMessage({ id: `enum.department.${item.department}` })}
@@ -74,15 +71,15 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
       </View>
 
       <View className="mt-4 flex-row flex-wrap gap-2">
-        <View className="rounded-xl bg-success px-3.5 py-2">
+        <View className="rounded-xl bg-accent px-3.5 py-2">
           <Text className="text-white">
             {intl.formatMessage({
               id: `enum.airway-management.${item.airwayManagement}`,
             })}
           </Text>
         </View>
-        <View className="rounded-xl bg-border-secondary px-3.5 py-2">
-          <Text className="text-foreground-secondary">
+        <View className="rounded-xl bg-accent px-3.5 py-2">
+          <Text className="text-white">
             {intl.formatMessage(
               { id: 'home.asa-score' },
               {

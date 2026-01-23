@@ -11,7 +11,7 @@ import {
   TextFieldRef,
   Stepper,
 } from '@expo/ui/swift-ui';
-import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
+import { scrollContentBackground, tint, listRowBackground } from '@expo/ui/swift-ui/modifiers';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
 import { useColorScheme } from 'nativewind';
@@ -114,6 +114,7 @@ export default function FilterForm({
 }: FilterFormProps) {
   const intl = useIntl();
   const { colorScheme } = useColorScheme();
+  const rowBackground = colorScheme === 'dark' ? '#1E293B' : '#f3f4f6';
 
   const nameRef = useRef<TextFieldRef>(null);
   const goalRef = useRef<TextFieldRef>(null);
@@ -166,21 +167,17 @@ export default function FilterForm({
             save,
           })
         : null}
-      <View
-        className="flex-1"
-        style={{
-          backgroundColor: colorScheme === 'light' ? '#F2F2F7' : '#000000',
-        }}
-      >
+      <View className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
         <Host style={{ flex: 1 }}>
           <Form
-            modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}
+            modifiers={[scrollContentBackground('hidden'), tint('#ef4444')]}
           >
             <>
               <Section
                 title={intl.formatMessage({
                   id: 'create-filter.filter-details',
                 })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="name">
                   {({ state, handleChange }) => (
@@ -208,6 +205,7 @@ export default function FilterForm({
                         }
                       }}
                       variant="switch"
+                      color="#ef4444"
                     />
                   )}
                 </form.Field>
@@ -231,6 +229,7 @@ export default function FilterForm({
               </Section>
               <Section
                 title={intl.formatMessage({ id: 'create-filter.combinator' })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="combinator">
                   {({ state, handleChange }) => (
@@ -270,6 +269,7 @@ export default function FilterForm({
                             { id: 'create-filter.condition' },
                             { index: i + 1 },
                           )}
+                          modifiers={[listRowBackground(rowBackground)]}
                         >
                           <Fragment key={i}>
                             <form.Field
@@ -618,7 +618,7 @@ export default function FilterForm({
                         </Section>
                       );
                     })}
-                    <Section title="">
+                    <Section title="" modifiers={[listRowBackground(rowBackground)]}>
                       <Button
                         onPress={() => {
                           // Create a default condition and cast to the union type
@@ -641,7 +641,7 @@ export default function FilterForm({
               </form.Field>
             </>
             {isEditing && (
-              <Section>
+              <Section modifiers={[listRowBackground(rowBackground)]}>
                 <Button role="destructive" onPress={onDelete}>
                   <Text>
                     {intl.formatMessage({ id: 'edit-filter.delete' })}

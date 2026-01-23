@@ -1,9 +1,7 @@
-import { count } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useRouter } from 'expo-router';
 import { ChevronDown, Plus } from 'lucide-react-native';
-import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -15,17 +13,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import { db } from '~/db/db';
 import { filterConditionTable, filterTable } from '~/db/schema';
-import { useFilterLogic, useFilterMatchCounts } from '~/hooks/useFilterLogic';
+import { useFilterMatchCounts } from '~/hooks/useFilterLogic';
 import { FilterCard } from '../ui/FilterCard';
 
 export default function FilterGrid() {
   const router = useRouter();
   const intl = useIntl();
-  const { colorScheme } = useColorScheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const rotation = useSharedValue(0);
-
-  const foregroundColor = colorScheme === 'dark' ? '#f8fafc' : '#1c1917';
 
   const chevronStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
@@ -37,15 +32,6 @@ export default function FilterGrid() {
   };
 
   const { data: filters } = useLiveQuery(db.select().from(filterTable));
-  const { data: filterConditions } = useLiveQuery(
-    db
-      .select({
-        filterId: filterConditionTable.filterId,
-        conditionCount: count(),
-      })
-      .from(filterConditionTable)
-      .groupBy(filterConditionTable.filterId),
-  );
 
   const { data: allFilterConditions } = useLiveQuery(
     db.select().from(filterConditionTable),
@@ -53,24 +39,22 @@ export default function FilterGrid() {
 
   const filterMatchCounts = useFilterMatchCounts(filters, allFilterConditions);
 
-  const { getConditionText } = useFilterLogic();
-
   return (
     <>
       <PressableScale
         onPress={toggleCollapsed}
         className="mb-6 flex-row items-center gap-4"
       >
-        <Text className="text-[28px] font-semibold text-foreground">
+        <Text className="text-[28px] font-semibold text-text-primary-light dark:text-text-primary-dark">
           {intl.formatMessage({ id: 'home.my-filters' })}
         </Text>
         <View className="flex-1">
           <Animated.View style={chevronStyle} className="w-6">
-            <ChevronDown size={24} color={foregroundColor} />
+            <ChevronDown size={24} className="color-text-primary-light dark:color-text-primary-dark" />
           </Animated.View>
         </View>
-        <View className="rounded-xl border border-border bg-background-tertiary px-3 py-1">
-          <Text className="font-semibold text-foreground-secondary">
+        <View className="rounded-xl bg-background-secondary-dark px-3 py-1">
+          <Text className="font-semibold text-white">
             {filters.length}
           </Text>
         </View>
@@ -79,14 +63,14 @@ export default function FilterGrid() {
       {!isCollapsed && (
         <View className="mb-8 flex-row flex-wrap gap-4">
           <PressableScale
-            className="h-24 w-[47%]"
+            className="h-24 w-[48%]"
             onPress={() => router.push('/filter/create')}
           >
             <GlassView
               glassEffectStyle="regular"
-              tintColor="#3B82F6"
+              tintColor="#EF4444"
               className="h-full w-full items-center justify-center rounded-2xl p-3"
-              style={!isLiquidGlassAvailable() && { backgroundColor: '#3B82F6' }}
+              style={!isLiquidGlassAvailable() && { backgroundColor: '#EF4444' }}
             >
               <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
               <Text
@@ -103,11 +87,6 @@ export default function FilterGrid() {
             <FilterCard
               key={filter.id}
               filter={filter}
-              conditionText={getConditionText(
-                filter.id,
-                filterConditions,
-                allFilterConditions,
-              )}
               matchingCount={filterMatchCounts.get(filter.id) ?? 0}
               onPress={() => router.push(`/filter/${filter.id}/show`)}
             />

@@ -22,15 +22,15 @@ const ListHeader = ({ proceduresCount }: ListHeaderProps) => {
   const intl = useIntl();
 
   return (
-    <View className="bg-background px-4 pt-4">
+    <View className="pt-4">
       <FilterGrid />
 
       <View className="mb-6 flex-row items-center gap-4">
-        <Text className="flex-1 text-[28px] font-semibold text-foreground">
+        <Text className="flex-1 text-[28px] font-semibold text-text-primary-light dark:text-text-primary-dark">
           {intl.formatMessage({ id: 'home.my-procedures' })}
         </Text>
-        <View className="rounded-xl border border-border bg-background-tertiary px-3 py-1">
-          <Text className="font-semibold text-foreground-secondary">
+        <View className="rounded-xl bg-background-secondary-dark px-3 py-1">
+          <Text className="font-semibold text-white">
             {proceduresCount}
           </Text>
         </View>
@@ -85,7 +85,7 @@ export default function Home() {
   );
 
   return (
-    <SafeAreaView edges={['bottom']} className="flex-1 bg-background">
+    <SafeAreaView edges={['bottom']} className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'app.title' }),

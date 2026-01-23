@@ -1,4 +1,5 @@
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { GlassView } from 'expo-glass-effect';
+import { HeartPulse } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
 import { View, Text } from 'react-native';
@@ -8,19 +9,16 @@ interface FilterCardProps {
     id: number;
     name: string;
   };
-  conditionText: string;
   matchingCount: number;
   onPress?: () => void;
 }
 
 export function FilterCard({
   filter,
-  conditionText,
   matchingCount,
   onPress,
 }: FilterCardProps) {
   const intl = useIntl();
-  const hasGlassEffect = isLiquidGlassAvailable();
 
   return (
     <PressableScale
@@ -34,34 +32,31 @@ export function FilterCard({
       accessibilityHint={intl.formatMessage({
         id: 'filter.accessibility.hint',
       })}
-      className="h-24 w-[47%]"
+      className="h-24 w-[48%]"
     >
       <GlassView
         glassEffectStyle="regular"
-        className="h-full w-full justify-between rounded-2xl border border-card-border p-3"
-        style={!hasGlassEffect && { backgroundColor: 'rgba(255,255,255,0.85)' }}
+        className="h-full w-full justify-between rounded-2xl p-3 bg-background-secondary-light dark:bg-background-secondary-dark"
       >
         <View className="flex-row items-center justify-between">
+          <HeartPulse
+            size={24}
+            color="#EF4444"
+          />
           <Text
-            className="w-2/3 text-sm font-medium text-foreground"
-            numberOfLines={2}
-          >
-            {filter.name}
-          </Text>
-          <Text
-            className="w-1/3 text-right text-lg font-bold text-foreground"
+            className="text-right text-3xl font-bold text-text-primary-light dark:text-text-primary-dark"
             numberOfLines={1}
           >
             {matchingCount}
           </Text>
         </View>
-
-        <View className="flex-row flex-wrap gap-1">
-          <View className="rounded-full bg-border px-2 py-1">
-            <Text className="text-xs text-foreground-secondary">
-              {conditionText}
-            </Text>
-          </View>
+        <View className="flex-row items-center justify-between">
+          <Text
+            className="w-full text-sm font-medium text-text-primary-light dark:text-text-primary-dark"
+            numberOfLines={2}
+          >
+            {filter.name}
+          </Text>
         </View>
       </GlassView>
     </PressableScale>

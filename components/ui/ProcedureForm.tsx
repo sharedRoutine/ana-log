@@ -9,7 +9,7 @@ import {
   TextFieldRef,
   Text,
 } from '@expo/ui/swift-ui';
-import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
+import { listRowBackground, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useRouter } from 'expo-router';
@@ -196,30 +196,30 @@ export default function ProcedureForm({
   };
   const save = () => form.handleSubmit();
 
+  const rowBackground = colorScheme === 'dark' ? '#1E293B' : '#f3f4f6';
+
   return (
     <>
       {children
         ? children({
-            canSubmit: canSubmit && !isSubmitting,
-            dismiss,
-            save,
-          })
+          canSubmit: canSubmit && !isSubmitting,
+          dismiss,
+          save,
+        })
         : null}
       <View
-        className="flex-1"
-        style={{
-          backgroundColor: colorScheme === 'light' ? '#F2F2F7' : '#000000',
-        }}
+        className="flex-1 bg-background-primary-light dark:bg-background-primary-dark"
       >
         <Host style={{ flex: 1 }}>
           <Form
-            modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}
+            modifiers={[scrollContentBackground('hidden'), tint('#ef4444')]}
           >
             <>
               <Section
                 title={intl.formatMessage({
                   id: 'procedure.form.section.case-info',
                 })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="caseNumber">
                   {({ state, handleChange }) => (
@@ -243,6 +243,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
+                      color='#ef4444'
                     />
                   )}
                 </form.Field>
@@ -251,6 +252,7 @@ export default function ProcedureForm({
                 title={intl.formatMessage({
                   id: 'procedure.form.section.patient-info',
                 })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="patientAgeYears">
                   {({ state: yearsState, handleChange: handleYearsChange }) => (
@@ -276,6 +278,7 @@ export default function ProcedureForm({
                 title={intl.formatMessage({
                   id: 'procedure.form.section.operation-info',
                 })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="operationDate">
                   {({ state, handleChange }) => (
@@ -322,8 +325,8 @@ export default function ProcedureForm({
                       selectedIndex={
                         state.value
                           ? SORTED_AIRWAY_OPTIONS.map(
-                              (option) => option.value,
-                            ).indexOf(state.value)
+                            (option) => option.value,
+                          ).indexOf(state.value)
                           : 0
                       }
                       onOptionSelected={({ nativeEvent: { index } }) => {
@@ -345,8 +348,8 @@ export default function ProcedureForm({
                       selectedIndex={
                         state.value
                           ? SORTED_DEPARTMENT_OPTIONS.map(
-                              (option) => option.value,
-                            ).indexOf(state.value)
+                            (option) => option.value,
+                          ).indexOf(state.value)
                           : 0
                       }
                       onOptionSelected={({ nativeEvent: { index } }) => {
@@ -380,6 +383,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
+                      color='#ef4444'
                     />
                   )}
                 </form.Field>
@@ -411,6 +415,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
+                      color='#ef4444'
                     />
                   )}
                 </form.Field>
@@ -419,6 +424,7 @@ export default function ProcedureForm({
                 title={intl.formatMessage({
                   id: 'procedure.form.section.specials',
                 })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="specials">
                   {({ state, handleChange }) => {
@@ -437,8 +443,8 @@ export default function ProcedureForm({
                           {state.value.length > 0
                             ? selectedLabels
                             : intl.formatMessage({
-                                id: 'create-filter.select',
-                              })}
+                              id: 'create-filter.select',
+                            })}
                         </Text>
                       </Button>
                     );
@@ -448,6 +454,7 @@ export default function ProcedureForm({
               </Section>
               <Section
                 title={intl.formatMessage({ id: 'procedure.form.procedure' })}
+                modifiers={[listRowBackground(rowBackground)]}
               >
                 <form.Field name="procedure">
                   {({ state, handleChange }) => (
