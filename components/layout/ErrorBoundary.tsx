@@ -1,6 +1,8 @@
 import { PressableScale } from 'pressto';
 import React, { Component, ReactNode } from 'react';
+import { IntlProvider, useIntl } from 'react-intl';
 import { View, Text, StyleSheet } from 'react-native';
+import deMessages from '../../locales/de.json';
 
 interface Props {
   children: ReactNode;
@@ -10,6 +12,35 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+}
+
+function ErrorFallbackContent({ onRetry }: { onRetry: () => void }) {
+  const intl = useIntl();
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>
+          {intl.formatMessage({ id: 'error.generic.title' })}
+        </Text>
+        <Text style={styles.message}>
+          {intl.formatMessage({ id: 'error.generic.message' })}
+        </Text>
+        <PressableScale style={styles.button} onPress={onRetry}>
+          <Text style={styles.buttonText}>
+            {intl.formatMessage({ id: 'common.retry' })}
+          </Text>
+        </PressableScale>
+      </View>
+    </View>
+  );
+}
+
+function ErrorFallback({ onRetry }: { onRetry: () => void }) {
+  return (
+    <IntlProvider locale="de" messages={deMessages}>
+      <ErrorFallbackContent onRetry={onRetry} />
+    </IntlProvider>
+  );
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -36,19 +67,7 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      return (
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.title}>Etwas ist schief gelaufen</Text>
-            <Text style={styles.message}>
-              Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.
-            </Text>
-            <PressableScale style={styles.button} onPress={this.handleRetry}>
-              <Text style={styles.buttonText}>Erneut versuchen</Text>
-            </PressableScale>
-          </View>
-        </View>
-      );
+      return <ErrorFallback onRetry={this.handleRetry} />;
     }
 
     return this.props.children;

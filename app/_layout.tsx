@@ -8,7 +8,7 @@ import { Stack } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { useState } from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, useIntl } from 'react-intl';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import DataBackup from '~/components/home/DataBackup';
@@ -44,22 +44,22 @@ const getModalOptions = (
   presentation: 'modal',
 });
 
-function MigrationErrorScreen({
+function MigrationErrorContent({
   error,
   onRetry,
 }: {
   error: Error | undefined;
   onRetry: () => void;
 }) {
+  const intl = useIntl();
   return (
     <View className="flex-1 items-center justify-center bg-background-secondary p-6">
       <View className="max-w-[320px] items-center">
         <Text className="mb-3 text-center text-2xl font-bold text-foreground">
-          Datenbank-Fehler
+          {intl.formatMessage({ id: 'layout.database-error.title' })}
         </Text>
         <Text className="mb-4 text-center text-base leading-[22px] text-foreground-secondary">
-          Die Datenbank konnte nicht initialisiert werden. Bitte starte die App
-          neu.
+          {intl.formatMessage({ id: 'layout.database-error.message' })}
         </Text>
         {error && (
           <Text className="mb-6 text-center font-mono text-xs text-foreground-tertiary">
@@ -71,7 +71,7 @@ function MigrationErrorScreen({
           onPress={onRetry}
         >
           <Text className="text-base font-semibold text-white">
-            Erneut versuchen
+            {intl.formatMessage({ id: 'common.retry' })}
           </Text>
         </PressableScale>
       </View>
@@ -79,14 +79,37 @@ function MigrationErrorScreen({
   );
 }
 
-function LayoutLoadingScreen() {
+function MigrationErrorScreen({
+  error,
+  onRetry,
+}: {
+  error: Error | undefined;
+  onRetry: () => void;
+}) {
+  return (
+    <IntlProvider locale="de" messages={deMessages}>
+      <MigrationErrorContent error={error} onRetry={onRetry} />
+    </IntlProvider>
+  );
+}
+
+function LayoutLoadingContent() {
+  const intl = useIntl();
   return (
     <View className="flex-1 items-center justify-center bg-background-secondary">
       <ActivityIndicator size="large" color="#3B82F6" />
       <Text className="mt-4 text-base text-foreground-secondary">
-        Datenbank wird initialisiert...
+        {intl.formatMessage({ id: 'layout.database-initializing' })}
       </Text>
     </View>
+  );
+}
+
+function LayoutLoadingScreen() {
+  return (
+    <IntlProvider locale="de" messages={deMessages}>
+      <LayoutLoadingContent />
+    </IntlProvider>
   );
 }
 

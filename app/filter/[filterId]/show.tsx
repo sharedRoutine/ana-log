@@ -94,36 +94,44 @@ export default function ShowFilter() {
     [whereClause],
   );
 
+  const intl = useIntl();
+
   if (!whereClause) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text>No valid conditions for filter {filterId}.</Text>
+      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+        <Text className="text-black dark:text-white">
+          {intl.formatMessage({ id: 'filter.error.no-valid-conditions' })}
+        </Text>
       </View>
     );
   }
 
   if (isFilterPending || isConditionsPending) {
-    // TODO: Proper Loading Screen
     return (
-      <View>
-        <Text>Loading...</Text>
+      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+        <Text className="text-black dark:text-white">
+          {intl.formatMessage({ id: 'common.loading' })}
+        </Text>
       </View>
     );
   }
 
   if (!filters || filters.length === 0) {
-    // TODO: Proper Empty Screen
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text>No filter found for {filterId}.</Text>
+      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+        <Text className="text-black dark:text-white">
+          {intl.formatMessage({ id: 'filter.error.not-found' })}
+        </Text>
       </View>
     );
   }
 
   if (!conditions) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text>No conditions found for filter {filterId}.</Text>
+      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+        <Text className="text-black dark:text-white">
+          {intl.formatMessage({ id: 'filter.error.no-conditions' })}
+        </Text>
       </View>
     );
   }
