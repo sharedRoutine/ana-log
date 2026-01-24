@@ -1,5 +1,23 @@
-import { Calendar, type DateData } from 'react-native-calendars';
+import { Calendar, LocaleConfig, type DateData } from 'react-native-calendars';
 import { useColorScheme, View } from 'react-native';
+
+LocaleConfig.locales['de'] = {
+  monthNames: [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  ],
+  monthNamesShort: [
+    'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+  ],
+  dayNames: [
+    'Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'
+  ],
+  dayNamesShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+  today: 'Heute'
+};
+
+LocaleConfig.defaultLocale = 'de';
 
 interface CalendarViewProps {
   markedDates: Record<string, { marked?: boolean; dotColor?: string; selected?: boolean; selectedColor?: string }>;
