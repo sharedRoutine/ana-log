@@ -167,7 +167,7 @@ export default function EditProcedure() {
                   save();
                 }}
               >
-                <Save size={24} color="#3B82F6" />
+                <Save size={24} color="#10b981" />
               </PressableScale>
             ),
           }}

@@ -2,7 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { desc, eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { FilePlus2 } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -44,8 +44,8 @@ export default function Home() {
   const filteredProcedures =
     viewMode === 'calendar' && selectedDate
       ? procedures.filter(
-          ({ procedure }) => formatDateKey(procedure.date) === selectedDate,
-        )
+        ({ procedure }) => formatDateKey(procedure.date) === selectedDate,
+      )
       : procedures;
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -73,7 +73,7 @@ export default function Home() {
               }
             >
               <View className="px-2">
-                <Plus size={24} color={iconColor} />
+                <FilePlus2 size={24} color={iconColor} />
               </View>
             </PressableScale>
           ),
