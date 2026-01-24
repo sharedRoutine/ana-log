@@ -128,10 +128,10 @@ export default function ShowProcedure() {
         }}
       />
       {procedure.emergency && (
-        <View className="mx-4 mt-4 flex-row items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 dark:bg-red-900">
-          <Siren size={20} className="color-red-600 dark:color-red-300" />
-          <Text className="text-base font-semibold text-red-600 dark:text-red-300">
-            Notfall
+        <View className="mx-4 mt-4 flex-row items-center justify-center gap-2 rounded-xl bg-green-400 px-4 py-3 dark:bg-green-900">
+          <Siren size={20} />
+          <Text className="text-base font-semibold text-white dark:text-white">
+            {intl.formatMessage({ id: 'procedure.emergency-banner' })}
           </Text>
         </View>
       )}
@@ -156,7 +156,7 @@ export default function ShowProcedure() {
             <LabeledContent
               label={intl.formatMessage({ id: 'procedure.form.favorite' })}
             >
-              <SwiftText>{medicalCase.favorite ? 'Ja' : 'Nein'}</SwiftText>
+              <SwiftText>{medicalCase.favorite ? intl.formatMessage({ id: 'common.yes' }) : intl.formatMessage({ id: 'common.no' })}</SwiftText>
             </LabeledContent>
           </Section>
 
@@ -219,7 +219,7 @@ export default function ShowProcedure() {
                 id: 'procedure.form.local-anesthetics',
               })}
             >
-              <SwiftText>{procedure.localAnesthetics ? 'Ja' : 'Nein'}</SwiftText>
+              <SwiftText>{procedure.localAnesthetics ? intl.formatMessage({ id: 'common.yes' }) : intl.formatMessage({ id: 'common.no' })}</SwiftText>
             </LabeledContent>
             {procedure.localAnestheticsText && (
               <LabeledContent label="">
@@ -229,7 +229,7 @@ export default function ShowProcedure() {
             <LabeledContent
               label={intl.formatMessage({ id: 'procedure.form.emergency' })}
             >
-              <SwiftText>{procedure.emergency ? 'Ja' : 'Nein'}</SwiftText>
+              <SwiftText>{procedure.emergency ? intl.formatMessage({ id: 'common.yes' }) : intl.formatMessage({ id: 'common.no' })}</SwiftText>
             </LabeledContent>
           </Section>
 
