@@ -2,82 +2,35 @@ import { FlashList } from '@shopify/flash-list';
 import { desc, eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { CalendarDays, List, Plus } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { View, Text, useColorScheme } from 'react-native';
-import { type DateData } from 'react-native-calendars';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CalendarView } from '~/components/home/CalendarView';
+import { ListHeader } from '~/components/home/ListHeader';
 import SettingsMenu from '~/components/home/SettingsMenu';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { db } from '~/db/db';
 import { procedureTable, medicalCaseTable } from '~/db/schema';
+import { computeMarkedDates } from '~/lib/calendar';
+import { getTodayKey, formatDateKey } from '~/lib/date';
 
 type ViewMode = 'list' | 'calendar';
-
-const getTodayKey = () => new Date().toISOString().split('T')[0];
-
-const formatDateKey = (epochMs: number) => {
-  const date = new Date(epochMs);
-  return date.toISOString().split('T')[0];
-};
-
-interface ListHeaderProps {
-  proceduresCount: number;
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-  calendarView: React.ReactNode | null;
-}
-
-const ListHeader = ({ proceduresCount, viewMode, onViewModeChange, calendarView }: ListHeaderProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
-  const iconColor = isDark ? '#FFFFFF' : '#000000';
-  const activeIconColor = '#34D399';
-
-  return (
-    <View className="pt-4">
-      <View className="mb-4 flex-row items-center justify-between">
-        <View className="rounded-xl bg-background-secondary-dark px-3 py-1">
-          <Text className="font-semibold text-white">
-            {proceduresCount}
-          </Text>
-        </View>
-        <View className="flex-row items-center gap-2">
-          <PressableScale onPress={() => onViewModeChange('list')}>
-            <View className={`rounded-lg p-2 ${viewMode === 'list' ? 'bg-background-secondary-light dark:bg-background-secondary-dark' : ''}`}>
-              <List size={20} color={viewMode === 'list' ? activeIconColor : iconColor} strokeWidth={2} />
-            </View>
-          </PressableScale>
-          <PressableScale onPress={() => onViewModeChange('calendar')}>
-            <View className={`rounded-lg p-2 ${viewMode === 'calendar' ? 'bg-background-secondary-light dark:bg-background-secondary-dark' : ''}`}>
-              <CalendarDays size={20} color={viewMode === 'calendar' ? activeIconColor : iconColor} strokeWidth={2} />
-            </View>
-          </PressableScale>
-        </View>
-      </View>
-      {calendarView}
-    </View>
-  );
-};
 
 export default function Home() {
   const intl = useIntl();
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#000000';
+
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#000000';
 
   const { data: procedures } = useLiveQuery(
     db
-      .select({
-        procedure: procedureTable,
-        medicalCase: medicalCaseTable,
-      })
+      .select({ procedure: procedureTable, medicalCase: medicalCaseTable })
       .from(procedureTable)
       .innerJoin(
         medicalCaseTable,
@@ -86,74 +39,39 @@ export default function Home() {
       .orderBy(desc(procedureTable.date)),
   );
 
-  const markedDates = procedures.reduce<Record<string, { marked?: boolean; dotColor?: string; selected?: boolean; selectedColor?: string }>>((acc, { procedure }) => {
-    const key = formatDateKey(procedure.date);
-    acc[key] = { marked: true, dotColor: '#34D399' };
-    return acc;
-  }, {});
+  const markedDates = computeMarkedDates(procedures, selectedDate);
 
-  if (selectedDate) {
-    markedDates[selectedDate] = {
-      ...markedDates[selectedDate],
-      selected: true,
-      selectedColor: '#34D399',
-    };
-  }
-
-  const filteredProcedures = viewMode === 'calendar' && selectedDate
-    ? procedures.filter(({ procedure }) => formatDateKey(procedure.date) === selectedDate)
-    : procedures;
-
-  const handleDayPress = (date: DateData) => {
-    setSelectedDate(date.dateString);
-  };
+  const filteredProcedures =
+    viewMode === 'calendar' && selectedDate
+      ? procedures.filter(
+          ({ procedure }) => formatDateKey(procedure.date) === selectedDate,
+        )
+      : procedures;
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
-    if (mode === 'list') {
-      setSelectedDate(null);
-    } else {
-      setSelectedDate(getTodayKey());
-    }
+    setSelectedDate(mode === 'list' ? null : getTodayKey());
   };
 
-  const renderItem = ({
-    item,
-  }: {
-    item: {
-      procedure: typeof procedureTable.$inferSelect;
-      medicalCase: typeof medicalCaseTable.$inferSelect;
-    };
-  }) => (
-    <ProcedureCard
-      item={item.procedure}
-      onPress={() => router.push(`/procedure/${item.procedure.id}/show`)}
-    />
-  );
-
-  const renderListHeader = () => (
-    <ListHeader
-      proceduresCount={filteredProcedures.length}
-      viewMode={viewMode}
-      onViewModeChange={handleViewModeChange}
-      calendarView={viewMode === 'calendar' ? (
-        <CalendarView
-          markedDates={markedDates}
-          selectedDate={selectedDate}
-          onDayPress={handleDayPress}
-        />
-      ) : null}
-    />
-  );
-
   return (
-    <SafeAreaView edges={['bottom']} className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
+    <SafeAreaView
+      edges={['bottom']}
+      className="flex-1 bg-background-primary-light dark:bg-background-primary-dark"
+    >
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'home.my-procedures' }),
           headerLeft: () => <SettingsMenu />,
           headerRight: () => (
-            <PressableScale onPress={() => router.push(selectedDate ? `/procedure/create?date=${selectedDate}` : '/procedure/create')}>
+            <PressableScale
+              onPress={() =>
+                router.push(
+                  selectedDate
+                    ? `/procedure/create?date=${selectedDate}`
+                    : '/procedure/create',
+                )
+              }
+            >
               <View className="px-2">
                 <Plus size={24} color={iconColor} />
               </View>
@@ -163,19 +81,40 @@ export default function Home() {
       />
       <FlashList
         data={filteredProcedures}
-        renderItem={renderItem}
-        maintainVisibleContentPosition={{ disabled: true }}
-        ListHeaderComponent={renderListHeader}
-        ListEmptyComponent={viewMode === 'calendar' && selectedDate ? (
-          <View className="items-center py-8">
-            <Text className="text-text-secondary-light dark:text-text-secondary-dark">
-              {intl.formatMessage({ id: 'home.no-procedures' })}
-            </Text>
-          </View>
-        ) : null}
+        renderItem={({ item }) => (
+          <ProcedureCard
+            item={item.procedure}
+            onPress={() => router.push(`/procedure/${item.procedure.id}/show`)}
+          />
+        )}
+        ListHeaderComponent={
+          <ListHeader
+            proceduresCount={filteredProcedures.length}
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+          >
+            {viewMode === 'calendar' && (
+              <CalendarView
+                markedDates={markedDates}
+                selectedDate={selectedDate}
+                onDayPress={(date) => setSelectedDate(date.dateString)}
+              />
+            )}
+          </ListHeader>
+        }
+        ListEmptyComponent={
+          viewMode === 'calendar' && selectedDate ? (
+            <View className="items-center py-8">
+              <Text className="text-text-secondary-light dark:text-text-secondary-dark">
+                {intl.formatMessage({ id: 'home.no-procedures' })}
+              </Text>
+            </View>
+          ) : null
+        }
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
         keyExtractor={(item) => item.procedure.id.toString()}
         ItemSeparatorComponent={() => <View className="h-4" />}
+        maintainVisibleContentPosition={{ disabled: true }}
       />
     </SafeAreaView>
   );
