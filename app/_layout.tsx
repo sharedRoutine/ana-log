@@ -11,7 +11,6 @@ import { useState } from 'react';
 import { IntlProvider, useIntl } from 'react-intl';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import DataBackup from '~/components/home/DataBackup';
 import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
 import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
 import { db } from '~/db/db';
