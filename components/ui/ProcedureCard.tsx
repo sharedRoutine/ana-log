@@ -1,4 +1,3 @@
-import { Siren } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
 import { View, Text } from 'react-native';
@@ -13,7 +12,11 @@ interface ProcedureCardProps {
 
 export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
   const intl = useIntl();
-  const { getDepartmentClass } = useColors();
+  const { getDepartmentClass, getDepartmentTextClass } = useColors();
+
+  const departmentLabel = intl.formatMessage({
+    id: `enum.department.${item.department}`,
+  });
 
   const accessibilityLabel = intl.formatMessage(
     { id: 'procedure.accessibility.card' },
@@ -31,9 +34,17 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
     },
   );
 
+  const metadata = [
+    intl.formatMessage({
+      id: `enum.airway-management.${item.airwayManagement}`,
+    }),
+    intl.formatMessage({ id: 'home.asa-score' }, { score: item.asaScore }),
+    intl.formatMessage({ id: 'procedure.age-years' }, { years: item.ageYears }),
+  ].join(' | ');
+
   return (
     <PressableScale
-      className="rounded-[20px] bg-background-secondary-light dark:bg-background-secondary-dark p-5"
+      className="flex-row items-center py-3"
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
@@ -41,61 +52,40 @@ export function ProcedureCard({ item, onPress }: ProcedureCardProps) {
         id: 'procedure.accessibility.hint',
       })}
     >
-      <View className="mb-4 flex-row items-center justify-between">
-        <View className="gap-1">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">
-              {item.caseNumber}
-            </Text>
-            {item.emergency && (
-              <View className="mb-0.5">
-                <Siren size={22} color="#34D399" />
-              </View>
-            )}
-          </View>
-          <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-            {intl.formatDate(item.date, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </Text>
-        </View>
+      <View className="flex-1 flex-row">
         <View
-          className={'rounded-full px-3 py-1 bg-background-secondary-dark'}
-        >
-          <Text className="text-white">
-            {intl.formatMessage({ id: `enum.department.${item.department}` })}
-          </Text>
-        </View>
-      </View>
+          className={cn(
+            'w-1 self-stretch rounded-sm',
+            getDepartmentClass(item.department),
+          )}
+        />
 
-      <View className="mt-4 flex-row flex-wrap gap-2">
-        <View className="rounded-xl bg-accent px-3.5 py-2">
-          <Text className="text-white">
-            {intl.formatMessage({
-              id: `enum.airway-management.${item.airwayManagement}`,
-            })}
-          </Text>
-        </View>
-        <View className="rounded-xl bg-accent px-3.5 py-2">
-          <Text className="text-white">
-            {intl.formatMessage(
-              { id: 'home.asa-score' },
-              {
-                score: item.asaScore,
-              },
-            )}
-          </Text>
-        </View>
-        <View className="rounded-xl bg-accent px-3.5 py-2">
-          <Text className="text-white">
-            {intl.formatMessage(
-              { id: 'procedure.age-years' },
-              {
-                years: item.ageYears,
-              },
-            )}
+        <View className="flex-1 pl-3">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <Text className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark">
+                {item.caseNumber}
+              </Text>
+              {item.emergency && (
+                <View className="h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </View>
+            <Text className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+              {intl.formatDate(item.date, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </Text>
+          </View>
+          <Text className="mt-0.5 text-sm">
+            <Text className={getDepartmentTextClass(item.department)}>
+              {departmentLabel}
+            </Text>
+            <Text className="text-text-secondary-light dark:text-text-secondary-dark">
+              {' | '}
+              {metadata}
+            </Text>
           </Text>
         </View>
       </View>

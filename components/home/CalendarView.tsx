@@ -1,31 +1,69 @@
-import { Calendar, LocaleConfig, type DateData } from 'react-native-calendars';
 import { useColorScheme, View } from 'react-native';
+import { Calendar, LocaleConfig, type DateData } from 'react-native-calendars';
 
 LocaleConfig.locales['de'] = {
   monthNames: [
-    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+    'Januar',
+    'Februar',
+    'März',
+    'April',
+    'Mai',
+    'Juni',
+    'Juli',
+    'August',
+    'September',
+    'Oktober',
+    'November',
+    'Dezember',
   ],
   monthNamesShort: [
-    'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+    'Jan',
+    'Feb',
+    'Mär',
+    'Apr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Dez',
   ],
   dayNames: [
-    'Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'
+    'Sonntag',
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
   ],
   dayNamesShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-  today: 'Heute'
+  today: 'Heute',
 };
 
 LocaleConfig.defaultLocale = 'de';
 
 interface CalendarViewProps {
-  markedDates: Record<string, { marked?: boolean; dotColor?: string; selected?: boolean; selectedColor?: string }>;
+  markedDates: Record<
+    string,
+    {
+      marked?: boolean;
+      dotColor?: string;
+      selected?: boolean;
+      selectedColor?: string;
+    }
+  >;
   selectedDate: string | null;
   onDayPress: (date: DateData) => void;
 }
 
-export const CalendarView = ({ markedDates, selectedDate, onDayPress }: CalendarViewProps) => {
+export const CalendarView = ({
+  markedDates,
+  selectedDate,
+  onDayPress,
+}: CalendarViewProps) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 

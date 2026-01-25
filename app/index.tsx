@@ -10,14 +10,29 @@ import { View, Text, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CalendarView } from '~/components/home/CalendarView';
 import { ListHeader } from '~/components/home/ListHeader';
+import { SectionHeader } from '~/components/home/SectionHeader';
 import SettingsMenu from '~/components/home/SettingsMenu';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { db } from '~/db/db';
 import { procedureTable, medicalCaseTable } from '~/db/schema';
 import { computeMarkedDates } from '~/lib/calendar';
 import { getTodayKey, formatDateKey } from '~/lib/date';
+import { groupIntoSections, SectionKey } from '~/lib/sections';
 
 type ViewMode = 'list' | 'calendar';
+
+type ProcedureItem = {
+  type: 'procedure';
+  procedure: typeof procedureTable.$inferSelect;
+  medicalCase: typeof medicalCaseTable.$inferSelect;
+};
+
+type SectionItem = {
+  type: 'section';
+  sectionKey: SectionKey;
+};
+
+type ListItem = ProcedureItem | SectionItem;
 
 export default function Home() {
   const intl = useIntl();
@@ -44,9 +59,23 @@ export default function Home() {
   const filteredProcedures =
     viewMode === 'calendar' && selectedDate
       ? procedures.filter(
-        ({ procedure }) => formatDateKey(procedure.date) === selectedDate,
-      )
+          ({ procedure }) => formatDateKey(procedure.date) === selectedDate,
+        )
       : procedures;
+
+  const listData: Array<ListItem> =
+    viewMode === 'list'
+      ? groupIntoSections(filteredProcedures).flatMap((section) => [
+          { type: 'section' as const, sectionKey: section.key },
+          ...section.data.map((item) => ({
+            type: 'procedure' as const,
+            ...item,
+          })),
+        ])
+      : filteredProcedures.map((item) => ({
+          type: 'procedure' as const,
+          ...item,
+        }));
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -80,13 +109,21 @@ export default function Home() {
         }}
       />
       <FlashList
-        data={filteredProcedures}
-        renderItem={({ item }) => (
-          <ProcedureCard
-            item={item.procedure}
-            onPress={() => router.push(`/procedure/${item.procedure.id}/show`)}
-          />
-        )}
+        data={listData}
+        renderItem={({ item }) => {
+          if (item.type === 'section') {
+            return <SectionHeader sectionKey={item.sectionKey} />;
+          }
+          return (
+            <ProcedureCard
+              item={item.procedure}
+              onPress={() =>
+                router.push(`/procedure/${item.procedure.id}/show`)
+              }
+            />
+          );
+        }}
+        getItemType={(item) => item.type}
         ListHeaderComponent={
           <ListHeader
             proceduresCount={filteredProcedures.length}
@@ -112,8 +149,16 @@ export default function Home() {
           ) : null
         }
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
-        keyExtractor={(item) => item.procedure.id.toString()}
-        ItemSeparatorComponent={() => <View className="h-4" />}
+        keyExtractor={(item) =>
+          item.type === 'section'
+            ? `section-${item.sectionKey.type}${item.sectionKey.type === 'month' ? `-${item.sectionKey.date}` : ''}`
+            : `procedure-${item.procedure.id}`
+        }
+        ItemSeparatorComponent={({ leadingItem }) =>
+          leadingItem?.type === 'procedure' ? (
+            <View className="ml-4 h-px bg-gray-200 dark:bg-gray-700" />
+          ) : null
+        }
         maintainVisibleContentPosition={{ disabled: true }}
       />
     </SafeAreaView>

@@ -9,7 +9,11 @@ import {
   TextFieldRef,
   Text,
 } from '@expo/ui/swift-ui';
-import { listRowBackground, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
+import {
+  listRowBackground,
+  scrollContentBackground,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useRouter } from 'expo-router';
@@ -220,14 +224,12 @@ export default function ProcedureForm({
     <>
       {children
         ? children({
-          canSubmit: canSubmit && !isSubmitting,
-          dismiss,
-          save,
-        })
+            canSubmit: canSubmit && !isSubmitting,
+            dismiss,
+            save,
+          })
         : null}
-      <View
-        className="flex-1 bg-background-primary-light dark:bg-background-primary-dark"
-      >
+      <View className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
         <Host style={{ flex: 1 }}>
           <Form
             modifiers={[scrollContentBackground('hidden'), tint('#34D399')]}
@@ -261,7 +263,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color='#34D399'
+                      color="#34D399"
                     />
                   )}
                 </form.Field>
@@ -343,8 +345,8 @@ export default function ProcedureForm({
                       selectedIndex={
                         state.value
                           ? SORTED_AIRWAY_OPTIONS.map(
-                            (option) => option.value,
-                          ).indexOf(state.value)
+                              (option) => option.value,
+                            ).indexOf(state.value)
                           : 0
                       }
                       onOptionSelected={({ nativeEvent: { index } }) => {
@@ -366,8 +368,8 @@ export default function ProcedureForm({
                       selectedIndex={
                         state.value
                           ? SORTED_DEPARTMENT_OPTIONS.map(
-                            (option) => option.value,
-                          ).indexOf(state.value)
+                              (option) => option.value,
+                            ).indexOf(state.value)
                           : 0
                       }
                       onOptionSelected={({ nativeEvent: { index } }) => {
@@ -401,7 +403,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color='#34D399'
+                      color="#34D399"
                     />
                   )}
                 </form.Field>
@@ -433,7 +435,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color='#34D399'
+                      color="#34D399"
                     />
                   )}
                 </form.Field>
@@ -461,8 +463,8 @@ export default function ProcedureForm({
                           {state.value.length > 0
                             ? selectedLabels
                             : intl.formatMessage({
-                              id: 'create-filter.select',
-                            })}
+                                id: 'create-filter.select',
+                              })}
                         </Text>
                       </Button>
                     );

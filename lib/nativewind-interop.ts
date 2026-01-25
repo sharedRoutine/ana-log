@@ -1,5 +1,10 @@
 import { GlassContainer, GlassView } from 'expo-glass-effect';
-import { ChevronDown, ChevronLeftCircle, Edit } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ChevronLeftCircle,
+  ChevronRight,
+  Edit,
+} from 'lucide-react-native';
 import { cssInterop } from 'nativewind';
 import { PressableScale } from 'pressto';
 
@@ -24,5 +29,9 @@ cssInterop(ChevronLeftCircle, {
 });
 
 cssInterop(Edit, {
+  className: 'style',
+});
+
+cssInterop(ChevronRight, {
   className: 'style',
 });

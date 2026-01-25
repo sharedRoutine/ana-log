@@ -147,10 +147,7 @@ export default function Layout() {
           <IntlProvider locale="de" messages={deMessages}>
             <SpecialsPickerProvider>
               <Stack key={retryKey}>
-                <Stack.Screen
-                  name="index"
-                  options={headerOptions}
-                />
+                <Stack.Screen name="index" options={headerOptions} />
                 <Stack.Screen name="procedure/create" options={modalOptions} />
                 <Stack.Screen
                   name="procedure/[procedureId]/edit"

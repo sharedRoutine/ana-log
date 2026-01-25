@@ -50,10 +50,7 @@ export default function SettingsMenu() {
             </Button>
           </ContextMenu.Items>
           <ContextMenu.Trigger>
-            <Menu
-              size={24}
-              color={colorScheme === 'light' ? '#000' : '#fff'}
-            />
+            <Menu size={24} color={colorScheme === 'light' ? '#000' : '#fff'} />
           </ContextMenu.Trigger>
         </ContextMenu>
       </Host>

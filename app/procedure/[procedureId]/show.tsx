@@ -11,10 +11,15 @@ import {
   tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { useQuery } from '@tanstack/react-query';
-import { useColorScheme } from 'nativewind';
 import { eq } from 'drizzle-orm';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeftCircle, Edit, FileQuestion, Siren } from 'lucide-react-native';
+import {
+  ChevronLeftCircle,
+  Edit,
+  FileQuestion,
+  Siren,
+} from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
 import { Text, View } from 'react-native';
@@ -136,12 +141,7 @@ export default function ShowProcedure() {
         </View>
       )}
       <Host style={{ flex: 1 }}>
-        <Form
-          modifiers={[
-            scrollContentBackground('hidden'),
-            tint('#3B82F6'),
-          ]}
-        >
+        <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
           <Section
             title={intl.formatMessage({
               id: 'procedure.form.section.case-info',
@@ -156,7 +156,11 @@ export default function ShowProcedure() {
             <LabeledContent
               label={intl.formatMessage({ id: 'procedure.form.favorite' })}
             >
-              <SwiftText>{medicalCase.favorite ? intl.formatMessage({ id: 'common.yes' }) : intl.formatMessage({ id: 'common.no' })}</SwiftText>
+              <SwiftText>
+                {medicalCase.favorite
+                  ? intl.formatMessage({ id: 'common.yes' })
+                  : intl.formatMessage({ id: 'common.no' })}
+              </SwiftText>
             </LabeledContent>
           </Section>
 
@@ -185,7 +189,9 @@ export default function ShowProcedure() {
             modifiers={[listRowBackground(rowBackground)]}
           >
             <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.operation-date' })}
+              label={intl.formatMessage({
+                id: 'procedure.form.operation-date',
+              })}
             >
               <SwiftText>
                 {intl.formatDate(procedure.date, {
@@ -212,14 +218,20 @@ export default function ShowProcedure() {
             <LabeledContent
               label={intl.formatMessage({ id: 'procedure.form.department' })}
             >
-              <SwiftText>{getTranslatedDepartment(procedure.department)}</SwiftText>
+              <SwiftText>
+                {getTranslatedDepartment(procedure.department)}
+              </SwiftText>
             </LabeledContent>
             <LabeledContent
               label={intl.formatMessage({
                 id: 'procedure.form.local-anesthetics',
               })}
             >
-              <SwiftText>{procedure.localAnesthetics ? intl.formatMessage({ id: 'common.yes' }) : intl.formatMessage({ id: 'common.no' })}</SwiftText>
+              <SwiftText>
+                {procedure.localAnesthetics
+                  ? intl.formatMessage({ id: 'common.yes' })
+                  : intl.formatMessage({ id: 'common.no' })}
+              </SwiftText>
             </LabeledContent>
             {procedure.localAnestheticsText && (
               <LabeledContent label="">
@@ -229,7 +241,11 @@ export default function ShowProcedure() {
             <LabeledContent
               label={intl.formatMessage({ id: 'procedure.form.emergency' })}
             >
-              <SwiftText>{procedure.emergency ? intl.formatMessage({ id: 'common.yes' }) : intl.formatMessage({ id: 'common.no' })}</SwiftText>
+              <SwiftText>
+                {procedure.emergency
+                  ? intl.formatMessage({ id: 'common.yes' })
+                  : intl.formatMessage({ id: 'common.no' })}
+              </SwiftText>
             </LabeledContent>
           </Section>
 

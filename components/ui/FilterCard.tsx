@@ -41,15 +41,9 @@ export function FilterCard({
       >
         <View className="flex-row items-center justify-between">
           {filter.goal && filter.goal <= matchingCount ? (
-            <Check
-              size={24}
-              color="#34D399"
-            />
+            <Check size={24} color="#34D399" />
           ) : (
-            <HeartPulse
-              size={24}
-              color="#34D399"
-            />
+            <HeartPulse size={24} color="#34D399" />
           )}
           <Text
             className="text-right text-3xl font-bold text-text-primary-light dark:text-text-primary-dark"

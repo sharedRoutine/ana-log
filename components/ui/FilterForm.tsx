@@ -11,7 +11,11 @@ import {
   TextFieldRef,
   Stepper,
 } from '@expo/ui/swift-ui';
-import { scrollContentBackground, tint, listRowBackground } from '@expo/ui/swift-ui/modifiers';
+import {
+  scrollContentBackground,
+  tint,
+  listRowBackground,
+} from '@expo/ui/swift-ui/modifiers';
 import { useForm, useStore } from '@tanstack/react-form';
 import { Match } from 'effect';
 import { useColorScheme } from 'nativewind';
@@ -636,7 +640,10 @@ export default function FilterForm({
                         </Section>
                       );
                     })}
-                    <Section title="" modifiers={[listRowBackground(rowBackground)]}>
+                    <Section
+                      title=""
+                      modifiers={[listRowBackground(rowBackground)]}
+                    >
                       <Button
                         onPress={() => {
                           // Create a default condition and cast to the union type

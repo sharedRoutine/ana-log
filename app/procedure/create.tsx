@@ -19,7 +19,9 @@ export default function CreateProcedure() {
   const { colorScheme } = useColorScheme();
   const { date: dateParam } = useLocalSearchParams<{ date: string }>();
 
-  const operationDate = dateParam ? DateTime.unsafeMake(new Date(dateParam)) : DateTime.unsafeMake(new Date());
+  const operationDate = dateParam
+    ? DateTime.unsafeMake(new Date(dateParam))
+    : DateTime.unsafeMake(new Date());
 
   const procedure = {
     caseNumber: '',

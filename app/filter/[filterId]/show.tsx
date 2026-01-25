@@ -20,7 +20,7 @@ import {
 } from '~/db/schema';
 import { useFilterLogic } from '~/hooks/useFilterLogic';
 
-const Goal = ({ current, goal }: { current: number, goal: number }) => {
+const Goal = ({ current, goal }: { current: number; goal: number }) => {
   const intl = useIntl();
   return (
     <View className="px-4 pt-4">
@@ -47,8 +47,8 @@ const Goal = ({ current, goal }: { current: number, goal: number }) => {
         </Host>
       </View>
     </View>
-  )
-}
+  );
+};
 
 export default function ShowFilter() {
   const router = useRouter();
@@ -184,7 +184,7 @@ export default function ShowFilter() {
               />
             )}
             ListHeaderComponent={() => (
-              <View className='mb-6'>
+              <View className="mb-6">
                 {filters[0].goal ? (
                   <Goal current={procedures.length} goal={filters[0].goal} />
                 ) : null}
@@ -199,7 +199,9 @@ export default function ShowFilter() {
             )}
             getItemType={() => 'procedure'}
             keyExtractor={(item) => item.procedure.id.toString()}
-            ItemSeparatorComponent={() => <View className="h-4" />}
+            ItemSeparatorComponent={() => (
+              <View className="ml-4 h-px bg-gray-200 dark:bg-gray-700" />
+            )}
           />
         </View>
       </SafeAreaView>

@@ -11,7 +11,10 @@ export default function FiltersModal() {
   const router = useRouter();
 
   return (
-    <SafeAreaView edges={['bottom']} className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
+    <SafeAreaView
+      edges={['bottom']}
+      className="flex-1 bg-background-primary-light dark:bg-background-primary-dark"
+    >
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'home.my-filters' }),
