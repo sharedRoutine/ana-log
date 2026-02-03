@@ -23,7 +23,7 @@ export default function FilterGrid() {
   const filterMatchCounts = useFilterMatchCounts(filters, allFilterConditions);
 
   return (
-    <View className="flex-row flex-wrap gap-4">
+    <View className="flex-row flex-wrap justify-between gap-2">
       <PressableScale
         className="h-24 w-[48%]"
         onPress={() => router.push('/filter/create')}
