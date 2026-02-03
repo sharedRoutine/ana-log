@@ -77,7 +77,7 @@ export const CalendarView = ({
     selectedDayTextColor: '#FFFFFF',
     dotColor: '#34D399',
     selectedDotColor: '#FFFFFF',
-    arrowColor: '#34D399',
+    arrowColor: isDark ? '#34D399' : '#059669',
     monthTextColor: isDark ? '#FFFFFF' : '#000000',
     textDisabledColor: isDark ? '#4B5563' : '#D1D5DB',
   };
