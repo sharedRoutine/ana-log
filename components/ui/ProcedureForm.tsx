@@ -23,6 +23,7 @@ import { useIntl } from 'react-intl';
 import { Alert, View } from 'react-native';
 import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
 import { medicalCaseTable, procedureTable } from '~/db/schema';
+import { useColors } from '~/hooks/useColors';
 import {
   AIRWAY_OPTIONS,
   DEPARTMENT_OPTIONS,
@@ -77,10 +78,12 @@ type ProcedureFormProps = {
     canSubmit,
     dismiss,
     save,
+    tintColor,
   }: {
     canSubmit: boolean;
     dismiss: () => void;
     save: () => void;
+    tintColor: string;
   }) => React.ReactNode;
 };
 
@@ -153,10 +156,14 @@ export default function ProcedureForm({
     },
   });
 
+  const { getDepartmentHexColor, getDepartmentRowBackground } = useColors();
+
   const departmentValue = useStore(
     form.store,
     (state) => state.values.department,
   );
+  const tintColor = getDepartmentHexColor(departmentValue);
+
   const localAnestheticsValue = useStore(
     form.store,
     (state) => state.values.localAnesthetics,
@@ -218,7 +225,10 @@ export default function ProcedureForm({
     );
   };
 
-  const rowBackground = colorScheme === 'dark' ? '#1E293B' : '#f3f4f6';
+  const rowBackground = getDepartmentRowBackground(
+    departmentValue,
+    colorScheme === 'dark',
+  );
 
   return (
     <>
@@ -227,12 +237,13 @@ export default function ProcedureForm({
             canSubmit: canSubmit && !isSubmitting,
             dismiss,
             save,
+            tintColor,
           })
         : null}
       <View className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
         <Host style={{ flex: 1 }}>
           <Form
-            modifiers={[scrollContentBackground('hidden'), tint('#34D399')]}
+            modifiers={[scrollContentBackground('hidden'), tint(tintColor)]}
           >
             <>
               <Section
@@ -263,8 +274,55 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color="#34D399"
+                      color={tintColor}
                     />
+                  )}
+                </form.Field>
+              </Section>
+              <Section
+                title={intl.formatMessage({
+                  id: 'procedure.form.section.department',
+                })}
+                modifiers={[listRowBackground(rowBackground)]}
+              >
+                <form.Field name="department">
+                  {({ state, handleChange }) => (
+                    <Picker
+                      variant="menu"
+                      label={intl.formatMessage({
+                        id: 'procedure.form.department',
+                      })}
+                      options={SORTED_DEPARTMENT_OPTIONS.map(
+                        (option) => option.label,
+                      )}
+                      selectedIndex={
+                        state.value
+                          ? SORTED_DEPARTMENT_OPTIONS.map(
+                              (option) => option.value,
+                            ).indexOf(state.value)
+                          : 0
+                      }
+                      onOptionSelected={({ nativeEvent: { index } }) => {
+                        handleChange(SORTED_DEPARTMENT_OPTIONS[index].value);
+                      }}
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="departmentOther">
+                  {({ state, handleChange }) => (
+                    <>
+                      {departmentValue === 'other' && (
+                        <DismissableTextField
+                          placeholder={intl.formatMessage({
+                            id: 'procedure.form.department.other.placeholder',
+                          })}
+                          defaultValue={state.value}
+                          onChangeText={handleChange}
+                          autocorrection={false}
+                          ref={departmentOtherRef}
+                        />
+                      )}
+                    </>
                   )}
                 </form.Field>
               </Section>
@@ -355,46 +413,6 @@ export default function ProcedureForm({
                     />
                   )}
                 </form.Field>
-                <form.Field name="department">
-                  {({ state, handleChange }) => (
-                    <Picker
-                      variant="menu"
-                      label={intl.formatMessage({
-                        id: 'procedure.form.department',
-                      })}
-                      options={SORTED_DEPARTMENT_OPTIONS.map(
-                        (option) => option.label,
-                      )}
-                      selectedIndex={
-                        state.value
-                          ? SORTED_DEPARTMENT_OPTIONS.map(
-                              (option) => option.value,
-                            ).indexOf(state.value)
-                          : 0
-                      }
-                      onOptionSelected={({ nativeEvent: { index } }) => {
-                        handleChange(SORTED_DEPARTMENT_OPTIONS[index].value);
-                      }}
-                    />
-                  )}
-                </form.Field>
-                <form.Field name="departmentOther">
-                  {({ state, handleChange }) => (
-                    <>
-                      {departmentValue === 'other' && (
-                        <DismissableTextField
-                          placeholder={intl.formatMessage({
-                            id: 'procedure.form.department.other.placeholder',
-                          })}
-                          defaultValue={state.value}
-                          onChangeText={handleChange}
-                          autocorrection={false}
-                          ref={departmentOtherRef}
-                        />
-                      )}
-                    </>
-                  )}
-                </form.Field>
                 <form.Field name="localAnesthetics">
                   {({ state, handleChange }) => (
                     <Switch
@@ -403,7 +421,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color="#34D399"
+                      color={tintColor}
                     />
                   )}
                 </form.Field>
@@ -435,7 +453,7 @@ export default function ProcedureForm({
                       })}
                       value={state.value}
                       onValueChange={handleChange}
-                      color="#34D399"
+                      color={tintColor}
                     />
                   )}
                 </form.Field>

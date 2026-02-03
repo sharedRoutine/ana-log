@@ -66,7 +66,7 @@ export default function CreateProcedure() {
         router.back();
       }}
     >
-      {({ canSubmit, dismiss, save }) => (
+      {({ canSubmit, dismiss, save, tintColor }) => (
         <Stack.Screen
           options={{
             title: intl.formatMessage({ id: 'add-item.title' }),
@@ -93,7 +93,7 @@ export default function CreateProcedure() {
                   save();
                 }}
               >
-                <Save size={24} color="#10b981" />
+                <Save size={24} color={tintColor} />
               </PressableScale>
             ),
           }}
