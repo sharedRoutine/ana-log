@@ -10,6 +10,7 @@ import { ComponentProps, useState } from 'react';
 import { IntlProvider, useIntl } from 'react-intl';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppLock } from '~/components/layout/AppLock';
 import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
 import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
@@ -174,49 +175,56 @@ export default function Layout() {
 
   return (
     <GestureHandlerRootView className="flex-1">
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="de" messages={deMessages}>
-            <SpecialsPickerProvider>
-              <AppLock>
-                <ThemeProvider
-                  value={colorScheme === 'dark' ? darkNavTheme : lightNavTheme}
-                >
-                  <Stack key={retryKey}>
-                    <Stack.Screen name="index" options={headerOptions} />
-                    <Stack.Screen
-                      name="procedure/create"
-                      options={modalOptions}
-                    />
-                    <Stack.Screen
-                      name="procedure/[procedureId]/edit"
-                      options={modalOptions}
-                    />
-                    <Stack.Screen
-                      name="procedure/[procedureId]/show"
-                      options={modalOptions}
-                    />
-                    <Stack.Screen
-                      name="procedure/specials-picker"
-                      options={headerOptions}
-                    />
-                    <Stack.Screen name="filters" options={modalOptions} />
-                    <Stack.Screen name="filter/create" options={modalOptions} />
-                    <Stack.Screen
-                      name="filter/[filterId]/show"
-                      options={modalOptions}
-                    />
-                    <Stack.Screen
-                      name="filter/[filterId]/edit"
-                      options={modalOptions}
-                    />
-                  </Stack>
-                </ThemeProvider>
-              </AppLock>
-            </SpecialsPickerProvider>
-          </IntlProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
+      <KeyboardProvider>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <IntlProvider locale="de" messages={deMessages}>
+              <SpecialsPickerProvider>
+                <AppLock>
+                  <ThemeProvider
+                    value={
+                      colorScheme === 'dark' ? darkNavTheme : lightNavTheme
+                    }
+                  >
+                    <Stack key={retryKey}>
+                      <Stack.Screen name="index" options={headerOptions} />
+                      <Stack.Screen
+                        name="procedure/create"
+                        options={modalOptions}
+                      />
+                      <Stack.Screen
+                        name="procedure/[procedureId]/edit"
+                        options={modalOptions}
+                      />
+                      <Stack.Screen
+                        name="procedure/[procedureId]/show"
+                        options={modalOptions}
+                      />
+                      <Stack.Screen
+                        name="procedure/specials-picker"
+                        options={headerOptions}
+                      />
+                      <Stack.Screen name="filters" options={modalOptions} />
+                      <Stack.Screen
+                        name="filter/create"
+                        options={modalOptions}
+                      />
+                      <Stack.Screen
+                        name="filter/[filterId]/show"
+                        options={modalOptions}
+                      />
+                      <Stack.Screen
+                        name="filter/[filterId]/edit"
+                        options={modalOptions}
+                      />
+                    </Stack>
+                  </ThemeProvider>
+                </AppLock>
+              </SpecialsPickerProvider>
+            </IntlProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

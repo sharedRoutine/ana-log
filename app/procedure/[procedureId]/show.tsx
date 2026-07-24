@@ -6,24 +6,60 @@ import {
   Edit,
   FileQuestion,
   Siren,
+  Star,
 } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
+import { ReactNode } from 'react';
 import { useIntl } from 'react-intl';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/layout/EmptyState';
 import { LoadingScreen } from '~/components/layout/LoadingScreen';
-import { FormSection, FormValueRow } from '~/components/ui/Form';
 import { db } from '~/db/db';
 import {
   procedureTable,
   procedureSpecialTable,
   medicalCaseTable,
 } from '~/db/schema';
+import { useColors } from '~/hooks/useColors';
+import { cn } from '~/lib/cn';
+
+const SectionLabel = ({ children }: { children: ReactNode }) => (
+  <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-widest text-text-secondary-light dark:text-text-secondary-dark">
+    {children}
+  </Text>
+);
+
+const StatTile = ({ label, value }: { label: string; value: string }) => (
+  <View className="flex-1 rounded-2xl border border-black/5 bg-background-secondary-light p-3 dark:border-white/5 dark:bg-background-secondary-dark">
+    <Text
+      className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary-light dark:text-text-secondary-dark"
+      numberOfLines={1}
+    >
+      {label}
+    </Text>
+    <Text
+      className="mt-1 text-xl font-bold tabular-nums text-text-primary-light dark:text-text-primary-dark"
+      numberOfLines={1}
+      adjustsFontSizeToFit
+    >
+      {value}
+    </Text>
+  </View>
+);
+
+const Chip = ({ children }: { children: ReactNode }) => (
+  <View className="rounded-full bg-black/5 px-3 py-1.5 dark:bg-white/10">
+    <Text className="text-sm font-medium text-text-primary-light dark:text-text-primary-dark">
+      {children}
+    </Text>
+  </View>
+);
 
 export default function ShowProcedure() {
   const intl = useIntl();
   const router = useRouter();
+  const { getDepartmentHexColor, getDepartmentTextClass } = useColors();
 
   const { procedureId: procedureIdParam } = useLocalSearchParams<{
     procedureId: string;
@@ -59,11 +95,6 @@ export default function ShowProcedure() {
     },
   });
 
-  const yesNo = (value: boolean) =>
-    value
-      ? intl.formatMessage({ id: 'common.yes' })
-      : intl.formatMessage({ id: 'common.no' });
-
   if (isPending) {
     return <LoadingScreen />;
   }
@@ -81,6 +112,23 @@ export default function ShowProcedure() {
   }
 
   const { procedure, medicalCase, specials } = data;
+  const departmentColor = getDepartmentHexColor(procedure.department);
+
+  const ageValue =
+    procedure.ageYears > 0
+      ? procedure.ageMonths > 0
+        ? `${procedure.ageYears} ${intl.formatMessage({ id: 'unit.years-short' })} ${procedure.ageMonths} ${intl.formatMessage({ id: 'unit.months-short' })}`
+        : `${procedure.ageYears} ${intl.formatMessage({ id: 'unit.years-short' })}`
+      : `${procedure.ageMonths} ${intl.formatMessage({ id: 'unit.months-short' })}`;
+
+  const specialLabels = specials
+    .map((special) => intl.formatMessage({ id: `enum.specials.${special}` }))
+    .sort((a, b) => a.localeCompare(b));
+
+  const hasFlags =
+    specialLabels.length > 0 ||
+    procedure.localAnesthetics ||
+    procedure.localAnestheticsText;
 
   return (
     <SafeAreaView
@@ -122,117 +170,129 @@ export default function ShowProcedure() {
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
       >
-        {procedure.emergency && (
-          <View className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3">
-            <Siren size={20} color="#FFFFFF" />
-            <Text className="text-base font-semibold text-white">
-              {intl.formatMessage({ id: 'procedure.emergency-banner' })}
-            </Text>
+        <View
+          className="mb-6 rounded-2xl border p-4"
+          style={{
+            backgroundColor: `${departmentColor}1A`,
+            borderColor: `${departmentColor}33`,
+          }}
+        >
+          <View className="flex-row items-center gap-3">
+            <View
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${departmentColor}26` }}
+            >
+              <Text
+                className={cn(
+                  'text-xs font-bold',
+                  getDepartmentTextClass(procedure.department),
+                )}
+                numberOfLines={1}
+              >
+                {procedure.department === 'other' ? '?' : procedure.department}
+              </Text>
+            </View>
+            <View className="flex-1">
+              <Text
+                className={cn(
+                  'text-sm font-semibold',
+                  getDepartmentTextClass(procedure.department),
+                )}
+                numberOfLines={1}
+              >
+                {procedure.department === 'other' && procedure.departmentOther
+                  ? procedure.departmentOther
+                  : intl.formatMessage({
+                      id: `enum.department.${procedure.department}`,
+                    })}
+              </Text>
+              <Text className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                {intl.formatDate(procedure.date, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </Text>
+            </View>
           </View>
-        )}
-        <FormSection
-          title={intl.formatMessage({ id: 'procedure.form.section.case-info' })}
-        >
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.case-number' })}
-            value={procedure.caseNumber}
-          />
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.favorite' })}
-            value={yesNo(medicalCase.favorite)}
-          />
-        </FormSection>
-        <FormSection
-          title={intl.formatMessage({
-            id: 'procedure.form.section.patient-info',
-          })}
-        >
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.years' })}
-            value={`${procedure.ageYears}`}
-          />
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.months' })}
-            value={`${procedure.ageMonths}`}
-          />
-        </FormSection>
-        <FormSection
-          title={intl.formatMessage({
-            id: 'procedure.form.section.operation-info',
-          })}
-        >
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.operation-date' })}
-            value={intl.formatDate(procedure.date, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          />
-          <FormValueRow
+          <Text className="mt-3 text-3xl font-bold tabular-nums text-text-primary-light dark:text-text-primary-dark">
+            {procedure.caseNumber}
+          </Text>
+          {(procedure.emergency || medicalCase.favorite) && (
+            <View className="mt-3 flex-row flex-wrap gap-2">
+              {procedure.emergency && (
+                <View className="flex-row items-center gap-1.5 rounded-full bg-red-500 px-3 py-1.5">
+                  <Siren size={14} color="#FFFFFF" />
+                  <Text className="text-sm font-semibold text-white">
+                    {intl.formatMessage({ id: 'procedure.form.emergency' })}
+                  </Text>
+                </View>
+              )}
+              {medicalCase.favorite && (
+                <View className="flex-row items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1.5">
+                  <Star size={14} color="#000000" fill="#000000" />
+                  <Text className="text-sm font-semibold text-black">
+                    {intl.formatMessage({ id: 'procedure.form.favorite' })}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+        <View className="mb-6 flex-row gap-2">
+          <StatTile
             label={intl.formatMessage({ id: 'procedure.form.asa-score' })}
-            value={`ASA ${procedure.asaScore}`}
+            value={`${procedure.asaScore}`}
           />
-          <FormValueRow
-            label={intl.formatMessage({
-              id: 'procedure.form.airway-management',
-            })}
+          <StatTile
+            label={intl.formatMessage({ id: 'show.age' })}
+            value={ageValue}
+          />
+          <StatTile
+            label={intl.formatMessage({ id: 'show.airway' })}
             value={intl.formatMessage({
               id: `enum.airway-management.${procedure.airwayManagement}`,
             })}
           />
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.department' })}
-            value={intl.formatMessage({
-              id: `enum.department.${procedure.department}`,
-            })}
-          />
-          <FormValueRow
-            label={intl.formatMessage({
-              id: 'procedure.form.local-anesthetics',
-            })}
-            value={yesNo(procedure.localAnesthetics)}
-          />
-          {procedure.localAnestheticsText ? (
-            <View className="px-4 py-3">
-              <Text className="text-base text-text-primary-light dark:text-text-primary-dark">
-                {procedure.localAnestheticsText}
-              </Text>
+        </View>
+        {hasFlags && (
+          <View className="mb-6">
+            <SectionLabel>
+              {intl.formatMessage({ id: 'procedure.form.section.specials' })}
+            </SectionLabel>
+            <View className="flex-row flex-wrap gap-2">
+              {procedure.localAnesthetics && (
+                <Chip>
+                  {intl.formatMessage({
+                    id: 'procedure.form.local-anesthetics',
+                  })}
+                </Chip>
+              )}
+              {specialLabels.map((label) => (
+                <Chip key={label}>{label}</Chip>
+              ))}
             </View>
-          ) : null}
-          <FormValueRow
-            label={intl.formatMessage({ id: 'procedure.form.emergency' })}
-            value={yesNo(procedure.emergency)}
-          />
-        </FormSection>
-        {specials && specials.length > 0 && (
-          <FormSection
-            title={intl.formatMessage({
-              id: 'procedure.form.section.specials',
-            })}
-          >
-            <View className="px-4 py-3">
-              <Text className="text-base text-text-primary-light dark:text-text-primary-dark">
-                {specials
-                  .map((special) =>
-                    intl.formatMessage({ id: `enum.specials.${special}` }),
-                  )
-                  .sort((a, b) => a.localeCompare(b))
-                  .join(', ')}
-              </Text>
-            </View>
-          </FormSection>
+            {procedure.localAnestheticsText ? (
+              <View className="mt-3 rounded-2xl border border-black/5 bg-background-secondary-light p-4 dark:border-white/5 dark:bg-background-secondary-dark">
+                <Text className="text-base leading-6 text-text-primary-light dark:text-text-primary-dark">
+                  {procedure.localAnestheticsText}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         )}
         {procedure.description ? (
-          <FormSection
-            title={intl.formatMessage({ id: 'procedure.form.procedure' })}
-          >
-            <View className="px-4 py-3">
+          <View className="mb-6">
+            <SectionLabel>
+              {intl.formatMessage({ id: 'procedure.form.procedure' })}
+            </SectionLabel>
+            <View className="rounded-2xl border border-black/5 bg-background-secondary-light p-4 dark:border-white/5 dark:bg-background-secondary-dark">
               <Text className="text-base leading-6 text-text-primary-light dark:text-text-primary-dark">
                 {procedure.description}
               </Text>
             </View>
-          </FormSection>
+          </View>
         ) : null}
       </ScrollView>
     </SafeAreaView>

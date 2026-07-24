@@ -2,16 +2,12 @@ import { Minus, Plus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { Children, Fragment, isValidElement, ReactNode, Ref } from 'react';
+import { useIntl } from 'react-intl';
+import { Switch, Text, TextInput, TextInputProps, View } from 'react-native';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  TextInputProps,
-  View,
-} from 'react-native';
+  KeyboardAwareScrollView,
+  KeyboardToolbar,
+} from 'react-native-keyboard-controller';
 import { cn } from '~/lib/cn';
 
 export const ACCENT = '#34D399';
@@ -25,22 +21,25 @@ export const contrastText = (hex: string) => {
 };
 
 export function FormScrollView({ children }: { children: ReactNode }) {
+  const intl = useIntl();
+
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
+    <>
+      <KeyboardAwareScrollView
         className="flex-1 bg-background-primary-light px-4 dark:bg-background-primary-dark"
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 48 }}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
+        bottomOffset={62}
       >
         {children}
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+      <KeyboardToolbar
+        doneText={intl.formatMessage({ id: 'form.keyboard.done' })}
+      />
+    </>
   );
 }
 

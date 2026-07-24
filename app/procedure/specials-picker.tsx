@@ -33,7 +33,7 @@ export default function SpecialsPicker() {
   };
 
   return (
-    <View className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
+    <>
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'procedure.form.section.specials' }),
@@ -48,7 +48,7 @@ export default function SpecialsPicker() {
         }}
       />
       <ScrollView
-        className="flex-1 px-4"
+        className="flex-1 bg-background-primary-light px-4 dark:bg-background-primary-dark"
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 48 }}
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
@@ -95,6 +95,6 @@ export default function SpecialsPicker() {
           })}
         </FormSection>
       </ScrollView>
-    </View>
+    </>
   );
 }
