@@ -20,7 +20,7 @@ export default function CreateProcedure() {
   const { date: dateParam } = useLocalSearchParams<{ date: string }>();
 
   const operationDate = dateParam
-    ? DateTime.unsafeMake(new Date(dateParam))
+    ? DateTime.unsafeMake(new Date(`${dateParam}T12:00:00`))
     : DateTime.unsafeMake(new Date());
 
   const procedure = {

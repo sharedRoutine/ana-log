@@ -1,61 +1,78 @@
-import { Effect, Either, Layer, Option } from 'effect';
+import { useQueryClient } from '@tanstack/react-query';
+import { Effect, Either, Layer } from 'effect';
 import { useIntl } from 'react-intl';
 import { Alert } from 'react-native';
 import {
   FileSystem,
-  SharingService,
-  DocumentPickerService,
   DatabaseService,
-  prepareBackup,
-  importFromUri,
+  BackupKeyService,
+  ICloudDriveService,
+  backupToICloud,
+  restoreFromICloud,
 } from '~/services/backup';
 
 const LiveLayer = Layer.mergeAll(
   FileSystem.Default,
-  SharingService.Default,
-  DocumentPickerService.Default,
   DatabaseService.Default,
+  BackupKeyService.Default,
+  ICloudDriveService.Default,
 );
 
 export function useDataBackup() {
   const intl = useIntl();
+  const queryClient = useQueryClient();
 
   return {
-    exportDatabase: Effect.fnUntraced(
+    backupToICloudNow: Effect.fnUntraced(
       function* () {
-        const sharing = yield* SharingService;
-        const backupPath = yield* prepareBackup;
-        yield* sharing.share(backupPath, {
-          mimeType: 'application/x-sqlite3',
-          dialogTitle: intl.formatMessage({ id: 'home.export-data' }),
-        });
-      },
-      Effect.provide(LiveLayer),
-      Effect.scoped,
-      Effect.runPromise,
-    ),
-    importDatabase: Effect.fnUntraced(
-      function* () {
-        const picker = yield* DocumentPickerService;
-        const uri = yield* picker.pick.pipe(Effect.option);
-        if (Option.isNone(uri)) {
-          return;
-        }
-        const result = yield* importFromUri(uri.value).pipe(Effect.either);
+        const result = yield* backupToICloud.pipe(Effect.either);
         Either.match(result, {
           onLeft: (error) => {
             Alert.alert(
-              intl.formatMessage({ id: 'import.failed.title' }),
+              intl.formatMessage({ id: 'icloud.backup.failed.title' }),
               error.message,
             );
           },
-          onRight: () => {
-            Alert.alert(
-              intl.formatMessage({ id: 'import.success.title' }),
-              intl.formatMessage({ id: 'import.success.message' }),
-            );
+          onRight: (written) => {
+            if (written) {
+              Alert.alert(
+                intl.formatMessage({ id: 'icloud.backup.success.title' }),
+                intl.formatMessage({ id: 'icloud.backup.success.message' }),
+              );
+            } else {
+              Alert.alert(
+                intl.formatMessage({ id: 'icloud.unavailable.title' }),
+                intl.formatMessage({ id: 'icloud.unavailable.message' }),
+              );
+            }
           },
         });
+      },
+      Effect.provide(LiveLayer),
+      Effect.runPromise,
+    ),
+    restoreFromICloud: Effect.fnUntraced(
+      function* () {
+        const result = yield* restoreFromICloud.pipe(Effect.either);
+        if (Either.isLeft(result)) {
+          Alert.alert(
+            intl.formatMessage({ id: 'import.failed.title' }),
+            result.left.message,
+          );
+          return;
+        }
+        if (!result.right) {
+          Alert.alert(
+            intl.formatMessage({ id: 'icloud.restore.none.title' }),
+            intl.formatMessage({ id: 'icloud.restore.none.message' }),
+          );
+          return;
+        }
+        yield* Effect.promise(() => queryClient.invalidateQueries());
+        Alert.alert(
+          intl.formatMessage({ id: 'import.success.title' }),
+          intl.formatMessage({ id: 'import.success.message' }),
+        );
       },
       Effect.provide(LiveLayer),
       Effect.runPromise,

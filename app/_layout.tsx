@@ -1,19 +1,20 @@
 import '../global.css';
 import '../lib/nativewind-interop';
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { Duration } from 'effect';
-import { Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
-import { useState } from 'react';
+import { ComponentProps, useState } from 'react';
 import { IntlProvider, useIntl } from 'react-intl';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppLock } from '~/components/layout/AppLock';
 import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
 import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
 import { db } from '~/db/db';
+import { useAutoBackup } from '~/hooks/useAutoBackup';
 import migrations from '../drizzle/migrations';
 import deMessages from '../locales/de.json';
 
@@ -26,19 +27,49 @@ const queryClient = new QueryClient({
   },
 });
 
+const darkNavTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: '#34D399',
+    background: '#0B0F17',
+    card: '#0B0F17',
+    text: '#FFFFFF',
+    border: 'rgba(255, 255, 255, 0.1)',
+  },
+};
+
+const lightNavTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#34D399',
+    background: '#FFFFFF',
+    card: '#FFFFFF',
+    text: '#000000',
+    border: 'rgba(0, 0, 0, 0.1)',
+  },
+};
+
+type StackScreenOptions = Extract<
+  NonNullable<ComponentProps<typeof Stack.Screen>['options']>,
+  object
+>;
+
 const getHeaderOptions = (
   colorScheme: 'light' | 'dark' | undefined,
-): NativeStackNavigationOptions => ({
+): StackScreenOptions => ({
   headerShown: true,
+  headerLargeTitle: true,
+  headerShadowVisible: false,
+  headerTintColor: '#34D399',
   headerTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
-  headerStyle: {
-    backgroundColor: colorScheme === 'light' ? undefined : 'black',
-  },
+  headerLargeTitleStyle: { color: colorScheme === 'light' ? '#000' : '#fff' },
 });
 
 const getModalOptions = (
   colorScheme: 'light' | 'dark' | undefined,
-): NativeStackNavigationOptions => ({
+): StackScreenOptions => ({
   ...getHeaderOptions(colorScheme),
   presentation: 'modal',
 });
@@ -116,6 +147,7 @@ export default function Layout() {
   const [retryKey, setRetryKey] = useState(0);
   const { success, error } = useMigrations(db, migrations);
   const { colorScheme } = useColorScheme();
+  useAutoBackup();
 
   const handleRetry = () => {
     setRetryKey((k) => k + 1);
@@ -146,32 +178,41 @@ export default function Layout() {
         <QueryClientProvider client={queryClient}>
           <IntlProvider locale="de" messages={deMessages}>
             <SpecialsPickerProvider>
-              <Stack key={retryKey}>
-                <Stack.Screen name="index" options={headerOptions} />
-                <Stack.Screen name="procedure/create" options={modalOptions} />
-                <Stack.Screen
-                  name="procedure/[procedureId]/edit"
-                  options={modalOptions}
-                />
-                <Stack.Screen
-                  name="procedure/[procedureId]/show"
-                  options={modalOptions}
-                />
-                <Stack.Screen
-                  name="procedure/specials-picker"
-                  options={headerOptions}
-                />
-                <Stack.Screen name="filters" options={modalOptions} />
-                <Stack.Screen name="filter/create" options={modalOptions} />
-                <Stack.Screen
-                  name="filter/[filterId]/show"
-                  options={modalOptions}
-                />
-                <Stack.Screen
-                  name="filter/[filterId]/edit"
-                  options={modalOptions}
-                />
-              </Stack>
+              <AppLock>
+                <ThemeProvider
+                  value={colorScheme === 'dark' ? darkNavTheme : lightNavTheme}
+                >
+                  <Stack key={retryKey}>
+                    <Stack.Screen name="index" options={headerOptions} />
+                    <Stack.Screen
+                      name="procedure/create"
+                      options={modalOptions}
+                    />
+                    <Stack.Screen
+                      name="procedure/[procedureId]/edit"
+                      options={modalOptions}
+                    />
+                    <Stack.Screen
+                      name="procedure/[procedureId]/show"
+                      options={modalOptions}
+                    />
+                    <Stack.Screen
+                      name="procedure/specials-picker"
+                      options={headerOptions}
+                    />
+                    <Stack.Screen name="filters" options={modalOptions} />
+                    <Stack.Screen name="filter/create" options={modalOptions} />
+                    <Stack.Screen
+                      name="filter/[filterId]/show"
+                      options={modalOptions}
+                    />
+                    <Stack.Screen
+                      name="filter/[filterId]/edit"
+                      options={modalOptions}
+                    />
+                  </Stack>
+                </ThemeProvider>
+              </AppLock>
             </SpecialsPickerProvider>
           </IntlProvider>
         </QueryClientProvider>

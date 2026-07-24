@@ -14,8 +14,8 @@ module.exports = {
             dark: colors.white,
           },
           secondary: {
-            light: colors.gray[700],
-            dark: colors.gray[400],
+            light: colors.slate[600],
+            dark: colors.slate[400],
           },
         },
         accent: {
@@ -26,11 +26,11 @@ module.exports = {
         background: {
           primary: {
             light: colors.white,
-            dark: colors.black,
+            dark: '#0B0F17',
           },
           secondary: {
             light: colors.slate[100],
-            dark: colors.slate[800],
+            dark: '#151B29',
           },
         },
       },

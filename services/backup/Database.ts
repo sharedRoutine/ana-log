@@ -1,9 +1,9 @@
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { migrate } from 'drizzle-orm/expo-sqlite/migrator';
 import { Effect } from 'effect';
-import { Paths } from 'expo-file-system/next';
+import { Paths } from 'expo-file-system';
 import { openDatabaseSync } from 'expo-sqlite';
-import { db } from '~/db/db';
+import { canRead, db, getDatabaseKey, keyPragma } from '~/db/db';
 import {
   filterConditionTable,
   filterTable,
@@ -17,12 +17,41 @@ export class DatabaseService extends Effect.Service<DatabaseService>()(
   'Database',
   {
     sync: () => ({
-      importFromBackup: (backupPath: string) =>
+      vacuumInto: (path: string) =>
+        Effect.try(() => {
+          db.$client.execSync(`VACUUM INTO '${path.replace('file://', '')}'`);
+        }),
+      rekeyBackup: (name: string, directory: string, backupKey: string) =>
+        Effect.try(() => {
+          const client = openDatabaseSync(
+            name,
+            { useNewConnection: true },
+            directory,
+          );
+          try {
+            client.execSync(keyPragma(getDatabaseKey()));
+            client.execSync(`PRAGMA rekey = "x'${backupKey}'";`);
+          } finally {
+            client.closeSync();
+          }
+        }),
+      importFromBackup: (backupPath: string, backupKey: string | null) =>
         Effect.acquireUseRelease(
           Effect.tryPromise(async () => {
             const dbName = backupPath.split('/').pop() ?? 'backup.db';
             const directory = Paths.dirname(backupPath);
-            const backupDb = drizzle(openDatabaseSync(dbName, {}, directory));
+            const open = () =>
+              openDatabaseSync(dbName, { useNewConnection: true }, directory);
+            let client = open();
+            if (backupKey) {
+              client.execSync(keyPragma(backupKey));
+              if (!canRead(client)) {
+                // Legacy backups from pre-encryption builds are plaintext.
+                client.closeSync();
+                client = open();
+              }
+            }
+            const backupDb = drizzle(client);
             await migrate(backupDb, migrations);
             return backupDb;
           }),

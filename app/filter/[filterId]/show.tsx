@@ -1,15 +1,15 @@
-import { Gauge, Host } from '@expo/ui/swift-ui';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { desc, eq, sql } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeftCircle, Edit } from 'lucide-react-native';
+import { Check, ChevronLeftCircle, Edit } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { PlatformColor, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ACCENT, contrastText } from '~/components/ui/Form';
 import { ProcedureCard } from '~/components/ui/ProcedureCard';
 import { db } from '~/db/db';
 import {
@@ -22,29 +22,37 @@ import { useFilterLogic } from '~/hooks/useFilterLogic';
 
 const Goal = ({ current, goal }: { current: number; goal: number }) => {
   const intl = useIntl();
+  const progress = goal > 0 ? Math.min(1, current / goal) : 0;
+  const isComplete = current >= goal;
+
   return (
-    <View className="px-4 pt-4">
-      <View className="flex flex-row items-center justify-between">
-        <Text className="text-3xl font-bold text-black dark:text-white">
+    <View className="rounded-2xl border border-black/5 bg-background-secondary-light p-4 dark:border-white/5 dark:bg-background-secondary-dark">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-xs font-semibold uppercase tracking-widest text-text-secondary-light dark:text-text-secondary-dark">
           {intl.formatMessage({ id: 'filter.goal' })}
         </Text>
-        <Host matchContents>
-          <Gauge
-            max={{ value: goal, label: `${goal}` }}
-            min={{ value: 0, label: '0' }}
-            current={{
-              value: current,
-              label: `${current}`,
-            }}
-            color={[
-              PlatformColor('systemRed'),
-              PlatformColor('systemOrange'),
-              PlatformColor('systemYellow'),
-              PlatformColor('systemGreen'),
-            ]}
-            type="circular"
-          />
-        </Host>
+        {isComplete && (
+          <View
+            className="h-6 w-6 items-center justify-center rounded-full"
+            style={{ backgroundColor: ACCENT }}
+          >
+            <Check size={14} color={contrastText(ACCENT)} strokeWidth={3} />
+          </View>
+        )}
+      </View>
+      <View className="mt-2 flex-row items-end gap-1.5">
+        <Text className="text-4xl font-bold tabular-nums text-text-primary-light dark:text-text-primary-dark">
+          {current}
+        </Text>
+        <Text className="pb-1 text-base font-medium tabular-nums text-text-secondary-light dark:text-text-secondary-dark">
+          / {goal}
+        </Text>
+      </View>
+      <View className="mt-3 h-2 overflow-hidden rounded-full bg-black/5 dark:bg-white/10">
+        <View
+          className="h-full rounded-full"
+          style={{ width: `${progress * 100}%`, backgroundColor: ACCENT }}
+        />
       </View>
     </View>
   );
@@ -98,7 +106,7 @@ export default function ShowFilter() {
 
   if (!whereClause) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+      <View className="flex-1 items-center justify-center bg-background-primary-light dark:bg-background-primary-dark">
         <Text className="text-black dark:text-white">
           {intl.formatMessage({ id: 'filter.error.no-valid-conditions' })}
         </Text>
@@ -108,7 +116,7 @@ export default function ShowFilter() {
 
   if (isFilterPending || isConditionsPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+      <View className="flex-1 items-center justify-center bg-background-primary-light dark:bg-background-primary-dark">
         <Text className="text-black dark:text-white">
           {intl.formatMessage({ id: 'common.loading' })}
         </Text>
@@ -118,7 +126,7 @@ export default function ShowFilter() {
 
   if (!filters || filters.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+      <View className="flex-1 items-center justify-center bg-background-primary-light dark:bg-background-primary-dark">
         <Text className="text-black dark:text-white">
           {intl.formatMessage({ id: 'filter.error.not-found' })}
         </Text>
@@ -128,7 +136,7 @@ export default function ShowFilter() {
 
   if (!conditions) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+      <View className="flex-1 items-center justify-center bg-background-primary-light dark:bg-background-primary-dark">
         <Text className="text-black dark:text-white">
           {intl.formatMessage({ id: 'filter.error.no-conditions' })}
         </Text>
@@ -172,10 +180,11 @@ export default function ShowFilter() {
       />
       <SafeAreaView
         edges={['bottom']}
-        className="flex-1 bg-white dark:bg-black"
+        className="flex-1 bg-background-primary-light dark:bg-background-primary-dark"
       >
         <View className="flex-1 px-4 pt-4">
           <FlashList
+            contentInsetAdjustmentBehavior="automatic"
             data={procedures}
             renderItem={({ item: { procedure } }) => (
               <ProcedureCard
@@ -188,8 +197,8 @@ export default function ShowFilter() {
                 {filters[0].goal ? (
                   <Goal current={procedures.length} goal={filters[0].goal} />
                 ) : null}
-                <View className="flex-row flex-wrap px-4 py-4">
-                  <Text className="text-gray-600 dark:text-gray-300 text-sm">
+                <View className="flex-row flex-wrap px-1 py-3">
+                  <Text className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                     {conditions
                       .map((condition) => stringifyCondition(condition))
                       .join(', ')}
@@ -199,9 +208,6 @@ export default function ShowFilter() {
             )}
             getItemType={() => 'procedure'}
             keyExtractor={(item) => item.procedure.id.toString()}
-            ItemSeparatorComponent={() => (
-              <View className="ml-4 h-px bg-gray-200 dark:bg-gray-700" />
-            )}
           />
         </View>
       </SafeAreaView>

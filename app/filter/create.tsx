@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import FilterForm from '~/components/ui/FilterForm';
 import { db } from '~/db/db';
 import { filterConditionTable, filterTable } from '~/db/schema';
-import { Filter, FilterCondition } from '~/lib/condition';
+import { BooleanCondition, Filter, FilterCondition } from '~/lib/condition';
 
 export default function CreateFilter() {
   const intl = useIntl();
@@ -19,7 +19,9 @@ export default function CreateFilter() {
     <FilterForm
       filter={Filter.make({
         name: '',
-        conditions: [] as Array<typeof FilterCondition.Type>,
+        conditions: [
+          BooleanCondition.make({ field: 'age', value: false }),
+        ] as Array<typeof FilterCondition.Type>,
       })}
       hasGoal={false}
       onSubmit={async (value) => {

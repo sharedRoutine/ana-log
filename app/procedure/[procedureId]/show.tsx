@@ -1,15 +1,3 @@
-import {
-  Form,
-  Host,
-  LabeledContent,
-  Section,
-  Text as SwiftText,
-} from '@expo/ui/swift-ui';
-import {
-  listRowBackground,
-  scrollContentBackground,
-  tint,
-} from '@expo/ui/swift-ui/modifiers';
 import { useQuery } from '@tanstack/react-query';
 import { eq } from 'drizzle-orm';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -19,24 +7,23 @@ import {
   FileQuestion,
   Siren,
 } from 'lucide-react-native';
-import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/layout/EmptyState';
 import { LoadingScreen } from '~/components/layout/LoadingScreen';
+import { FormSection, FormValueRow } from '~/components/ui/Form';
 import { db } from '~/db/db';
 import {
   procedureTable,
   procedureSpecialTable,
   medicalCaseTable,
 } from '~/db/schema';
+
 export default function ShowProcedure() {
   const intl = useIntl();
   const router = useRouter();
-  const { colorScheme } = useColorScheme();
-  const rowBackground = colorScheme === 'dark' ? '#1E293B' : '#f3f4f6';
 
   const { procedureId: procedureIdParam } = useLocalSearchParams<{
     procedureId: string;
@@ -72,13 +59,10 @@ export default function ShowProcedure() {
     },
   });
 
-  const getTranslatedAirwayManagement = (airway: string) => {
-    return intl.formatMessage({ id: `enum.airway-management.${airway}` });
-  };
-
-  const getTranslatedDepartment = (department: string) => {
-    return intl.formatMessage({ id: `enum.department.${department}` });
-  };
+  const yesNo = (value: boolean) =>
+    value
+      ? intl.formatMessage({ id: 'common.yes' })
+      : intl.formatMessage({ id: 'common.no' });
 
   if (isPending) {
     return <LoadingScreen />;
@@ -132,151 +116,125 @@ export default function ShowProcedure() {
           ),
         }}
       />
-      {procedure.emergency && (
-        <View className="mx-4 mt-4 flex-row items-center justify-center gap-2 rounded-xl bg-green-400 px-4 py-3 dark:bg-green-900">
-          <Siren size={20} />
-          <Text className="text-base font-semibold text-white dark:text-white">
-            {intl.formatMessage({ id: 'procedure.emergency-banner' })}
-          </Text>
-        </View>
-      )}
-      <Host style={{ flex: 1 }}>
-        <Form modifiers={[scrollContentBackground('hidden'), tint('#3B82F6')]}>
-          <Section
-            title={intl.formatMessage({
-              id: 'procedure.form.section.case-info',
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 48 }}
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+      >
+        {procedure.emergency && (
+          <View className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3">
+            <Siren size={20} color="#FFFFFF" />
+            <Text className="text-base font-semibold text-white">
+              {intl.formatMessage({ id: 'procedure.emergency-banner' })}
+            </Text>
+          </View>
+        )}
+        <FormSection
+          title={intl.formatMessage({ id: 'procedure.form.section.case-info' })}
+        >
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.case-number' })}
+            value={procedure.caseNumber}
+          />
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.favorite' })}
+            value={yesNo(medicalCase.favorite)}
+          />
+        </FormSection>
+        <FormSection
+          title={intl.formatMessage({
+            id: 'procedure.form.section.patient-info',
+          })}
+        >
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.years' })}
+            value={`${procedure.ageYears}`}
+          />
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.months' })}
+            value={`${procedure.ageMonths}`}
+          />
+        </FormSection>
+        <FormSection
+          title={intl.formatMessage({
+            id: 'procedure.form.section.operation-info',
+          })}
+        >
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.operation-date' })}
+            value={intl.formatDate(procedure.date, {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
             })}
-            modifiers={[listRowBackground(rowBackground)]}
-          >
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.case-number' })}
-            >
-              <SwiftText>{procedure.caseNumber}</SwiftText>
-            </LabeledContent>
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.favorite' })}
-            >
-              <SwiftText>
-                {medicalCase.favorite
-                  ? intl.formatMessage({ id: 'common.yes' })
-                  : intl.formatMessage({ id: 'common.no' })}
-              </SwiftText>
-            </LabeledContent>
-          </Section>
-
-          <Section
-            title={intl.formatMessage({
-              id: 'procedure.form.section.patient-info',
+          />
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.asa-score' })}
+            value={`ASA ${procedure.asaScore}`}
+          />
+          <FormValueRow
+            label={intl.formatMessage({
+              id: 'procedure.form.airway-management',
             })}
-            modifiers={[listRowBackground(rowBackground)]}
-          >
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.years' })}
-            >
-              <SwiftText>{`${procedure.ageYears}`}</SwiftText>
-            </LabeledContent>
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.months' })}
-            >
-              <SwiftText>{`${procedure.ageMonths}`}</SwiftText>
-            </LabeledContent>
-          </Section>
-
-          <Section
-            title={intl.formatMessage({
-              id: 'procedure.form.section.operation-info',
+            value={intl.formatMessage({
+              id: `enum.airway-management.${procedure.airwayManagement}`,
             })}
-            modifiers={[listRowBackground(rowBackground)]}
+          />
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.department' })}
+            value={intl.formatMessage({
+              id: `enum.department.${procedure.department}`,
+            })}
+          />
+          <FormValueRow
+            label={intl.formatMessage({
+              id: 'procedure.form.local-anesthetics',
+            })}
+            value={yesNo(procedure.localAnesthetics)}
+          />
+          {procedure.localAnestheticsText ? (
+            <View className="px-4 py-3">
+              <Text className="text-base text-text-primary-light dark:text-text-primary-dark">
+                {procedure.localAnestheticsText}
+              </Text>
+            </View>
+          ) : null}
+          <FormValueRow
+            label={intl.formatMessage({ id: 'procedure.form.emergency' })}
+            value={yesNo(procedure.emergency)}
+          />
+        </FormSection>
+        {specials && specials.length > 0 && (
+          <FormSection
+            title={intl.formatMessage({
+              id: 'procedure.form.section.specials',
+            })}
           >
-            <LabeledContent
-              label={intl.formatMessage({
-                id: 'procedure.form.operation-date',
-              })}
-            >
-              <SwiftText>
-                {intl.formatDate(procedure.date, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </SwiftText>
-            </LabeledContent>
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.asa-score' })}
-            >
-              <SwiftText>{`ASA ${procedure.asaScore}`}</SwiftText>
-            </LabeledContent>
-            <LabeledContent
-              label={intl.formatMessage({
-                id: 'procedure.form.airway-management',
-              })}
-            >
-              <SwiftText>
-                {getTranslatedAirwayManagement(procedure.airwayManagement)}
-              </SwiftText>
-            </LabeledContent>
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.department' })}
-            >
-              <SwiftText>
-                {getTranslatedDepartment(procedure.department)}
-              </SwiftText>
-            </LabeledContent>
-            <LabeledContent
-              label={intl.formatMessage({
-                id: 'procedure.form.local-anesthetics',
-              })}
-            >
-              <SwiftText>
-                {procedure.localAnesthetics
-                  ? intl.formatMessage({ id: 'common.yes' })
-                  : intl.formatMessage({ id: 'common.no' })}
-              </SwiftText>
-            </LabeledContent>
-            {procedure.localAnestheticsText && (
-              <LabeledContent label="">
-                <SwiftText>{procedure.localAnestheticsText}</SwiftText>
-              </LabeledContent>
-            )}
-            <LabeledContent
-              label={intl.formatMessage({ id: 'procedure.form.emergency' })}
-            >
-              <SwiftText>
-                {procedure.emergency
-                  ? intl.formatMessage({ id: 'common.yes' })
-                  : intl.formatMessage({ id: 'common.no' })}
-              </SwiftText>
-            </LabeledContent>
-          </Section>
-
-          {specials && specials.length > 0 && (
-            <Section
-              title={intl.formatMessage({
-                id: 'procedure.form.section.specials',
-              })}
-              modifiers={[listRowBackground(rowBackground)]}
-            >
-              <SwiftText>
+            <View className="px-4 py-3">
+              <Text className="text-base text-text-primary-light dark:text-text-primary-dark">
                 {specials
                   .map((special) =>
                     intl.formatMessage({ id: `enum.specials.${special}` }),
                   )
                   .sort((a, b) => a.localeCompare(b))
                   .join(', ')}
-              </SwiftText>
-            </Section>
-          )}
-
-          {procedure.description && (
-            <Section
-              title={intl.formatMessage({ id: 'procedure.form.procedure' })}
-              modifiers={[listRowBackground(rowBackground)]}
-            >
-              <SwiftText>{procedure.description}</SwiftText>
-            </Section>
-          )}
-        </Form>
-      </Host>
+              </Text>
+            </View>
+          </FormSection>
+        )}
+        {procedure.description ? (
+          <FormSection
+            title={intl.formatMessage({ id: 'procedure.form.procedure' })}
+          >
+            <View className="px-4 py-3">
+              <Text className="text-base leading-6 text-text-primary-light dark:text-text-primary-dark">
+                {procedure.description}
+              </Text>
+            </View>
+          </FormSection>
+        ) : null}
+      </ScrollView>
     </SafeAreaView>
   );
 }

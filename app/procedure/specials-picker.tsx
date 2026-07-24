@@ -1,19 +1,16 @@
-import { Form, Host, Section, Switch } from '@expo/ui/swift-ui';
-import { scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
-import { ChevronLeftCircle } from 'lucide-react-native';
-import { useColorScheme } from 'nativewind';
+import { Check, ChevronLeftCircle } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
-import { View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { ACCENT, contrastText, FormSection } from '~/components/ui/Form';
 import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
+import { cn } from '~/lib/cn';
 import { SPECIALS_OPTIONS } from '~/lib/options';
 
 export default function SpecialsPicker() {
   const intl = useIntl();
   const router = useRouter();
-  const { colorScheme } = useColorScheme();
-  const isLight = colorScheme === 'light';
 
   const { selection, setSelection, onSelectionComplete } = useSpecialsPicker();
 
@@ -22,14 +19,11 @@ export default function SpecialsPicker() {
     label: intl.formatMessage({ id: `enum.specials.${option}` }),
   })).sort((a, b) => a.label.localeCompare(b.label));
 
-  const toggleSelection = (
-    value: (typeof SPECIALS_OPTIONS)[number],
-    checked: boolean,
-  ) => {
-    if (checked) {
-      setSelection([...selection, value]);
-    } else {
+  const toggleSelection = (value: (typeof SPECIALS_OPTIONS)[number]) => {
+    if (selection.includes(value)) {
       setSelection(selection.filter((v) => v !== value));
+    } else {
+      setSelection([...selection, value]);
     }
   };
 
@@ -39,43 +33,68 @@ export default function SpecialsPicker() {
   };
 
   return (
-    <View
-      className="flex-1"
-      style={{ backgroundColor: isLight ? '#F2F2F7' : '#000000' }}
-    >
+    <View className="flex-1 bg-background-primary-light dark:bg-background-primary-dark">
       <Stack.Screen
         options={{
           title: intl.formatMessage({ id: 'procedure.form.section.specials' }),
           headerLeft: () => (
-            <PressableScale
-              style={{ paddingHorizontal: 8 }}
-              onPress={handleBack}
-            >
-              <ChevronLeftCircle size={24} color={isLight ? '#000' : '#fff'} />
+            <PressableScale className="px-2" onPress={handleBack}>
+              <ChevronLeftCircle
+                size={24}
+                className="color-black dark:color-white"
+              />
             </PressableScale>
           ),
         }}
       />
-      <Host style={{ flex: 1 }}>
-        <Form modifiers={[scrollContentBackground('visible'), tint('#3B82F6')]}>
-          <Section>
-            {SORTED_OPTIONS.map((item) => {
-              const isSelected = selection.includes(item.value);
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 48 }}
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+      >
+        <FormSection>
+          {SORTED_OPTIONS.map((item) => {
+            const isSelected = selection.includes(item.value);
 
-              return (
-                <Switch
-                  key={item.value}
-                  label={item.label}
-                  value={isSelected}
-                  onValueChange={(checked) =>
-                    toggleSelection(item.value, checked)
-                  }
-                />
-              );
-            })}
-          </Section>
-        </Form>
-      </Host>
+            return (
+              <PressableScale
+                key={item.value}
+                onPress={() => toggleSelection(item.value)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: isSelected }}
+              >
+                <View className="min-h-[52px] flex-row items-center justify-between gap-3 px-4 py-3">
+                  <Text
+                    className={cn(
+                      'flex-1 text-base text-text-primary-light dark:text-text-primary-dark',
+                      isSelected && 'font-semibold',
+                    )}
+                  >
+                    {item.label}
+                  </Text>
+                  <View
+                    className={cn(
+                      'h-6 w-6 items-center justify-center rounded-full',
+                      !isSelected &&
+                        'border border-black/15 dark:border-white/20',
+                    )}
+                    style={isSelected && { backgroundColor: ACCENT }}
+                  >
+                    {isSelected && (
+                      <Check
+                        size={14}
+                        color={contrastText(ACCENT)}
+                        strokeWidth={3}
+                      />
+                    )}
+                  </View>
+                </View>
+              </PressableScale>
+            );
+          })}
+        </FormSection>
+      </ScrollView>
     </View>
   );
 }
