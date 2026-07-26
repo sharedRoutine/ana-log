@@ -1,3 +1,4 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Minus, Plus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
@@ -356,6 +357,41 @@ export function FormStepperRow({
           onPress={() => onChange(Math.min(max, value + 1))}
         />
       </View>
+    </View>
+  );
+}
+
+export function FormDateRow({
+  label,
+  value,
+  onChange,
+  minimumDate,
+  maximumDate,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  minimumDate?: Date;
+  maximumDate?: Date;
+}) {
+  const { colorScheme } = useColorScheme();
+
+  return (
+    <View className="min-h-[52px] flex-row items-center justify-between gap-3 px-4 py-2">
+      <Text className="shrink-0 text-base text-text-primary-light dark:text-text-primary-dark">
+        {label}
+      </Text>
+      <DateTimePicker
+        value={new Date(value)}
+        mode="date"
+        display="compact"
+        themeVariant={colorScheme === 'dark' ? 'dark' : 'light'}
+        minimumDate={minimumDate}
+        maximumDate={maximumDate}
+        onChange={(_, date) => {
+          if (date) onChange(date.getTime());
+        }}
+      />
     </View>
   );
 }

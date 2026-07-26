@@ -78,6 +78,13 @@
       "when": 1768741062536,
       "tag": "0010_crazy_caretaker",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1784973726269,
+      "tag": "0011_broad_living_lightning",
+      "breakpoints": true
     }
   ]
 }

@@ -444,6 +444,12 @@ export function useFilterMatchCounts(
     };
 
     const matchingCount = data.filter(({ procedure, medicalCase }) => {
+      if (
+        (filter.dateStart != null && procedure.date < filter.dateStart) ||
+        (filter.dateEnd != null && procedure.date > filter.dateEnd)
+      ) {
+        return false;
+      }
       if (filter.combinator === 'OR') {
         return conditions.some((condition) =>
           matchCondition({ procedure, medicalCase }, condition),

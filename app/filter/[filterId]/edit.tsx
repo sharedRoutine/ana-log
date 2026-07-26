@@ -63,6 +63,8 @@ export default function EditFilter() {
         name: data[0].name,
         goal: data[0].goal ?? undefined,
         combinator: data[0].combinator,
+        dateStart: data[0].dateStart ?? undefined,
+        dateEnd: data[0].dateEnd ?? undefined,
         conditions: convertConditions(conditions || []),
       })}
       hasGoal={data[0].goal !== null}
@@ -85,6 +87,8 @@ export default function EditFilter() {
               name: value.name,
               goal: value.hasGoal ? value.goal : null,
               combinator: value.combinator,
+              dateStart: value.hasDateRange ? value.dateStart : null,
+              dateEnd: value.hasDateRange ? value.dateEnd : null,
             })
             .where(eq(filterTable.id, filterId));
           await tx

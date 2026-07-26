@@ -15,6 +15,7 @@ import {
   ACCENT,
   FormButtonRow,
   FormChipSelect,
+  FormDateRow,
   FormRow,
   FormScrollView,
   FormSection,
@@ -24,14 +25,37 @@ import {
   FormTextField,
 } from './Form';
 
+const startOfDayMs = (ms: number) => {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+};
+
+const endOfDayMs = (ms: number) => {
+  const d = new Date(ms);
+  d.setHours(23, 59, 59, 999);
+  return d.getTime();
+};
+
 // TODO: Better errors
-const validateForm = (value: typeof Filter.Type & { hasGoal: boolean }) => {
+const validateForm = (
+  value: typeof Filter.Type & { hasGoal: boolean; hasDateRange: boolean },
+) => {
   if (!value.name) {
     return 'No name';
   }
   if (value.hasGoal) {
     if (typeof value.goal !== 'number' || isNaN(value.goal)) {
       return 'Invalid goal value';
+    }
+  }
+  if (value.hasDateRange) {
+    if (
+      typeof value.dateStart !== 'number' ||
+      typeof value.dateEnd !== 'number' ||
+      value.dateStart > value.dateEnd
+    ) {
+      return 'Invalid date range';
     }
   }
   if (value.conditions.length === 0) {
@@ -87,7 +111,7 @@ type FilterFormProps = {
   hasGoal: boolean;
   isEditing?: boolean;
   onSubmit?: (
-    value: typeof Filter.Type & { hasGoal: boolean },
+    value: typeof Filter.Type & { hasGoal: boolean; hasDateRange: boolean },
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
   children?: ({
@@ -116,6 +140,7 @@ export default function FilterForm({
     defaultValues: {
       ...filter,
       hasGoal,
+      hasDateRange: filter.dateStart != null && filter.dateEnd != null,
     },
     validators: {
       onMount: ({ value }) => validateForm(value),
@@ -135,6 +160,15 @@ export default function FilterForm({
   })).sort((a, b) => a.label.localeCompare(b.label));
 
   const hasGoalValue = useStore(form.store, (state) => state.values.hasGoal);
+  const hasDateRangeValue = useStore(
+    form.store,
+    (state) => state.values.hasDateRange,
+  );
+  const dateStartValue = useStore(
+    form.store,
+    (state) => state.values.dateStart,
+  );
+  const dateEndValue = useStore(form.store, (state) => state.values.dateEnd);
   const conditions = useStore(form.store, (state) => state.values.conditions);
   const canSubmit = useStore(form.store, (state) => state.canSubmit);
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
@@ -214,6 +248,62 @@ export default function FilterForm({
                   min={0}
                   max={1000}
                   onChange={(value) => handleChange(value)}
+                />
+              )}
+            </form.Field>
+          )}
+        </FormSection>
+        <FormSection
+          title={intl.formatMessage({ id: 'create-filter.date-range' })}
+        >
+          <form.Field name="hasDateRange">
+            {({ state, handleChange }) => (
+              <FormSwitchRow
+                label={intl.formatMessage({
+                  id: 'create-filter.date-range.toggle',
+                })}
+                value={state.value}
+                onValueChange={(checked) => {
+                  handleChange(checked);
+
+                  if (checked) {
+                    if (form.getFieldValue('dateStart') == null) {
+                      form.setFieldValue('dateStart', startOfDayMs(Date.now()));
+                    }
+                    if (form.getFieldValue('dateEnd') == null) {
+                      form.setFieldValue('dateEnd', endOfDayMs(Date.now()));
+                    }
+                  }
+                }}
+              />
+            )}
+          </form.Field>
+          {hasDateRangeValue && (
+            <form.Field name="dateStart">
+              {({ state, handleChange }) => (
+                <FormDateRow
+                  label={intl.formatMessage({ id: 'range.from' })}
+                  value={state.value ?? startOfDayMs(Date.now())}
+                  maximumDate={
+                    dateEndValue != null ? new Date(dateEndValue) : undefined
+                  }
+                  onChange={(value) => handleChange(startOfDayMs(value))}
+                />
+              )}
+            </form.Field>
+          )}
+          {hasDateRangeValue && (
+            <form.Field name="dateEnd">
+              {({ state, handleChange }) => (
+                <FormDateRow
+                  label={intl.formatMessage({ id: 'range.to' })}
+                  value={state.value ?? endOfDayMs(Date.now())}
+                  minimumDate={
+                    dateStartValue != null
+                      ? new Date(dateStartValue)
+                      : undefined
+                  }
+                  onChange={(value) => handleChange(endOfDayMs(value))}
                 />
               )}
             </form.Field>

@@ -106,7 +106,10 @@ export default function Home() {
       procedure.caseNumber.toLowerCase().includes(query) ||
       procedure.department.toLowerCase().includes(query) ||
       department.includes(query) ||
-      airway.includes(query)
+      airway.includes(query) ||
+      procedure.description.toLowerCase().includes(query) ||
+      (procedure.departmentOther?.toLowerCase().includes(query) ?? false) ||
+      (procedure.localAnestheticsText?.toLowerCase().includes(query) ?? false)
     );
   };
 

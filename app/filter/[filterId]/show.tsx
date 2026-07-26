@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, ChevronLeftCircle, Edit } from 'lucide-react-native';
@@ -84,10 +84,24 @@ export default function ShowFilter() {
         .where(eq(filterConditionTable.filterId, filterId)),
   });
 
-  const whereClause =
+  const conditionsWhere =
     isConditionsPending || isFilterPending
       ? sql`1 = 0`
       : buildWhereClause(conditions || [], filters?.[0]?.combinator ?? 'AND');
+
+  const filterRange =
+    filters?.[0]?.dateStart != null && filters?.[0]?.dateEnd != null
+      ? { start: filters[0].dateStart, end: filters[0].dateEnd }
+      : null;
+
+  const whereClause =
+    conditionsWhere && filterRange
+      ? and(
+          conditionsWhere,
+          gte(procedureTable.date, filterRange.start),
+          lte(procedureTable.date, filterRange.end),
+        )
+      : conditionsWhere;
 
   const { data: procedures } = useLiveQuery(
     db
@@ -192,20 +206,38 @@ export default function ShowFilter() {
                 onPress={() => router.push(`/procedure/${procedure.id}/show`)}
               />
             )}
-            ListHeaderComponent={() => (
+            ListHeaderComponent={
               <View className="mb-6">
                 {filters[0].goal ? (
                   <Goal current={procedures.length} goal={filters[0].goal} />
                 ) : null}
                 <View className="flex-row flex-wrap px-1 py-3">
                   <Text className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                    {conditions
-                      .map((condition) => stringifyCondition(condition))
-                      .join(', ')}
+                    {[
+                      ...(filterRange
+                        ? [
+                            `${intl.formatDate(filterRange.start)} – ${intl.formatDate(filterRange.end)}`,
+                          ]
+                        : []),
+                      ...conditions.map((condition) =>
+                        stringifyCondition(condition),
+                      ),
+                    ].join(', ')}
                   </Text>
                 </View>
               </View>
-            )}
+            }
+            ListEmptyComponent={
+              <View className="items-center py-8">
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark">
+                  {intl.formatMessage({
+                    id: filterRange
+                      ? 'home.no-procedures-range'
+                      : 'filter.no-matches',
+                  })}
+                </Text>
+              </View>
+            }
             getItemType={() => 'procedure'}
             keyExtractor={(item) => item.procedure.id.toString()}
           />

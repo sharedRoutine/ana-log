@@ -32,6 +32,8 @@ export default function CreateFilter() {
               name: value.name,
               goal: value.hasGoal ? value.goal : null,
               combinator: value.combinator,
+              dateStart: value.hasDateRange ? value.dateStart : null,
+              dateEnd: value.hasDateRange ? value.dateEnd : null,
             })
             .returning({ id: filterTable.id });
 

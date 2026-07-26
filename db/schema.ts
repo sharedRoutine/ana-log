@@ -78,6 +78,8 @@ export const filterTable = sqliteTable('filter', {
   combinator: text('combinator', { enum: ['AND', 'OR'] })
     .notNull()
     .default('AND'),
+  dateStart: integer('date_start'),
+  dateEnd: integer('date_end'),
   createdAt: integer('created_at', { mode: 'number' })
     .notNull()
     .$defaultFn(() => Date.now()),

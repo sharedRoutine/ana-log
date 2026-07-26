@@ -52,6 +52,8 @@ export const FilterCondition = Schema.Union(
 export const Filter = Schema.Struct({
   name: Schema.String,
   goal: Schema.Number.pipe(Schema.optional),
+  dateStart: Schema.Number.pipe(Schema.optional),
+  dateEnd: Schema.Number.pipe(Schema.optional),
   combinator: Schema.Literal('AND', 'OR').pipe(
     Schema.optional,
     Schema.withDefaults({

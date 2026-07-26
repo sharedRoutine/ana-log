@@ -34,9 +34,11 @@ const convertCondition = (
     Match.when({ type: 'NUMBER_CONDITION' }, (numberCondition) =>
       NumberCondition.make({
         field: numberCondition.field,
-        operator: (numberCondition.operator as 'gt' | 'lt') ?? undefined,
+        operator:
+          (numberCondition.operator as 'eq' | 'gt' | 'gte' | 'lt' | 'lte') ??
+          undefined,
         value: numberCondition.valueNumber ?? 0,
-        operators: new Set(['gt', 'lt']),
+        operators: new Set(['eq', 'gt', 'gte', 'lt', 'lte']),
         _tag: 'NUMBER_CONDITION',
       }),
     ),

@@ -11,6 +11,7 @@ import m0007 from './0007_tricky_the_santerians.sql';
 import m0008 from './0008_medical_case_migration.sql';
 import m0009 from './0009_harsh_norrin_radd.sql';
 import m0010 from './0010_crazy_caretaker.sql';
+import m0011 from './0011_broad_living_lightning.sql';
 import journal from './meta/_journal.json';
 
 export default {
@@ -27,5 +28,6 @@ export default {
     m0008,
     m0009,
     m0010,
+    m0011,
   },
 };
