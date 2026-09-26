@@ -123,9 +123,15 @@ export function FormRow({
 type FormTextFieldProps = TextInputProps & {
   label?: string;
   ref?: Ref<TextInput>;
+  trailing?: ReactNode;
 };
 
-export function FormTextField({ label, ref, ...props }: FormTextFieldProps) {
+export function FormTextField({
+  label,
+  ref,
+  trailing,
+  ...props
+}: FormTextFieldProps) {
   const { colorScheme } = useColorScheme();
 
   const input = (
@@ -162,6 +168,7 @@ export function FormTextField({ label, ref, ...props }: FormTextFieldProps) {
         </Text>
       )}
       {input}
+      {trailing}
     </View>
   );
 }

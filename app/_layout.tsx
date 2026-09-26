@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppLock } from '~/components/layout/AppLock';
 import { ErrorBoundary } from '~/components/layout/ErrorBoundary';
+import { BarcodeScannerProvider } from '~/contexts/BarcodeScannerContext';
 import { SpecialsPickerProvider } from '~/contexts/SpecialsPickerContext';
 import { db } from '~/db/db';
 import { useAutoBackup } from '~/hooks/useAutoBackup';
@@ -180,46 +181,55 @@ export default function Layout() {
           <QueryClientProvider client={queryClient}>
             <IntlProvider locale="de" messages={deMessages}>
               <SpecialsPickerProvider>
-                <AppLock>
-                  <ThemeProvider
-                    value={
-                      colorScheme === 'dark' ? darkNavTheme : lightNavTheme
-                    }
-                  >
-                    <Stack key={retryKey}>
-                      <Stack.Screen name="index" options={headerOptions} />
-                      <Stack.Screen
-                        name="procedure/create"
-                        options={modalOptions}
-                      />
-                      <Stack.Screen
-                        name="procedure/[procedureId]/edit"
-                        options={modalOptions}
-                      />
-                      <Stack.Screen
-                        name="procedure/[procedureId]/show"
-                        options={modalOptions}
-                      />
-                      <Stack.Screen
-                        name="procedure/specials-picker"
-                        options={headerOptions}
-                      />
-                      <Stack.Screen name="filters" options={modalOptions} />
-                      <Stack.Screen
-                        name="filter/create"
-                        options={modalOptions}
-                      />
-                      <Stack.Screen
-                        name="filter/[filterId]/show"
-                        options={modalOptions}
-                      />
-                      <Stack.Screen
-                        name="filter/[filterId]/edit"
-                        options={modalOptions}
-                      />
-                    </Stack>
-                  </ThemeProvider>
-                </AppLock>
+                <BarcodeScannerProvider>
+                  <AppLock>
+                    <ThemeProvider
+                      value={
+                        colorScheme === 'dark' ? darkNavTheme : lightNavTheme
+                      }
+                    >
+                      <Stack key={retryKey}>
+                        <Stack.Screen name="index" options={headerOptions} />
+                        <Stack.Screen
+                          name="procedure/create"
+                          options={modalOptions}
+                        />
+                        <Stack.Screen
+                          name="procedure/[procedureId]/edit"
+                          options={modalOptions}
+                        />
+                        <Stack.Screen
+                          name="procedure/[procedureId]/show"
+                          options={modalOptions}
+                        />
+                        <Stack.Screen
+                          name="procedure/specials-picker"
+                          options={headerOptions}
+                        />
+                        <Stack.Screen
+                          name="procedure/scan-case-number"
+                          options={{
+                            presentation: 'fullScreenModal',
+                            headerShown: false,
+                          }}
+                        />
+                        <Stack.Screen name="filters" options={modalOptions} />
+                        <Stack.Screen
+                          name="filter/create"
+                          options={modalOptions}
+                        />
+                        <Stack.Screen
+                          name="filter/[filterId]/show"
+                          options={modalOptions}
+                        />
+                        <Stack.Screen
+                          name="filter/[filterId]/edit"
+                          options={modalOptions}
+                        />
+                      </Stack>
+                    </ThemeProvider>
+                  </AppLock>
+                </BarcodeScannerProvider>
               </SpecialsPickerProvider>
             </IntlProvider>
           </QueryClientProvider>

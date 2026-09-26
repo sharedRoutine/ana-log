@@ -1,3 +1,4 @@
+import { CameraView } from 'expo-camera';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
 import {
   ChevronDown,
@@ -33,5 +34,9 @@ cssInterop(Edit, {
 });
 
 cssInterop(ChevronRight, {
+  className: 'style',
+});
+
+cssInterop(CameraView, {
   className: 'style',
 });

@@ -28,6 +28,14 @@
       "expo-secure-store",
       "@react-native-community/datetimepicker",
       "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Ana|Log verwendet die Kamera, um Fallnummern per Barcode zu scannen.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-status-bar",
       "expo-font"
     ],

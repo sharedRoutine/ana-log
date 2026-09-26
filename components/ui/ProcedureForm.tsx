@@ -2,11 +2,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useForm, useStore } from '@tanstack/react-form';
 import { DateTime } from 'effect';
 import { useRouter } from 'expo-router';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, ScanBarcode } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { PressableScale } from 'pressto';
 import { useIntl } from 'react-intl';
 import { Alert, Keyboard, Text, View } from 'react-native';
+import { useBarcodeScanner } from '~/contexts/BarcodeScannerContext';
 import { useSpecialsPicker } from '~/contexts/SpecialsPickerContext';
 import { medicalCaseTable, procedureTable } from '~/db/schema';
 import { useColors } from '~/hooks/useColors';
@@ -93,6 +94,7 @@ export default function ProcedureForm({
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const { setSelection, setOnSelectionComplete } = useSpecialsPicker();
+  const { setOnScan } = useBarcodeScanner();
 
   const form = useForm({
     defaultValues: procedure,
@@ -183,6 +185,12 @@ export default function ProcedureForm({
     router.push('/procedure/specials-picker');
   };
 
+  const openCaseNumberScanner = (onComplete: (caseNumber: string) => void) => {
+    Keyboard.dismiss();
+    setOnScan(onComplete);
+    router.push('/procedure/scan-case-number');
+  };
+
   const dismiss = () => Keyboard.dismiss();
   const save = () => form.handleSubmit();
 
@@ -223,11 +231,27 @@ export default function ProcedureForm({
               <FormTextField
                 autoCorrect={false}
                 onChangeText={(text) => handleChange(text)}
-                defaultValue={state.value}
+                value={state.value}
                 placeholder={intl.formatMessage({
                   id: 'procedure.form.case-number',
                 })}
                 keyboardType="numeric"
+                trailing={
+                  <PressableScale
+                    onPress={() =>
+                      openCaseNumberScanner((caseNumber) =>
+                        handleChange(caseNumber),
+                      )
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel={intl.formatMessage({
+                      id: 'procedure.form.case-number.scan',
+                    })}
+                    hitSlop={8}
+                  >
+                    <ScanBarcode size={22} color={tintColor} />
+                  </PressableScale>
+                }
               />
             )}
           </form.Field>
